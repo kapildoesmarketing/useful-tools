@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Looper & Beat Repeater</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+  <!-- lamejs library for MP3 encoding -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.all.min.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Drop Zone */
+    .drop-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      background-color: var(--bg-color);
+      cursor: pointer;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    .drop-zone p {
+      margin: 8px 0 0 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    /* Controls Panel */
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background-color: var(--bg-color);
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 110px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    select,
+    input[type="number"] {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 8px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    select:focus,
+    input[type="number"]:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+    }
+
+    /* Preset buttons */
+    .preset-btn {
+      background-color: white;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+
+    .preset-btn:hover {
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    .preset-btn.active {
+      background-color: var(--primary-blue);
+      color: white;
+      border-color: var(--primary-blue);
+    }
+
+    /* Media Box */
+    .media-box {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      background-color: #1e1e1e;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    canvas.waveform-canvas {
+      width: 100%;
+      height: 90px;
+      border-radius: 4px;
+    }
+
+    audio {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .media-info {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+      text-align: center;
+      margin-top: 4px;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .progress-bar-bg {
+      height: 8px;
+      background-color: var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background-color: var(--primary-blue);
+      transition: width 0.1s linear;
+    }
+
+    /* Animation class for Clear */
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: var(--bg-color);
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: var(--bg-color);
+      }
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 170px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Drop Zone -->
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <span class="material-symbols-outlined" style="font-size: 36px; color: var(--primary-blue);">repeat</span>
+      <p id="dropZoneText">Click or drag & drop audio tracks here (MP3, WAV, AAC, FLAC, OGG, M4A)</p>
+      <input type="file" id="fileInput" class="file-input" accept="audio/*" onchange="handleFileSelect(event)">
+    </div>
+
+    <!-- Options Panel -->
+    <div class="controls-panel" id="controlsPanel">
+      <div class="control-row">
+        <label style="font-weight: 500;">Loop Repeat Presets:</label>
+        <button class="preset-btn" id="preset2" onclick="applyLoopPreset(2)">2× Repeat</button>
+        <button class="preset-btn active" id="preset4" onclick="applyLoopPreset(4)">4× Repeat</button>
+        <button class="preset-btn" id="preset8" onclick="applyLoopPreset(8)">8× Repeat</button>
+        <button class="preset-btn" id="preset16" onclick="applyLoopPreset(16)">16× Repeat</button>
+      </div>
+
+      <div class="control-row">
+        <div class="input-group">
+          <label for="loopCount">Loop Repeat Count</label>
+          <input type="number" id="loopCount" min="1" max="100" step="1" value="4" onchange="updateLoopInfo()">
+        </div>
+
+        <div class="input-group">
+          <label for="crossfadeSec">Loop Crossfade (Anti-Click)</label>
+          <select id="crossfadeSec">
+            <option value="0.0">Seamless Snap Cut (0.0s)</option>
+            <option value="0.1" selected>Micro-Fade (0.1s - Prevent Clicks)</option>
+            <option value="0.5">Smooth Blend (0.5s)</option>
+            <option value="1.0">Long Crossfade (1.0s)</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label for="exportFormat" onchange="toggleExportOptions()">Export Format</label>
+          <select id="exportFormat">
+            <option value="mp3" selected>MP3 (.mp3 - Universal Compressed)</option>
+            <option value="wav">WAV (.wav - Instant Lossless 16-bit)</option>
+          </select>
+        </div>
+
+        <div class="input-group" id="bitrateGroup">
+          <label for="bitrateSelect">MP3 Quality</label>
+          <select id="bitrateSelect">
+            <option value="320" selected>320 kbps (High Quality)</option>
+            <option value="192">192 kbps (Standard)</option>
+            <option value="128">128 kbps (Compact)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Segment Trimmer -->
+      <div class="control-row" style="border-top: 1px solid var(--border-color); padding-top: 10px;">
+        <label style="width: 100%; font-weight: 500;">Loop Segment Region (Optional - Default: Full Track)</label>
+        <div class="input-group">
+          <label for="trimStart">Loop Start (sec)</label>
+          <input type="number" id="trimStart" min="0" step="0.1" value="0" onchange="onRegionChange()">
+        </div>
+        <button class="btn-secondary" style="padding: 4px 8px; font-size: 11px; margin-top: 18px;" onclick="setStartToCurrent()">Set Start</button>
+
+        <div class="input-group">
+          <label for="trimEnd">Loop End (sec)</label>
+          <input type="number" id="trimEnd" min="0" step="0.1" value="0" placeholder="0 = Full Track" onchange="onRegionChange()">
+        </div>
+        <button class="btn-secondary" style="padding: 4px 8px; font-size: 11px; margin-top: 18px;" onclick="setEndToCurrent()">Set End</button>
+      </div>
+    </div>
+
+    <!-- Progress Indicator -->
+    <div class="progress-container" id="progressContainer">
+      <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 500;">
+        <span id="progressText">Processing audio loop repeat...</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Source Audio Player -->
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <label style="font-weight: 500;">Source Track & Loop Region</label>
+        <div class="media-box">
+          <span id="noOrigText" style="color: #9aa0a6; font-size: 13px;">Uploaded audio will appear here</span>
+          <canvas id="origCanvas" class="waveform-canvas" style="display: none;"></canvas>
+          <audio id="origAudioPlayer" controls style="display: none;"></audio>
+        </div>
+        <div id="origMediaInfo" class="media-info"></div>
+      </div>
+
+      <!-- Looped Audio Player -->
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <label style="font-weight: 500;">Repeated Audio Output Preview</label>
+        <div class="media-box">
+          <span id="noOutText" style="color: #9aa0a6; font-size: 13px;">Looped audio preview will appear here</span>
+          <canvas id="outCanvas" class="waveform-canvas" style="display: none;"></canvas>
+          <audio id="outAudioPlayer" controls style="display: none;"></audio>
+        </div>
+        <div id="outMediaInfo" class="media-info"></div>
+      </div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="processBtn" class="btn-primary" onclick="startAudioLoopProcess()" disabled>
+        <span class="material-symbols-outlined" id="processIcon">repeat</span>
+        <span id="processText">Generate Audio Loop</span>
+      </button>
+
+      <button id="downloadBtn" class="btn-secondary" onclick="downloadLoopedAudio()" disabled>
+        <span class="material-symbols-outlined" id="downloadIcon">download</span>
+        <span id="downloadText">Download Looped Audio</span>
+      </button>
+
+      <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let rawAudioFile = null;
+    let origAudioUrl = null;
+    let decodedAudioBuffer = null;
+
+    let loopedAudioBlob = null;
+    let loopedAudioUrl = null;
+    let outputExt = 'mp3';
+
+    const dropZone = document.getElementById('dropZone');
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+      }, false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('audio/'));
+      if (files.length > 0) loadAudio(files[0]);
+    });
+
+    function handleFileSelect(event) {
+      if (event.target.files.length > 0) {
+        loadAudio(event.target.files[0]);
+      }
+    }
+
+    async function loadAudio(file) {
+      hideStatus();
+      rawAudioFile = file;
+
+      if (origAudioUrl) URL.revokeObjectURL(origAudioUrl);
+      origAudioUrl = URL.createObjectURL(file);
+
+      const aPlayer = document.getElementById('origAudioPlayer');
+      aPlayer.src = origAudioUrl;
+      aPlayer.style.display = 'block';
+      document.getElementById('noOrigText').style.display = 'none';
+
+      document.getElementById('dropZoneText').textContent = `Loaded: ${file.name} (${formatFileSize(file.size)})`;
+
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        decodedAudioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+        document.getElementById('trimStart').value = 0;
+        document.getElementById('trimEnd').value = Math.round(decodedAudioBuffer.duration * 10) / 10;
+
+        drawWaveformWithRegion('origCanvas', decodedAudioBuffer.getChannelData(0), 0, decodedAudioBuffer.duration);
+
+        document.getElementById('origMediaInfo').innerHTML = `
+          <strong>Duration:</strong> ${formatTime(decodedAudioBuffer.duration)} | <strong>Sample Rate:</strong> ${decodedAudioBuffer.sampleRate} Hz | <strong>Size:</strong> ${formatFileSize(file.size)}
+        `;
+
+        document.getElementById('processBtn').disabled = false;
+        updateLoopInfo();
+        showStatus(`Decoded track (${formatTime(decodedAudioBuffer.duration)}). Select repeat count and click Generate Audio Loop.`, 'success');
+      } catch (err) {
+        showStatus('Audio Decode Error: ' + err.message, 'error');
+      }
+    }
+
+    function applyLoopPreset(count) {
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      const btn = document.getElementById(`preset${count}`);
+      if (btn) btn.classList.add('active');
+
+      document.getElementById('loopCount').value = count;
+      updateLoopInfo();
+    }
+
+    function updateLoopInfo() {
+      if (!decodedAudioBuffer) return;
+      const count = parseInt(document.getElementById('loopCount').value, 10) || 1;
+      const startSec = parseFloat(document.getElementById('trimStart').value) || 0;
+      const endSec = parseFloat(document.getElementById('trimEnd').value) || decodedAudioBuffer.duration;
+      const segLen = Math.max(0.1, endSec - startSec);
+
+      const totalDuration = segLen * count;
+      showStatus(`Configured ${count}x repeat of ${formatTime(segLen)} segment. Expected Total Duration: ${formatTime(totalDuration)}.`, 'success');
+    }
+
+    function onRegionChange() {
+      if (!decodedAudioBuffer) return;
+      const startSec = parseFloat(document.getElementById('trimStart').value) || 0;
+      const endSec = parseFloat(document.getElementById('trimEnd').value) || decodedAudioBuffer.duration;
+
+      drawWaveformWithRegion('origCanvas', decodedAudioBuffer.getChannelData(0), startSec, endSec);
+      updateLoopInfo();
+    }
+
+    function setStartToCurrent() {
+      const a = document.getElementById('origAudioPlayer');
+      document.getElementById('trimStart').value = Math.round(a.currentTime * 10) / 10;
+      onRegionChange();
+    }
+
+    function setEndToCurrent() {
+      const a = document.getElementById('origAudioPlayer');
+      document.getElementById('trimEnd').value = Math.round(a.currentTime * 10) / 10;
+      onRegionChange();
+    }
+
+    function toggleExportOptions() {
+      const fmt = document.getElementById('exportFormat').value;
+      document.getElementById('bitrateGroup').style.display = fmt === 'mp3' ? 'flex' : 'none';
+    }
+
+    async function startAudioLoopProcess() {
+      hideStatus();
+      if (!decodedAudioBuffer) return;
+
+      const startTime = performance.now();
+      const btn = document.getElementById('processBtn');
+      const icon = document.getElementById('processIcon');
+      const text = document.getElementById('processText');
+
+      btn.disabled = true;
+      icon.style.display = 'none';
+      text.innerHTML = '<span class="spinner" style="margin-right: 6px;"></span>Generating...';
+
+      showProgress(10, 'Concatenating audio loop repeats...');
+
+      const loopCount = parseInt(document.getElementById('loopCount').value, 10) || 1;
+      const crossfadeSec = parseFloat(document.getElementById('crossfadeSec').value) || 0.0;
+      const startSec = parseFloat(document.getElementById('trimStart').value) || 0;
+      const endSec = parseFloat(document.getElementById('trimEnd').value) || decodedAudioBuffer.duration;
+
+      const format = document.getElementById('exportFormat').value;
+      outputExt = format;
+      const bitrate = parseInt(document.getElementById('bitrateSelect').value, 10) || 192;
+
+      try {
+        showProgress(35, `Performing C++ memory block copies for ${loopCount}x repeats...`);
+
+        // Fast native C++ memory block copy looper
+        const { leftOut, rightOut, sampleRate, numChannels } = renderLoopedAudioFast(decodedAudioBuffer, startSec, endSec, loopCount, crossfadeSec);
+
+        if (format === 'mp3') {
+          showProgress(60, 'Parallel Web Worker MP3 encoding...');
+          loopedAudioBlob = await encodeMp3Parallel(leftOut, rightOut, sampleRate, numChannels, bitrate);
+        } else {
+          showProgress(85, 'Exporting WAV PCM...');
+          loopedAudioBlob = bufferToWaveFast(leftOut, rightOut, sampleRate, numChannels);
+        }
+
+        const elapsedSec = ((performance.now() - startTime) / 1000).toFixed(2);
+        showProgress(100, `Loop generated in ${elapsedSec}s!`);
+
+        if (loopedAudioUrl) URL.revokeObjectURL(loopedAudioUrl);
+        loopedAudioUrl = URL.createObjectURL(loopedAudioBlob);
+
+        const outAudio = document.getElementById('outAudioPlayer');
+        outAudio.src = loopedAudioUrl;
+        outAudio.style.display = 'block';
+        document.getElementById('noOutText').style.display = 'none';
+
+        drawWaveformWithRegion('outCanvas', leftOut, 0, leftOut.length / sampleRate);
+
+        const newDurationSec = leftOut.length / sampleRate;
+        document.getElementById('outMediaInfo').innerHTML = `
+          <strong>Looped Duration:</strong> ${formatTime(newDurationSec)} (${loopCount}x loops) | <strong>Format:</strong> ${format.toUpperCase()} | <strong>Size:</strong> ${formatFileSize(loopedAudioBlob.size)} | <strong>Time:</strong> ${elapsedSec}s
+        `;
+
+        document.getElementById('downloadBtn').disabled = false;
+        showStatus(`Generated ${loopCount}x audio loop in ${elapsedSec}s (${formatFileSize(loopedAudioBlob.size)}).`, 'success');
+      } catch (err) {
+        showStatus('Loop Processing Error: ' + err.message, 'error');
+      }
+
+      hideProgress();
+      btn.disabled = false;
+      icon.style.display = 'block';
+      text.innerHTML = 'Generate Audio Loop';
+    }
+
+    /* Ultra-Fast C++ TypedArray.set() Block Copy Looper */
+    function renderLoopedAudioFast(audioBuffer, startSec, endSec, loopCount, crossfadeSec) {
+      const sampleRate = audioBuffer.sampleRate;
+      const numChannels = audioBuffer.numberOfChannels;
+
+      const startSample = Math.floor(startSec * sampleRate);
+      const endSample = Math.min(audioBuffer.length, Math.floor(endSec * sampleRate));
+      const segmentSamples = Math.max(1, endSample - startSample);
+      const crossfadeSamples = Math.floor(crossfadeSec * sampleRate);
+
+      let totalOutputSamples = 0;
+      if (crossfadeSamples > 0 && loopCount > 1) {
+        totalOutputSamples = segmentSamples + (loopCount - 1) * (segmentSamples - crossfadeSamples);
+      } else {
+        totalOutputSamples = segmentSamples * loopCount;
+      }
+
+      const leftOut = new Float32Array(totalOutputSamples);
+      const rightOut = numChannels > 1 ? new Float32Array(totalOutputSamples) : leftOut;
+
+      const srcLeft = audioBuffer.getChannelData(0).subarray(startSample, endSample);
+      const srcRight = numChannels > 1 ? audioBuffer.getChannelData(1).subarray(startSample, endSample) : srcLeft;
+
+      let currentOffset = 0;
+
+      for (let rep = 0; rep < loopCount; rep++) {
+        if (crossfadeSamples === 0 || rep === 0) {
+          // Fast C++ memcpy block copy
+          leftOut.set(srcLeft, currentOffset);
+          if (numChannels > 1) rightOut.set(srcRight, currentOffset);
+          currentOffset += segmentSamples;
+        } else {
+          // Micro crossfade blend boundary
+          const blendStart = currentOffset - crossfadeSamples;
+
+          for (let s = 0; s < crossfadeSamples; s++) {
+            const fadeIn = s / crossfadeSamples;
+            const fadeOut = 1 - fadeIn;
+            const targetPos = blendStart + s;
+
+            leftOut[targetPos] = (leftOut[targetPos] * fadeOut) + (srcLeft[s] * fadeIn);
+            if (numChannels > 1) {
+              rightOut[targetPos] = (rightOut[targetPos] * fadeOut) + (srcRight[s] * fadeIn);
+            }
+          }
+
+          // Fast C++ memcpy for remaining segment body
+          const bodySamples = srcLeft.subarray(crossfadeSamples);
+          leftOut.set(bodySamples, blendStart + crossfadeSamples);
+          if (numChannels > 1) {
+            rightOut.set(srcRight.subarray(crossfadeSamples), blendStart + crossfadeSamples);
+          }
+
+          currentOffset = blendStart + segmentSamples;
+        }
+      }
+
+      return { leftOut, rightOut, sampleRate, numChannels };
+    }
+
+    function drawWaveformWithRegion(canvasId, samples, regionStartSec, regionEndSec) {
+      const canvas = document.getElementById(canvasId);
+      canvas.style.display = 'block';
+      const ctx = canvas.getContext('2d');
+
+      const width = canvas.offsetWidth || 300;
+      const height = canvas.offsetHeight || 90;
+      canvas.width = width;
+      canvas.height = height;
+
+      ctx.fillStyle = '#1e1e1e';
+      ctx.fillRect(0, 0, width, height);
+
+      const totalDurationSec = samples.length / (decodedAudioBuffer ? decodedAudioBuffer.sampleRate : 44100);
+      const startPct = Math.max(0, regionStartSec / totalDurationSec);
+      const endPct = Math.min(1, regionEndSec / totalDurationSec);
+
+      // Draw Region Background Highlight
+      ctx.fillStyle = 'rgba(26, 115, 232, 0.25)';
+      ctx.fillRect(startPct * width, 0, (endPct - startPct) * width, height);
+
+      ctx.fillStyle = '#1a73e8';
+      const step = Math.ceil(samples.length / width);
+      const amp = height / 2;
+
+      for (let i = 0; i < width; i++) {
+        let min = 1.0;
+        let max = -1.0;
+        for (let j = 0; j < step; j++) {
+          const datum = samples[(i * step) + j];
+          if (datum < min) min = datum;
+          if (datum > max) max = datum;
+        }
+
+        const isInsideRegion = (i / width) >= startPct && (i / width) <= endPct;
+        ctx.fillStyle = isInsideRegion ? '#34a853' : '#1a73e8';
+        ctx.fillRect(i, (1 + min) * amp, 1, Math.max(1, (max - min) * amp));
+      }
+    }
+
+    /* Parallel Web Worker MP3 Encoder */
+    async function encodeMp3Parallel(left, right, sampleRate, numChannels, kbps) {
+      const numWorkers = Math.min(8, Math.max(2, navigator.hardwareConcurrency || 4));
+      const totalSamples = left.length;
+      const chunkSize = Math.ceil(totalSamples / numWorkers);
+
+      const workerCode = `
+        importScripts('https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.all.min.js');
+
+        self.onmessage = function(e) {
+          const { left, right, sampleRate, numChannels, kbps, chunkIndex } = e.data;
+          const mp3encoder = new lamejs.Mp3Encoder(numChannels, sampleRate, kbps);
+          const mp3Data = [];
+          const sampleBlockSize = 1152;
+          const total = left.length;
+
+          const leftInt16 = new Int16Array(total);
+          const rightInt16 = new Int16Array(total);
+
+          for (let i = 0; i < total; i++) {
+            let l = Math.max(-1, Math.min(1, left[i]));
+            let r = Math.max(-1, Math.min(1, right[i]));
+            leftInt16[i] = l < 0 ? l * 32768 : l * 32767;
+            rightInt16[i] = r < 0 ? r * 32768 : r * 32767;
+          }
+
+          for (let i = 0; i < total; i += sampleBlockSize) {
+            const leftChunk = leftInt16.subarray(i, i + sampleBlockSize);
+            const rightChunk = rightInt16.subarray(i, i + sampleBlockSize);
+
+            let mp3buf = null;
+            if (numChannels === 2) {
+              mp3buf = mp3encoder.encodeBuffer(leftChunk, rightChunk);
+            } else {
+              mp3buf = mp3encoder.encodeBuffer(leftChunk);
+            }
+            if (mp3buf.length > 0) mp3Data.push(mp3buf);
+          }
+
+          const mp3buf = mp3encoder.flush();
+          if (mp3buf.length > 0) mp3Data.push(mp3buf);
+
+          self.postMessage({ chunkIndex, mp3Data });
+        };
+      `;
+
+      const blob = new Blob([workerCode], { type: 'application/javascript' });
+      const workerUrl = URL.createObjectURL(blob);
+
+      const tasks = [];
+      let completedWorkers = 0;
+
+      for (let w = 0; w < numWorkers; w++) {
+        const start = w * chunkSize;
+        const end = Math.min(totalSamples, start + chunkSize);
+        if (start >= totalSamples) break;
+
+        const subLeft = left.slice(start, end);
+        const subRight = numChannels === 2 ? right.slice(start, end) : subLeft;
+
+        tasks.push(new Promise((resolve, reject) => {
+          const worker = new Worker(workerUrl);
+          worker.onmessage = function(e) {
+            completedWorkers++;
+            showProgress(60 + Math.round((completedWorkers / numWorkers) * 35), `Encoding MP3 (${completedWorkers}/${numWorkers} workers)...`);
+            worker.terminate();
+            resolve(e.data);
+          };
+          worker.onerror = function(err) {
+            worker.terminate();
+            reject(err);
+          };
+          worker.postMessage({
+            left: subLeft,
+            right: subRight,
+            sampleRate,
+            numChannels,
+            kbps,
+            chunkIndex: w
+          }, [subLeft.buffer, subRight.buffer]);
+        }));
+      }
+
+      const results = await Promise.all(tasks);
+      URL.revokeObjectURL(workerUrl);
+
+      results.sort((a, b) => a.chunkIndex - b.chunkIndex);
+
+      const combinedMp3Data = [];
+      for (let r of results) {
+        combinedMp3Data.push(...r.mp3Data);
+      }
+
+      return new Blob(combinedMp3Data, { type: 'audio/mp3' });
+    }
+
+    /* Fast WAV PCM Encoder */
+    function bufferToWaveFast(left, right, sampleRate, numOfChan) {
+      const len = left.length;
+      const length = len * numOfChan * 2 + 44;
+      const buffer = new ArrayBuffer(length);
+      const view = new DataView(buffer);
+      let pos = 0;
+
+      function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
+      function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
+
+      setUint32(0x46464952); // "RIFF"
+      setUint32(length - 8);
+      setUint32(0x45564157); // "WAVE"
+
+      setUint32(0x20746d66); // "fmt "
+      setUint32(16);
+      setUint16(1);
+      setUint16(numOfChan);
+      setUint32(sampleRate);
+      setUint32(sampleRate * 2 * numOfChan);
+      setUint16(numOfChan * 2);
+      setUint16(16);
+
+      setUint32(0x61746164); // "data"
+      setUint32(length - pos - 4);
+
+      for (let i = 0; i < len; i++) {
+        let l = Math.max(-1, Math.min(1, left[i]));
+        view.setInt16(pos, l < 0 ? l * 32768 : l * 32767, true);
+        pos += 2;
+
+        if (numOfChan === 2) {
+          let r = Math.max(-1, Math.min(1, right[i]));
+          view.setInt16(pos, r < 0 ? r * 32768 : r * 32767, true);
+          pos += 2;
+        }
+      }
+
+      return new Blob([buffer], { type: "audio/wav" });
+    }
+
+    function downloadLoopedAudio() {
+      if (!loopedAudioBlob || !loopedAudioUrl) return;
+
+      const count = parseInt(document.getElementById('loopCount').value, 10) || 1;
+      const baseName = rawAudioFile.name.substring(0, rawAudioFile.name.lastIndexOf('.')) || 'audio';
+
+      const a = document.createElement('a');
+      a.href = loopedAudioUrl;
+      a.download = `${baseName}_looped_${count}x.${outputExt}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      triggerSuccessButton('downloadBtn', 'downloadIcon', 'downloadText', `Saved ${outputExt.toUpperCase()} Loop!`);
+    }
+
+    function showProgress(pct, text) {
+      const container = document.getElementById('progressContainer');
+      container.style.display = 'flex';
+      document.getElementById('progressText').textContent = text;
+      document.getElementById('progressPct').textContent = `${pct}%`;
+      document.getElementById('progressBarFill').style.width = `${pct}%`;
+    }
+
+    function hideProgress() {
+      document.getElementById('progressContainer').style.display = 'none';
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      if (text) text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        if (text) text.innerText = originalText;
+      }, 2000);
+    }
+
+    function clearAll() {
+      if (origAudioUrl) {
+        URL.revokeObjectURL(origAudioUrl);
+        origAudioUrl = null;
+      }
+      if (loopedAudioUrl) {
+        URL.revokeObjectURL(loopedAudioUrl);
+        loopedAudioUrl = null;
+      }
+      rawAudioFile = null;
+      decodedAudioBuffer = null;
+      loopedAudioBlob = null;
+
+      document.getElementById('fileInput').value = '';
+      document.getElementById('origCanvas').style.display = 'none';
+      document.getElementById('outCanvas').style.display = 'none';
+      document.getElementById('origAudioPlayer').style.display = 'none';
+      document.getElementById('outAudioPlayer').style.display = 'none';
+      document.getElementById('noOrigText').style.display = 'block';
+      document.getElementById('noOutText').style.display = 'block';
+      document.getElementById('origMediaInfo').innerHTML = '';
+      document.getElementById('outMediaInfo').innerHTML = '';
+      document.getElementById('processBtn').disabled = true;
+      document.getElementById('downloadBtn').disabled = true;
+      document.getElementById('dropZoneText').textContent = 'Click or drag & drop audio files here (MP3, WAV, AAC, FLAC, OGG, M4A)';
+
+      hideStatus();
+      hideProgress();
+
+      dropZone.classList.remove('flash-clear');
+      document.getElementById('controlsPanel').classList.remove('flash-clear');
+
+      void dropZone.offsetWidth;
+
+      dropZone.classList.add('flash-clear');
+      document.getElementById('controlsPanel').classList.add('flash-clear');
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+    }
+
+    function hideStatus() {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = 'status-box';
+      statusBox.textContent = '';
+    }
+
+    function formatTime(seconds) {
+      if (isNaN(seconds)) return '00:00';
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function formatFileSize(bytes) {
+      if (!bytes) return '0 B';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+  </script>
+</body>
+
+</html>

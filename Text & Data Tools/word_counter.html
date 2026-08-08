@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word, Character & Reading Time Counter</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Roboto:wght@400;500&family=Roboto+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Metric Cards Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+    }
+
+    .metric-card {
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .metric-val {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary-blue);
+    }
+
+    .metric-lbl {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Text Area Input */
+    textarea {
+      width: 100%;
+      height: 280px;
+      box-sizing: border-box;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      padding: 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      outline: none;
+      resize: vertical;
+      transition: border-color 0.3s ease;
+    }
+
+    textarea:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+    }
+
+    /* Density Table */
+    .density-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .density-table th,
+    .density-table td {
+      padding: 6px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .density-table th {
+      background-color: var(--bg-color);
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    /* Progress bar for Social Limits */
+    .limit-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 12px;
+    }
+
+    .limit-bar-bg {
+      height: 6px;
+      background-color: var(--border-color);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .limit-bar-fill {
+      height: 100%;
+      width: 0%;
+      background-color: var(--primary-blue);
+      transition: width 0.2s ease, background-color 0.2s ease;
+    }
+
+    /* Animation class for Clear */
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: #ffffff;
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: #ffffff;
+      }
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 140px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Real-time Top Metrics Header -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <span class="metric-val" id="valWords">0</span>
+        <span class="metric-lbl">Words</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-val" id="valChars">0</span>
+        <span class="metric-lbl">Characters</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-val" id="valCharsNoSpaces">0</span>
+        <span class="metric-lbl">No Spaces</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-val" id="valSentences">0</span>
+        <span class="metric-lbl">Sentences</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-val" id="valReadTime">0m</span>
+        <span class="metric-lbl">Reading Time</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-val" id="valSpeakTime">0m</span>
+        <span class="metric-lbl">Speaking Time</span>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Left: Primary Text Area Input -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label style="font-weight: 500;">Input Text</label>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="document.getElementById('fileInput').click()">
+              <span class="material-symbols-outlined" style="font-size: 14px;">upload_file</span> Load File
+            </button>
+            <input type="file" id="fileInput" accept=".txt,.md,.json,.csv,.log,.html" style="display: none;" onchange="handleFileUpload(event)">
+          </div>
+        </div>
+        <textarea id="textInput" placeholder="Paste or type your text here to count words, characters, sentences, and estimated reading time..." oninput="analyzeText()"></textarea>
+      </div>
+
+      <!-- Right: Social Limits & Top Keyword Density -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <!-- Social Character Limits -->
+        <div style="background-color: var(--bg-color); padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; display: flex; flex-direction: column; gap: 10px;">
+          <label style="font-weight: 500;">Social Media & Search Limits</label>
+
+          <div class="limit-item">
+            <div style="display: flex; justify-content: space-between;">
+              <span>🐦 X / Twitter</span>
+              <span id="limitTwitterTxt">0 / 280</span>
+            </div>
+            <div class="limit-bar-bg"><div class="limit-bar-fill" id="limitTwitterBar"></div></div>
+          </div>
+
+          <div class="limit-item">
+            <div style="display: flex; justify-content: space-between;">
+              <span>🔍 Google SEO Meta Title</span>
+              <span id="limitSeoTitleTxt">0 / 60</span>
+            </div>
+            <div class="limit-bar-bg"><div class="limit-bar-fill" id="limitSeoTitleBar"></div></div>
+          </div>
+
+          <div class="limit-item">
+            <div style="display: flex; justify-content: space-between;">
+              <span>🔍 Google Meta Description</span>
+              <span id="limitSeoDescTxt">0 / 160</span>
+            </div>
+            <div class="limit-bar-bg"><div class="limit-bar-fill" id="limitSeoDescBar"></div></div>
+          </div>
+        </div>
+
+        <!-- Keyword Density Table -->
+        <div style="display: flex; flex-direction: column; gap: 6px; flex: 1;">
+          <label style="font-weight: 500;">Top Keyword Density</label>
+          <div style="border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; background-color: #ffffff; max-height: 140px; overflow-y: auto;">
+            <table class="density-table">
+              <thead>
+                <tr>
+                  <th>Keyword</th>
+                  <th>Count</th>
+                  <th>Density</th>
+                </tr>
+              </thead>
+              <tbody id="densityTbody">
+                <tr>
+                  <td colspan="3" style="text-align: center; color: var(--text-secondary); padding: 16px;">
+                    Type text on the left to view keyword frequency analysis.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="copyBtn" class="btn-primary" onclick="copyTextToClipboard()">
+        <span class="material-symbols-outlined" id="copyIcon">content_copy</span>
+        <span id="copyText">Copy Text</span>
+      </button>
+
+      <button class="btn-secondary" onclick="convertCase('upper')">UPPERCASE</button>
+      <button class="btn-secondary" onclick="convertCase('lower')">lowercase</button>
+      <button class="btn-secondary" onclick="convertCase('title')">Title Case</button>
+      <button class="btn-secondary" onclick="cleanExtraSpaces()">Clean Spaces</button>
+
+      <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const stopWords = new Set(['the','be','to','of','and','a','in','that','have','i','it','for','not','on','with','he','as','you','do','at','this','but','his','by','from','they','we','say','her','she','or','an','will','my','one','all','would','there','their','what','so','up','out','if','about','who','get','which','go','me']);
+
+    function analyzeText() {
+      const text = document.getElementById('textInput').value;
+
+      // 1. Basic Character Counts
+      const chars = text.length;
+      const charsNoSpaces = text.replace(/\s/g, '').length;
+
+      // 2. Word Count
+      const wordsArray = text.trim() ? text.trim().split(/\s+/) : [];
+      const wordCount = wordsArray.length;
+
+      // 3. Sentence Count
+      const sentences = text.trim() ? text.split(/[.!?]+/).filter(Boolean).length : 0;
+
+      // 4. Reading & Speaking Time
+      const readMins = Math.ceil(wordCount / 200);
+      const speakMins = Math.ceil(wordCount / 130);
+
+      document.getElementById('valWords').textContent = wordCount.toLocaleString();
+      document.getElementById('valChars').textContent = chars.toLocaleString();
+      document.getElementById('valCharsNoSpaces').textContent = charsNoSpaces.toLocaleString();
+      document.getElementById('valSentences').textContent = sentences.toLocaleString();
+      document.getElementById('valReadTime').textContent = `${readMins}m`;
+      document.getElementById('valSpeakTime').textContent = `${speakMins}m`;
+
+      // 5. Update Social Character Limits
+      updateLimitBar('Twitter', chars, 280);
+      updateLimitBar('SeoTitle', chars, 60);
+      updateLimitBar('SeoDesc', chars, 160);
+
+      // 6. Top Keyword Density
+      updateKeywordDensity(wordsArray);
+    }
+
+    function updateLimitBar(idPrefix, chars, max) {
+      const txt = document.getElementById(`limit${idPrefix}Txt`);
+      const bar = document.getElementById(`limit${idPrefix}Bar`);
+
+      txt.textContent = `${chars} / ${max}`;
+      const pct = Math.min(100, Math.round((chars / max) * 100));
+      bar.style.width = `${pct}%`;
+
+      if (chars > max) {
+        bar.style.backgroundColor = 'var(--danger-text)';
+      } else {
+        bar.style.backgroundColor = 'var(--primary-blue)';
+      }
+    }
+
+    function updateKeywordDensity(wordsArray) {
+      const tbody = document.getElementById('densityTbody');
+
+      if (wordsArray.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="3" style="text-align: center; color: var(--text-secondary); padding: 16px;">
+              Type text on the left to view keyword frequency analysis.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      const freqMap = {};
+      let totalFiltered = 0;
+
+      wordsArray.forEach(w => {
+        const clean = w.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (clean.length > 2 && !stopWords.has(clean)) {
+          freqMap[clean] = (freqMap[clean] || 0) + 1;
+          totalFiltered++;
+        }
+      });
+
+      const sorted = Object.entries(freqMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+      if (sorted.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="3" style="text-align: center; color: var(--text-secondary); padding: 12px;">
+              No significant keywords found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = sorted.map(([word, count]) => {
+        const density = ((count / wordsArray.length) * 100).toFixed(1);
+        return `
+          <tr>
+            <td><strong>${escapeHtml(word)}</strong></td>
+            <td>${count}</td>
+            <td>${density}%</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function convertCase(type) {
+      const textEl = document.getElementById('textInput');
+      let val = textEl.value;
+      if (!val) return;
+
+      if (type === 'upper') val = val.toUpperCase();
+      else if (type === 'lower') val = val.toLowerCase();
+      else if (type === 'title') {
+        val = val.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+      }
+
+      textEl.value = val;
+      analyzeText();
+      showStatus(`Converted text to ${type}case.`, 'success');
+    }
+
+    function cleanExtraSpaces() {
+      const textEl = document.getElementById('textInput');
+      let val = textEl.value;
+      if (!val) return;
+
+      val = val.replace(/[ \t]+/g, ' ').replace(/^\s+|\s+$/gm, '');
+      textEl.value = val;
+      analyzeText();
+      showStatus('Cleaned extra whitespace and trimmed empty lines.', 'success');
+    }
+
+    function handleFileUpload(event) {
+      if (event.target.files.length === 0) return;
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('textInput').value = e.target.result;
+        analyzeText();
+        showStatus(`Loaded ${file.name} (${formatFileSize(file.size)}).`, 'success');
+      };
+      reader.readAsText(file);
+    }
+
+    function copyTextToClipboard() {
+      const text = document.getElementById('textInput').value;
+      if (!text) return;
+
+      try {
+        navigator.clipboard.writeText(text);
+        triggerSuccessButton('copyBtn', 'copyIcon', 'copyText', 'Copied Text!');
+      } catch (e) {
+        const textEl = document.getElementById('textInput');
+        textEl.select();
+        document.execCommand('copy');
+        triggerSuccessButton('copyBtn', 'copyIcon', 'copyText', 'Copied Text!');
+      }
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function clearAll() {
+      document.getElementById('textInput').value = '';
+      document.getElementById('fileInput').value = '';
+      analyzeText();
+      hideStatus();
+
+      const textEl = document.getElementById('textInput');
+      textEl.classList.remove('flash-clear');
+      void textEl.offsetWidth;
+      textEl.classList.add('flash-clear');
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+    }
+
+    function hideStatus() {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = 'status-box';
+      statusBox.textContent = '';
+    }
+
+    function formatFileSize(bytes) {
+      if (!bytes) return '0 B';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+  </script>
+</body>
+
+</html>

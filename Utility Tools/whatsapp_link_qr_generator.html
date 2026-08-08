@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp Direct Link & QR Code Generator</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Roboto:wght@400;500&family=Roboto+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+  <!-- QRCode.js CDN for client-side QR generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+
+      /* WhatsApp Palette */
+      --wa-green: #25d366;
+      --wa-dark-green: #128c7e;
+      --wa-header-bg: #f0f2f5;
+      --wa-chat-bg: #efeae2;
+      --wa-bubble-bg: #d9fdd3;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 20px;
+    }
+
+    @media (max-width: 860px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Input Controls Card */
+    .form-card {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .phone-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    select,
+    input[type="text"],
+    textarea {
+      font-family: 'Roboto', sans-serif;
+      font-size: 14px;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    select:focus,
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: var(--wa-green);
+      box-shadow: 0 0 0 1px var(--wa-green);
+    }
+
+    textarea {
+      height: 90px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    /* Link & QR Code Side-by-Side Section */
+    .link-qr-row {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    @media (max-width: 600px) {
+      .link-qr-row {
+        flex-direction: column;
+      }
+    }
+
+    .link-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* WhatsApp Chat Preview Card */
+    .preview-card-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .phone-preview-card {
+      width: 100%;
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      height: 420px;
+    }
+
+    /* Top WhatsApp Header */
+    .wa-header {
+      background-color: var(--wa-header-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .wa-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+    }
+
+    .wa-user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .wa-user-number {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .wa-user-status {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    /* Chat Wallpaper Stage */
+    .wa-chat-stage {
+      flex: 1;
+      background-color: var(--wa-chat-bg);
+      background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+      background-size: 16px 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      overflow-y: auto;
+    }
+
+    /* Message Bubble */
+    .wa-bubble {
+      background-color: var(--wa-bubble-bg);
+      color: #111b21;
+      font-size: 13px;
+      padding: 8px 12px;
+      border-radius: 8px 0px 8px 8px;
+      align-self: flex-end;
+      max-width: 85%;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+      line-height: 1.4;
+      word-break: break-word;
+      position: relative;
+    }
+
+    .wa-time {
+      font-size: 10px;
+      color: #667781;
+      float: right;
+      margin-left: 12px;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    /* Bottom Input Bar */
+    .wa-footer {
+      background-color: var(--wa-header-bg);
+      border-top: 1px solid var(--border-color);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .wa-dummy-input {
+      flex: 1;
+      background-color: #ffffff;
+      border-radius: 18px;
+      padding: 6px 12px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+    }
+
+    /* QR Code Display Card */
+    .qr-side-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    #qrcodeCanvas {
+      padding: 6px;
+      background: white;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      position: relative;
+    }
+
+    /* Official WhatsApp Logo Overlay Badge */
+    .qr-wa-logo {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 28px;
+      height: 28px;
+      background-color: #25d366;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 0 0 2px #ffffff;
+    }
+
+    .qr-wa-logo svg {
+      width: 18px;
+      height: 18px;
+      fill: #ffffff;
+    }
+
+    /* Generated Link Output */
+    .output-link-box {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      padding: 10px 12px;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--primary-blue);
+      word-break: break-all;
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-wa {
+      background-color: #25d366;
+      color: white;
+    }
+
+    .btn-wa:hover:not(:disabled) {
+      background-color: #1ebc57;
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--text-main);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="grid">
+      <!-- Left: Phone Input, Link & QR Code Side-by-Side Card -->
+      <div class="form-card">
+        <div class="input-group">
+          <label for="phoneInput">WhatsApp Phone Number</label>
+          <span style="font-size: 11px; color: var(--text-secondary);">Select country code & enter WhatsApp mobile number</span>
+          <div class="phone-row">
+            <select id="countrySelect" onchange="updateLinkAndQr()">
+              <option value="91" selected>🇮🇳 India (+91)</option>
+              <option value="1">🇺🇸 USA / Canada (+1)</option>
+              <option value="44">🇬🇧 UK (+44)</option>
+              <option value="971">🇦🇪 UAE (+971)</option>
+              <option value="61">🇦🇺 Australia (+61)</option>
+              <option value="49">🇩🇪 Germany (+49)</option>
+              <option value="65">🇸🇬 Singapore (+65)</option>
+              <option value="966">🇸🇦 Saudi Arabia (+966)</option>
+            </select>
+            <input type="text" id="phoneInput" value="8329870799" placeholder="Mobile number e.g. 9876543210" style="flex: 1;" oninput="updateLinkAndQr()">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="messageInput">Custom Message 😋</label>
+            <span style="font-size: 11px; color: var(--text-secondary);">Supports WhatsApp formatting (*bold*, _italic_)</span>
+          </div>
+          <textarea id="messageInput" placeholder="Type custom pre-filled message..." oninput="updateLinkAndQr()">Hey Kapil Pidhwani (@hikapil), loved the concept of go/usefultools 💙</textarea>
+        </div>
+
+        <!-- Generated Link & Centered Badge QR Code Side-by-Side Section -->
+        <div class="link-qr-row">
+          <div class="link-details">
+            <label style="font-weight: 500;">Generated Direct Link</label>
+            <div class="output-link-box" id="waLinkBox">https://wa.me/918329870799?text=...</div>
+            
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;">
+              <button id="copyLinkBtn" class="btn-wa" onclick="copyWaLink()">
+                <span class="material-symbols-outlined" id="copyIcon">link</span>
+                <span id="copyText">Copy Link</span>
+              </button>
+
+              <button class="btn-secondary" onclick="openWaLink()">
+                <span class="material-symbols-outlined">open_in_new</span>
+                Open Chat
+              </button>
+            </div>
+          </div>
+
+          <!-- QR Code with Official WhatsApp SVG Logo Badge -->
+          <div class="qr-side-box">
+            <div style="position: relative;">
+              <div id="qrcodeCanvas"></div>
+              <div class="qr-wa-logo">
+                <svg viewBox="0 0 31 30"><path d="M15.565 0C7.057 0 .133 6.669.13 14.865c-.002 2.621.71 5.179 2.06 7.432L0 30l8.183-2.067a15.89 15.89 0 007.376 1.81h.006c8.508 0 15.432-6.67 15.435-14.866.002-3.97-1.602-7.707-4.517-10.516C23.569 1.551 19.694.001 15.565 0zm0 27.232h-.005c-2.302 0-4.56-.596-6.53-1.722l-.47-.268-4.854 1.226 1.296-4.56-.305-.467a11.983 11.983 0 01-1.962-6.576C2.738 8.052 8.494 2.511 15.57 2.511c3.426.001 6.647 1.288 9.07 3.623s3.756 5.44 3.754 8.742c-.003 6.813-5.758 12.356-12.83 12.356zm7.037-9.255c-.386-.185-2.282-1.084-2.636-1.209-.353-.123-.61-.187-.867.185-.256.372-.996 1.209-1.22 1.456-.226.248-.451.278-.837.093-.386-.186-1.629-.578-3.101-1.844-1.147-.984-1.921-2.2-2.146-2.573-.225-.371-.024-.572.169-.757.173-.165.386-.433.578-.65.192-.217.256-.372.386-.62.128-.247.064-.465-.033-.65-.097-.187-.867-2.015-1.19-2.758-.312-.724-.63-.627-.867-.639-.225-.01-.481-.013-.74-.013-.255 0-.674.093-1.028.465-.353.372-1.35 1.27-1.35 3.098 0 1.829 1.382 3.595 1.575 3.843.193.247 2.72 4 6.589 5.61.92.381 1.638.61 2.199.782.924.283 1.765.242 2.429.147.74-.107 2.282-.898 2.602-1.765.322-.867.322-1.611.226-1.766-.094-.155-.352-.248-.738-.435z" fill="#ffffff"></path></svg>
+              </div>
+            </div>
+            <button class="btn-secondary" style="font-size: 11px; padding: 4px 8px;" onclick="downloadQrCodePng()">
+              <span class="material-symbols-outlined" style="font-size: 14px;">download</span> Download QR
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Pure Dedicated Live WhatsApp Chat Message Preview Simulator -->
+      <div class="preview-card-wrapper">
+        <label style="font-weight: 500; font-size: 13px; color: var(--text-secondary);">Live Message Preview</label>
+        
+        <!-- Phone Simulator Frame -->
+        <div class="phone-preview-card">
+          <!-- WhatsApp Top Bar -->
+          <div class="wa-header">
+            <div class="wa-avatar">
+              <span class="material-symbols-outlined">person</span>
+            </div>
+            <div class="wa-user-info">
+              <span class="wa-user-number" id="previewNumber">+91 8329870799</span>
+              <span class="wa-user-status">Online</span>
+            </div>
+          </div>
+
+          <!-- Chat Stage -->
+          <div class="wa-chat-stage">
+            <div class="wa-bubble" id="previewBubble">
+              Hey Kapil Pidhwani (@hikapil), loved the concept of go/usefultools 💙
+              <span class="wa-time">12:30 PM <span class="material-symbols-outlined" style="font-size: 14px; color: #53bdeb;">done_all</span></span>
+            </div>
+          </div>
+
+          <!-- Bottom Footer -->
+          <div class="wa-footer">
+            <div class="wa-dummy-input">Type a message</div>
+            <span class="material-symbols-outlined" style="color: #54656f;">send</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box"></div>
+  </div>
+
+  <script>
+    let qrObj = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      qrObj = new QRCode(document.getElementById("qrcodeCanvas"), {
+        width: 115,
+        height: 115,
+        colorDark: "#111b21",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+
+      updateLinkAndQr();
+    });
+
+    function getFormattedFullNumber() {
+      const code = document.getElementById('countrySelect').value;
+      const rawNumber = document.getElementById('phoneInput').value.replace(/\D/g, '');
+      return `${code}${rawNumber}`;
+    }
+
+    function getWaShortlink() {
+      const fullNum = getFormattedFullNumber();
+      const text = document.getElementById('messageInput').value;
+      const encodedText = encodeURIComponent(text);
+      return text ? `https://wa.me/${fullNum}?text=${encodedText}` : `https://wa.me/${fullNum}`;
+    }
+
+    function updateLinkAndQr() {
+      const fullNum = getFormattedFullNumber();
+      const code = document.getElementById('countrySelect').value;
+      const rawNumber = document.getElementById('phoneInput').value.replace(/\D/g, '');
+      const text = document.getElementById('messageInput').value;
+
+      // Update Live Preview Phone Header
+      document.getElementById('previewNumber').textContent = `+${code} ${rawNumber}`;
+
+      // Update Chat Bubble Text
+      const bubble = document.getElementById('previewBubble');
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      const formattedText = escapeHtml(text || 'Your pre-filled message will appear here...')
+        .replace(/\*(.*?)\*/g, '<strong>$1</strong>')
+        .replace(/_(.*?)_/g, '<em>$1</em>');
+
+      bubble.innerHTML = `
+        ${formattedText}
+        <span class="wa-time">${timeStr} <span class="material-symbols-outlined" style="font-size: 14px; color: #53bdeb;">done_all</span></span>
+      `;
+
+      // Update Generated Link Box
+      const link = getWaShortlink();
+      document.getElementById('waLinkBox').textContent = link;
+
+      // Update QR Code
+      if (qrObj) {
+        qrObj.clear();
+        qrObj.makeCode(link);
+      }
+    }
+
+    function copyWaLink() {
+      const link = getWaShortlink();
+      try {
+        navigator.clipboard.writeText(link);
+        triggerSuccessButton('copyLinkBtn', 'copyIcon', 'copyText', 'Copied Link!');
+      } catch (e) {
+        const temp = document.createElement('input');
+        temp.value = link;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        triggerSuccessButton('copyLinkBtn', 'copyIcon', 'copyText', 'Copied Link!');
+      }
+    }
+
+    function openWaLink() {
+      const link = getWaShortlink();
+      window.open(link, '_blank');
+    }
+
+    function downloadQrCodePng() {
+      const qrImg = document.querySelector('#qrcodeCanvas img');
+      if (!qrImg) return;
+
+      const exportCanvas = document.createElement('canvas');
+      exportCanvas.width = 300;
+      exportCanvas.height = 300;
+      const ctx = exportCanvas.getContext('2d');
+
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, 300, 300);
+        ctx.drawImage(img, 0, 0, 300, 300);
+
+        // Draw Official WhatsApp Green Badge in Center
+        ctx.beginPath();
+        ctx.arc(150, 150, 26, 0, Math.PI * 2);
+        ctx.fillStyle = '#25d366';
+        ctx.fill();
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = '#ffffff';
+        ctx.stroke();
+
+        // Render Official WhatsApp SVG path onto canvas center
+        const p = new Path2D("M15.565 0C7.057 0 .133 6.669.13 14.865c-.002 2.621.71 5.179 2.06 7.432L0 30l8.183-2.067a15.89 15.89 0 007.376 1.81h.006c8.508 0 15.432-6.67 15.435-14.866.002-3.97-1.602-7.707-4.517-10.516C23.569 1.551 19.694.001 15.565 0zm0 27.232h-.005c-2.302 0-4.56-.596-6.53-1.722l-.47-.268-4.854 1.226 1.296-4.56-.305-.467a11.983 11.983 0 01-1.962-6.576C2.738 8.052 8.494 2.511 15.57 2.511c3.426.001 6.647 1.288 9.07 3.623s3.756 5.44 3.754 8.742c-.003 6.813-5.758 12.356-12.83 12.356zm7.037-9.255c-.386-.185-2.282-1.084-2.636-1.209-.353-.123-.61-.187-.867.185-.256.372-.996 1.209-1.22 1.456-.226.248-.451.278-.837.093-.386-.186-1.629-.578-3.101-1.844-1.147-.984-1.921-2.2-2.146-2.573-.225-.371-.024-.572.169-.757.173-.165.386-.433.578-.65.192-.217.256-.372.386-.62.128-.247.064-.465-.033-.65-.097-.187-.867-2.015-1.19-2.758-.312-.724-.63-.627-.867-.639-.225-.01-.481-.013-.74-.013-.255 0-.674.093-1.028.465-.353.372-1.35 1.27-1.35 3.098 0 1.829 1.382 3.595 1.575 3.843.193.247 2.72 4 6.589 5.61.92.381 1.638.61 2.199.782.924.283 1.765.242 2.429.147.74-.107 2.282-.898 2.602-1.765.322-.867.322-1.611.226-1.766-.094-.155-.352-.248-.738-.435z");
+        ctx.save();
+        ctx.translate(136, 136);
+        ctx.scale(0.9, 0.9);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill(p);
+        ctx.restore();
+
+        const a = document.createElement('a');
+        a.href = exportCanvas.toDataURL('image/png');
+        a.download = `whatsapp_qr_${getFormattedFullNumber()}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      };
+      img.src = qrImg.src;
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+  </script>
+</body>
+
+</html>

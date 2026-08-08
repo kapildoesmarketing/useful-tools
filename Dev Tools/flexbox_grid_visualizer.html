@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Figma-Style Visual CSS Grid & Flexbox Studio</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Roboto:wght@400;500&family=Roboto+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 100%;
+    }
+
+    /* Floating Figma Top Control Bar */
+    .figma-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      flex-wrap: wrap;
+    }
+
+    .tool-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tool-divider {
+      height: 24px;
+      width: 1px;
+      background-color: var(--border-color);
+      margin: 0 4px;
+    }
+
+    label.tool-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    select.tool-select,
+    input.tool-input {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      padding: 5px 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      outline: none;
+    }
+
+    /* Canvas Stage Container (Figma Workspace) */
+    .canvas-viewport {
+      background-color: #f1f3f4;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+      min-height: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: auto;
+    }
+
+    /* Resizable Container Canvas */
+    .figma-stage {
+      background-color: #ffffff;
+      border: 2px dashed var(--primary-blue);
+      border-radius: 8px;
+      padding: 16px;
+      min-width: 320px;
+      min-height: 320px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      position: relative;
+      box-sizing: border-box;
+      resize: both;
+      overflow: auto;
+      transition: border-color 0.2s ease;
+
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    /* On-Canvas Direct Action Box */
+    .canvas-item {
+      background-color: #e8f0fe;
+      border: 2px solid var(--primary-blue);
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 80px;
+      font-family: 'Roboto Mono', monospace;
+      position: relative;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    }
+
+    .canvas-item:hover {
+      border-color: var(--primary-hover);
+      box-shadow: 0 6px 16px rgba(26, 115, 232, 0.2);
+    }
+
+    .item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary-blue);
+    }
+
+    /* Floating On-Item Handle Bar */
+    .item-handles {
+      display: flex;
+      gap: 4px;
+      background-color: rgba(255, 255, 255, 0.95);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 2px 4px;
+      margin-top: 8px;
+    }
+
+    .handle-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      font-weight: 500;
+    }
+
+    .handle-btn:hover {
+      background-color: #e8f0fe;
+      color: var(--primary-blue);
+    }
+
+    .handle-btn.danger:hover {
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+    }
+
+    /* Floating Add Box Overlay */
+    .floating-add-btn {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background-color: var(--primary-blue);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 10;
+    }
+
+    .floating-add-btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* CSS Output Code Block */
+    pre.code-output {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      background-color: #1e1e1e;
+      color: #d4d4d4;
+      padding: 14px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button.nav-btn {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: #f8f9fa;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Figma-Style Contextual Control Bar -->
+    <div class="figma-toolbar">
+      <div class="tool-group">
+        <label class="tool-label">Layout:</label>
+        <select class="tool-select" id="modeSelect" onchange="switchMode(this.value)">
+          <option value="grid" selected>▦ CSS Grid</option>
+          <option value="flex">📐 Flexbox</option>
+        </select>
+      </div>
+
+      <div class="tool-divider"></div>
+
+      <!-- Grid Controls -->
+      <div class="tool-group" id="gridControls">
+        <label class="tool-label">Columns:</label>
+        <select class="tool-select" id="gridCols" onchange="updateStage()">
+          <option value="repeat(3, 1fr)" selected>3 Columns (Equal)</option>
+          <option value="repeat(2, 1fr)">2 Columns</option>
+          <option value="repeat(4, 1fr)">4 Columns</option>
+          <option value="repeat(auto-fit, minmax(120px, 1fr))">Auto-Fit (Responsive)</option>
+          <option value="200px 1fr">Sidebar + Main (200px 1fr)</option>
+        </select>
+      </div>
+
+      <!-- Flexbox Controls -->
+      <div class="tool-group" id="flexControls" style="display: none;">
+        <label class="tool-label">Direction:</label>
+        <select class="tool-select" id="flexDir" onchange="updateStage()">
+          <option value="row" selected>Horizontal (Row →)</option>
+          <option value="column">Vertical (Column ↓)</option>
+        </select>
+
+        <label class="tool-label" style="margin-left: 8px;">Align:</label>
+        <select class="tool-select" id="flexJustify" onchange="updateStage()">
+          <option value="flex-start" selected>Start</option>
+          <option value="center">Center</option>
+          <option value="space-between">Space Between</option>
+          <option value="space-around">Space Around</option>
+        </select>
+      </div>
+
+      <div class="tool-divider"></div>
+
+      <div class="tool-group">
+        <label class="tool-label">Gap:</label>
+        <input type="number" class="tool-input" id="gapInput" min="0" max="60" value="16" style="width: 50px;" onchange="updateStage()">
+        <span style="font-size: 11px; color: var(--text-secondary);">px</span>
+      </div>
+
+      <div class="tool-divider"></div>
+
+      <!-- Starter Presets -->
+      <div class="tool-group">
+        <label class="tool-label">Template:</label>
+        <select class="tool-select" onchange="applyTemplate(this.value)">
+          <option value="custom" selected>Custom</option>
+          <option value="holyGrail">🏛️ Holy Grail Website</option>
+          <option value="cards">🖼️ 3-Card Grid</option>
+          <option value="dashboard">📊 App Dashboard</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Main Canvas Viewport (75% Screen Canvas) -->
+    <div class="canvas-viewport">
+      <div style="position: absolute; top: 12px; left: 16px; font-size: 12px; color: var(--text-secondary); font-weight: 500;">
+        💡 <strong>Canvas Stage:</strong> Click <strong>+ Col</strong> or <strong>+ Row</strong> directly on any box to expand its layout span! Drag corner to resize canvas.
+      </div>
+
+      <div class="figma-stage" id="figmaStage">
+        <!-- Interactive Canvas Item Cards inserted dynamically -->
+      </div>
+
+      <button class="floating-add-btn" onclick="addBoxItem()">
+        <span class="material-symbols-outlined">add</span> Add New Box
+      </button>
+    </div>
+
+    <!-- Live Generated CSS Code -->
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <label style="font-weight: 500;">Live Production CSS Code</label>
+      <pre class="code-output" id="codeOutput">/* Generated CSS will appear here */</pre>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="copyBtn" class="nav-btn btn-primary" onclick="copyGeneratedCss()">
+        <span class="material-symbols-outlined" id="copyIcon">content_copy</span>
+        <span id="copyText">Copy CSS Code</span>
+      </button>
+
+      <button class="nav-btn btn-secondary" onclick="resetStage()">
+        <span class="material-symbols-outlined">refresh</span>
+        Reset Canvas
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let mode = 'grid'; // 'grid' or 'flex'
+
+    let itemsData = [
+      { id: 1, label: 'Header 👑', colSpan: 'full', rowSpan: 1, flexGrow: 0 },
+      { id: 2, label: 'Sidebar 📌', colSpan: 1, rowSpan: 1, flexGrow: 0 },
+      { id: 3, label: 'Main Content 📝', colSpan: 2, rowSpan: 1, flexGrow: 1 },
+      { id: 4, label: 'Footer 🔻', colSpan: 'full', rowSpan: 1, flexGrow: 0 }
+    ];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderStage();
+      updateStage();
+    });
+
+    function switchMode(newMode) {
+      mode = newMode;
+      document.getElementById('gridControls').style.display = mode === 'grid' ? 'flex' : 'none';
+      document.getElementById('flexControls').style.display = mode === 'flex' ? 'flex' : 'none';
+      renderStage();
+      updateStage();
+    }
+
+    function applyTemplate(tpl) {
+      if (tpl === 'holyGrail') {
+        switchMode('grid');
+        document.getElementById('gridCols').value = 'repeat(3, 1fr)';
+        itemsData = [
+          { id: 1, label: 'Header 👑', colSpan: 'full', rowSpan: 1, flexGrow: 0 },
+          { id: 2, label: 'Sidebar 📌', colSpan: 1, rowSpan: 1, flexGrow: 0 },
+          { id: 3, label: 'Main Content 📝', colSpan: 2, rowSpan: 1, flexGrow: 0 },
+          { id: 4, label: 'Footer 🔻', colSpan: 'full', rowSpan: 1, flexGrow: 0 }
+        ];
+      } else if (tpl === 'cards') {
+        switchMode('grid');
+        document.getElementById('gridCols').value = 'repeat(3, 1fr)';
+        itemsData = [
+          { id: 1, label: 'Card 1 🖼️', colSpan: 1, rowSpan: 1, flexGrow: 0 },
+          { id: 2, label: 'Card 2 🖼️', colSpan: 1, rowSpan: 1, flexGrow: 0 },
+          { id: 3, label: 'Card 3 🖼️', colSpan: 1, rowSpan: 1, flexGrow: 0 }
+        ];
+      } else if (tpl === 'dashboard') {
+        switchMode('grid');
+        document.getElementById('gridCols').value = '200px 1fr';
+        itemsData = [
+          { id: 1, label: 'Nav Sidebar 📊', colSpan: 1, rowSpan: 1, flexGrow: 0 },
+          { id: 2, label: 'Main Dashboard 🚀', colSpan: 1, rowSpan: 1, flexGrow: 0 }
+        ];
+      }
+
+      renderStage();
+      updateStage();
+    }
+
+    function renderStage() {
+      const stage = document.getElementById('figmaStage');
+      stage.innerHTML = '';
+
+      itemsData.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'canvas-item';
+
+        // Apply Grid or Flexbox CSS directly onto item element
+        if (mode === 'grid') {
+          if (item.colSpan === 'full') div.style.gridColumn = '1 / -1';
+          else if (item.colSpan > 1) div.style.gridColumn = `span ${item.colSpan}`;
+          else div.style.gridColumn = '';
+
+          if (item.rowSpan > 1) div.style.gridRow = `span ${item.rowSpan}`;
+          else div.style.gridRow = '';
+        } else {
+          div.style.gridColumn = '';
+          div.style.gridRow = '';
+          if (item.flexGrow > 0) div.style.flexGrow = item.flexGrow;
+          else div.style.flexGrow = '0';
+        }
+
+        div.innerHTML = `
+          <div class="item-header">
+            <span>${escapeHtml(item.label)}</span>
+            <span style="font-size: 10px; opacity: 0.7;">#${index + 1}</span>
+          </div>
+
+          <!-- Figma On-Item Direct Handles -->
+          <div class="item-handles">
+            ${mode === 'grid' ? `
+              <button class="handle-btn" onclick="adjustSpan(${index}, 'col', 1)" title="Expand Column Span">
+                <span class="material-symbols-outlined" style="font-size: 12px;">add</span>Col (${item.colSpan})
+              </button>
+              <button class="handle-btn" onclick="adjustSpan(${index}, 'col', -1)" title="Shrink Column Span">
+                <span class="material-symbols-outlined" style="font-size: 12px;">remove</span>
+              </button>
+            ` : `
+              <button class="handle-btn" onclick="adjustGrow(${index}, 1)" title="Toggle Grow">
+                <span class="material-symbols-outlined" style="font-size: 12px;">aspect_ratio</span>Grow:${item.flexGrow}
+              </button>
+            `}
+
+            <button class="handle-btn danger" onclick="deleteBoxItem(${index})" title="Delete Box">
+              <span class="material-symbols-outlined" style="font-size: 12px;">delete</span>
+            </button>
+          </div>
+        `;
+
+        stage.appendChild(div);
+      });
+    }
+
+    function adjustSpan(index, type, delta) {
+      const item = itemsData[index];
+      if (!item) return;
+
+      if (type === 'col') {
+        if (item.colSpan === 'full') {
+          item.colSpan = delta > 0 ? 1 : 1;
+        } else {
+          let curr = parseInt(item.colSpan, 10) || 1;
+          curr += delta;
+          if (curr > 4) item.colSpan = 'full';
+          else if (curr < 1) item.colSpan = 1;
+          else item.colSpan = curr;
+        }
+      }
+
+      renderStage();
+      updateStage();
+    }
+
+    function adjustGrow(index, delta) {
+      const item = itemsData[index];
+      if (!item) return;
+      item.flexGrow = item.flexGrow > 0 ? 0 : 1;
+      renderStage();
+      updateStage();
+    }
+
+    function updateStage() {
+      const stage = document.getElementById('figmaStage');
+      const codeOutput = document.getElementById('codeOutput');
+      const gap = document.getElementById('gapInput').value || 16;
+
+      let cssText = '';
+
+      if (mode === 'grid') {
+        const cols = document.getElementById('gridCols').value;
+        stage.style.display = 'grid';
+        stage.style.gridTemplateColumns = cols;
+        stage.style.gap = `${gap}px`;
+        stage.style.flexDirection = '';
+        stage.style.justifyContent = '';
+
+        cssText = `.container {\n  display: grid;\n  grid-template-columns: ${cols};\n  gap: ${gap}px;\n}\n`;
+
+        itemsData.forEach((item, idx) => {
+          if (item.colSpan === 'full') {
+            cssText += `\n.item-${idx + 1} {\n  grid-column: 1 / -1;\n}`;
+          } else if (parseInt(item.colSpan, 10) > 1) {
+            cssText += `\n.item-${idx + 1} {\n  grid-column: span ${item.colSpan};\n}`;
+          }
+        });
+      } else {
+        const dir = document.getElementById('flexDir').value;
+        const justify = document.getElementById('flexJustify').value;
+
+        stage.style.display = 'flex';
+        stage.style.flexDirection = dir;
+        stage.style.justifyContent = justify;
+        stage.style.gap = `${gap}px`;
+        stage.style.gridTemplateColumns = '';
+
+        cssText = `.container {\n  display: flex;\n  flex-direction: ${dir};\n  justify-content: ${justify};\n  gap: ${gap}px;\n}\n`;
+
+        itemsData.forEach((item, idx) => {
+          if (item.flexGrow > 0) {
+            cssText += `\n.item-${idx + 1} {\n  flex-grow: ${item.flexGrow};\n}`;
+          }
+        });
+      }
+
+      codeOutput.textContent = cssText;
+    }
+
+    function addBoxItem() {
+      const count = itemsData.length + 1;
+      itemsData.push({ id: count, label: `Box ${count} 📦`, colSpan: 1, rowSpan: 1, flexGrow: 0 });
+      renderStage();
+      updateStage();
+    }
+
+    function deleteBoxItem(index) {
+      if (itemsData.length > 1) {
+        itemsData.splice(index, 1);
+        renderStage();
+        updateStage();
+      }
+    }
+
+    function copyGeneratedCss() {
+      const css = document.getElementById('codeOutput').textContent;
+      try {
+        navigator.clipboard.writeText(css);
+        triggerSuccessButton('copyBtn', 'copyIcon', 'copyText', 'Copied CSS!');
+      } catch (e) {
+        const range = document.createRange();
+        range.selectNode(document.getElementById('codeOutput'));
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+        document.execCommand('copy');
+        triggerSuccessButton('copyBtn', 'copyIcon', 'copyText', 'Copied CSS!');
+      }
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function resetStage() {
+      applyTemplate('holyGrail');
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+  </script>
+</body>
+
+</html>
