@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URL Parameter Parser & UTM Inspector</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    input[type="text"],
+    textarea {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      outline: none;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+      background-color: #ffffff;
+    }
+
+    /* URL Overview Card */
+    .url-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      background-color: var(--bg-color);
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+    }
+
+    .info-card {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .info-card label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-card span {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Parameters Table */
+    .table-container {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      overflow-x: auto;
+      background-color: #ffffff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background-color: var(--bg-color);
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    td input[type="text"] {
+      padding: 6px 8px;
+      font-size: 12px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      font-size: 10px;
+      font-weight: 500;
+      border-radius: 4px;
+    }
+
+    .badge-utm {
+      background-color: #e8f0fe;
+      color: var(--primary-blue);
+    }
+
+    .badge-tracker {
+      background-color: #fef7e0;
+      color: #b06000;
+    }
+
+    .badge-param {
+      background-color: #f1f3f4;
+      color: var(--text-secondary);
+    }
+
+    .table-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      padding: 3px;
+      border-radius: 4px;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+
+    .icon-btn:hover {
+      background-color: #e8eaed;
+      color: var(--text-main);
+    }
+
+    /* Animation class for Clear */
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: var(--bg-color);
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: var(--bg-color);
+      }
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 150px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Input URL -->
+    <div class="input-group">
+      <label for="urlInput">
+        Paste Long URL / Tracking Link
+        <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="loadSampleUrl()">Sample Tracking Link</button>
+      </label>
+      <textarea id="urlInput" rows="3" placeholder="https://example.com/products/view?utm_source=google&utm_medium=cpc&utm_campaign=summer_sale&ref=user123#reviews" oninput="parseUrl()"></textarea>
+    </div>
+
+    <!-- URL Component Breakdown Header -->
+    <div class="url-info-grid" id="urlInfoGrid">
+      <div class="info-card">
+        <label>Protocol</label>
+        <span id="infoProtocol">-</span>
+      </div>
+      <div class="info-card">
+        <label>Domain Host</label>
+        <span id="infoHost">-</span>
+      </div>
+      <div class="info-card">
+        <label>Pathname</label>
+        <span id="infoPath">-</span>
+      </div>
+      <div class="info-card">
+        <label>Hash Fragment</label>
+        <span id="infoHash">-</span>
+      </div>
+      <div class="info-card">
+        <label>Total Params</label>
+        <span id="infoCount">0</span>
+      </div>
+    </div>
+
+    <!-- Parameter Table Section -->
+    <div class="input-group">
+      <label>
+        Structured Key-Value Parameters
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="stripTrackingParams()">Strip UTM & Trackers</button>
+          <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="addParamRow()">+ Add Parameter</button>
+        </div>
+      </label>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 25%;">Key</th>
+              <th>Value</th>
+              <th style="width: 15%;">Category</th>
+              <th style="width: 90px; text-align: center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="paramsTbody">
+            <tr>
+              <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 24px;">
+                Paste a URL above to inspect its parameters...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Clean Reconstructed URL Output -->
+    <div class="input-group">
+      <label for="reconstructedUrl">Reconstructed Clean URL</label>
+      <input type="text" id="reconstructedUrl" readonly placeholder="Reconstructed URL will appear here...">
+    </div>
+
+    <!-- Error Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="copyUrlBtn" class="btn-primary" onclick="copyCleanUrl()">
+        <span class="material-symbols-outlined" id="copyUrlIcon">content_copy</span>
+        <span id="copyUrlText">Copy Clean URL</span>
+      </button>
+
+      <button id="copyJsonBtn" class="btn-secondary" onclick="copyParamsJson()">
+        <span class="material-symbols-outlined" id="copyJsonIcon">code</span>
+        <span id="copyJsonText">Copy Params JSON</span>
+      </button>
+
+      <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let currentParsedUrl = null;
+    let parsedParamsList = []; // Array of { key, value }
+    let renderTimeout = null;
+
+    const sampleUrl = 'https://store.example.com/checkout/cart?utm_source=google_ads&utm_medium=cpc&utm_campaign=summer_2026_discount&gclid=Cj0KCQiA0&ref_code=AFFILIATE99&user_id=10492#shipping';
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('urlInput').value = sampleUrl;
+      parseUrl();
+    });
+
+    function loadSampleUrl() {
+      document.getElementById('urlInput').value = sampleUrl;
+      parseUrl();
+    }
+
+    function parseUrl() {
+      if (renderTimeout) cancelAnimationFrame(renderTimeout);
+
+      renderTimeout = requestAnimationFrame(() => {
+        hideStatus();
+        const rawUrl = document.getElementById('urlInput').value.trim();
+
+        if (!rawUrl) {
+          resetOverview();
+          renderParamsTable([]);
+          document.getElementById('reconstructedUrl').value = '';
+          return;
+        }
+
+        try {
+          // Handle relative or protocol-less URLs gracefully
+          let validUrlStr = rawUrl;
+          if (!validUrlStr.match(/^[a-zA-Z]+:\/\//)) {
+            validUrlStr = 'https://' + validUrlStr;
+          }
+
+          const parsed = new URL(validUrlStr);
+          currentParsedUrl = parsed;
+
+          document.getElementById('infoProtocol').textContent = parsed.protocol || '-';
+          document.getElementById('infoHost').textContent = parsed.hostname || '-';
+          document.getElementById('infoPath').textContent = parsed.pathname || '/';
+          document.getElementById('infoHash').textContent = parsed.hash || '-';
+
+          parsedParamsList = [];
+          parsed.searchParams.forEach((val, key) => {
+            parsedParamsList.push({ key, value: val });
+          });
+
+          document.getElementById('infoCount').textContent = parsedParamsList.length;
+
+          renderParamsTable(parsedParamsList);
+          rebuildUrl();
+        } catch (err) {
+          showStatus('Invalid URL format. Please paste a valid web link.', 'error');
+          resetOverview();
+          renderParamsTable([]);
+          document.getElementById('reconstructedUrl').value = '';
+        }
+      });
+    }
+
+    function resetOverview() {
+      document.getElementById('infoProtocol').textContent = '-';
+      document.getElementById('infoHost').textContent = '-';
+      document.getElementById('infoPath').textContent = '-';
+      document.getElementById('infoHash').textContent = '-';
+      document.getElementById('infoCount').textContent = '0';
+    }
+
+    function renderParamsTable(params) {
+      const tbody = document.getElementById('paramsTbody');
+
+      if (params.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 24px;">
+              No query parameters found in this URL.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = params.map((item, idx) => {
+        const keyLower = item.key.toLowerCase();
+        let badgeClass = 'badge-param';
+        let badgeText = 'Parameter';
+
+        if (keyLower.startsWith('utm_')) {
+          badgeClass = 'badge-utm';
+          badgeText = 'UTM Tag';
+        } else if (['gclid', 'fbclid', 'msclkid', 'ttclid', 'ref', 'affiliate'].some(t => keyLower.includes(t))) {
+          badgeClass = 'badge-tracker';
+          badgeText = 'Ad Tracker';
+        }
+
+        return `
+          <tr>
+            <td>
+              <input type="text" value="${escapeHtml(item.key)}" oninput="updateParamKey(${idx}, this.value)">
+            </td>
+            <td>
+              <input type="text" value="${escapeHtml(item.value)}" oninput="updateParamValue(${idx}, this.value)">
+            </td>
+            <td>
+              <span class="badge ${badgeClass}">${badgeText}</span>
+            </td>
+            <td style="text-align: center;">
+              <div class="table-actions" style="justify-content: center;">
+                <button class="icon-btn" onclick="copyParamPair(${idx})" title="Copy Key=Value">
+                  <span class="material-symbols-outlined">content_copy</span>
+                </button>
+                <button class="icon-btn" style="color: var(--danger-text);" onclick="deleteParamRow(${idx})" title="Delete Parameter">
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updateParamKey(idx, newKey) {
+      if (parsedParamsList[idx]) {
+        parsedParamsList[idx].key = newKey;
+        rebuildUrl();
+      }
+    }
+
+    function updateParamValue(idx, newVal) {
+      if (parsedParamsList[idx]) {
+        parsedParamsList[idx].value = newVal;
+        rebuildUrl();
+      }
+    }
+
+    function deleteParamRow(idx) {
+      parsedParamsList.splice(idx, 1);
+      document.getElementById('infoCount').textContent = parsedParamsList.length;
+      renderParamsTable(parsedParamsList);
+      rebuildUrl();
+    }
+
+    function addParamRow() {
+      parsedParamsList.push({ key: 'new_param', value: 'value' });
+      document.getElementById('infoCount').textContent = parsedParamsList.length;
+      renderParamsTable(parsedParamsList);
+      rebuildUrl();
+    }
+
+    function stripTrackingParams() {
+      parsedParamsList = parsedParamsList.filter(item => {
+        const k = item.key.toLowerCase();
+        return !k.startsWith('utm_') && !['gclid', 'fbclid', 'msclkid', 'ttclid', 'ref', 'ref_code', 'affiliate'].some(t => k.includes(t));
+      });
+      document.getElementById('infoCount').textContent = parsedParamsList.length;
+      renderParamsTable(parsedParamsList);
+      rebuildUrl();
+
+      showStatus('Stripped all UTM and tracking parameters from URL.', 'success');
+      setTimeout(hideStatus, 2000);
+    }
+
+    function rebuildUrl() {
+      if (!currentParsedUrl) return;
+
+      const newUrl = new URL(currentParsedUrl.origin + currentParsedUrl.pathname);
+      parsedParamsList.forEach(item => {
+        if (item.key.trim()) {
+          newUrl.searchParams.append(item.key.trim(), item.value);
+        }
+      });
+      newUrl.hash = currentParsedUrl.hash;
+
+      document.getElementById('reconstructedUrl').value = newUrl.href;
+    }
+
+    function copyCleanUrl() {
+      const cleanUrl = document.getElementById('reconstructedUrl').value;
+      if (!cleanUrl) return;
+
+      const tempArea = document.createElement('textarea');
+      tempArea.value = cleanUrl;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+
+      triggerSuccessButton('copyUrlBtn', 'copyUrlIcon', 'copyUrlText', 'Copied Clean URL!');
+    }
+
+    function copyParamsJson() {
+      if (parsedParamsList.length === 0) return;
+
+      const jsonObj = {};
+      parsedParamsList.forEach(item => {
+        if (item.key) jsonObj[item.key] = item.value;
+      });
+
+      const tempArea = document.createElement('textarea');
+      tempArea.value = JSON.stringify(jsonObj, null, 2);
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+
+      triggerSuccessButton('copyJsonBtn', 'copyJsonIcon', 'copyJsonText', 'Copied JSON!');
+    }
+
+    function copyParamPair(idx) {
+      const item = parsedParamsList[idx];
+      if (!item) return;
+
+      const text = `${item.key}=${item.value}`;
+      const tempArea = document.createElement('textarea');
+      tempArea.value = text;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function clearAll() {
+      currentParsedUrl = null;
+      parsedParamsList = [];
+
+      document.getElementById('urlInput').value = '';
+      document.getElementById('reconstructedUrl').value = '';
+      resetOverview();
+      renderParamsTable([]);
+      hideStatus();
+
+      document.getElementById('urlInput').classList.remove('flash-clear');
+      document.getElementById('urlInfoGrid').classList.remove('flash-clear');
+
+      void document.getElementById('urlInput').offsetWidth;
+
+      document.getElementById('urlInput').classList.add('flash-clear');
+      document.getElementById('urlInfoGrid').classList.add('flash-clear');
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+    }
+
+    function hideStatus() {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = 'status-box';
+      statusBox.textContent = '';
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+  </script>
+</body>
+
+</html>

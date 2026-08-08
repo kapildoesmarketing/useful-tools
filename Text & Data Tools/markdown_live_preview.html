@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Live Previewer & HTML Converter</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+  <!-- Marked parser CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/11.1.1/marked.min.js"></script>
+  <!-- DOMPurify for safe HTML rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
+  <!-- Highlight.js for code syntax highlighting in preview -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-main);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    textarea,
+    .preview-box {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      outline: none;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+      line-height: 1.6;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 340px;
+    }
+
+    textarea:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+      background-color: #ffffff;
+    }
+
+    /* Live Preview Container */
+    .preview-box {
+      min-height: 340px;
+      background-color: #ffffff;
+      overflow-y: auto;
+      max-height: 480px;
+    }
+
+    /* Full GitHub-Style Markdown Styles (Shared with Exported HTML) */
+    .markdown-body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Google Sans', Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #202124;
+      word-wrap: break-word;
+    }
+
+    .markdown-body h1,
+    .markdown-body h2,
+    .markdown-body h3,
+    .markdown-body h4,
+    .markdown-body h5,
+    .markdown-body h6 {
+      margin-top: 20px;
+      margin-bottom: 12px;
+      font-weight: 600;
+      line-height: 1.25;
+      color: #202124;
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .markdown-body h1 {
+      font-size: 22px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .markdown-body h2 {
+      font-size: 18px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .markdown-body h3 { font-size: 16px; }
+    .markdown-body h4 { font-size: 14px; }
+
+    .markdown-body p,
+    .markdown-body blockquote,
+    .markdown-body ul,
+    .markdown-body ol,
+    .markdown-body dl,
+    .markdown-body table,
+    .markdown-body pre {
+      margin-top: 0;
+      margin-bottom: 14px;
+    }
+
+    .markdown-body blockquote {
+      padding: 8px 16px;
+      color: #5f6368;
+      border-left: 4px solid var(--primary-blue);
+      background-color: var(--bg-color);
+      border-radius: 0 4px 4px 0;
+    }
+
+    .markdown-body table {
+      border-spacing: 0;
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 8px;
+      margin-bottom: 16px;
+      font-size: 13px;
+    }
+
+    .markdown-body table th,
+    .markdown-body table td {
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .markdown-body table th {
+      font-weight: 600;
+      background-color: var(--bg-color);
+    }
+
+    .markdown-body table tr:nth-child(2n) {
+      background-color: #f8f9fa;
+    }
+
+    .markdown-body code {
+      padding: 2px 6px;
+      margin: 0;
+      font-size: 12px;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    .markdown-body pre {
+      padding: 12px;
+      overflow: auto;
+      font-size: 13px;
+      line-height: 1.45;
+      background-color: var(--bg-color);
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    .markdown-body pre code {
+      display: inline;
+      padding: 0;
+      margin: 0;
+      overflow: visible;
+      background-color: transparent;
+      border: 0;
+    }
+
+    .markdown-body ul,
+    .markdown-body ol {
+      padding-left: 24px;
+    }
+
+    .markdown-body hr {
+      height: 2px;
+      padding: 0;
+      margin: 20px 0;
+      background-color: var(--border-color);
+      border: 0;
+    }
+
+    .markdown-body img {
+      max-width: 100%;
+      border-radius: 4px;
+    }
+
+    .stats-bar {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: normal;
+    }
+
+    /* Animation class for Clear */
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: var(--bg-color);
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: var(--bg-color);
+      }
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 140px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="grid">
+      <!-- Input Panel -->
+      <div class="input-group">
+        <label for="markdownInput">
+          Markdown Input
+          <span class="stats-bar" id="statsBar">0 words | 0 chars</span>
+        </label>
+        <textarea id="markdownInput" placeholder="# Welcome to Markdown Live Preview&#10;&#10;| Feature | Status |&#10;| --- | --- |&#10;| Tables | Supported |&#10;| Blockquotes | Supported |&#10;&#10;> Type your **Markdown** here..." oninput="updatePreview()"></textarea>
+      </div>
+
+      <!-- Preview Panel -->
+      <div class="input-group">
+        <label>Live HTML Render</label>
+        <div id="previewBox" class="preview-box markdown-body">
+          <span style="color: var(--text-secondary);">Live preview will render here...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden element for HTML export copy -->
+    <textarea id="hiddenHtmlOutput" style="display: none;"></textarea>
+
+    <!-- Error Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="copyHtmlBtn" class="btn-primary" onclick="copyHtml()">
+        <span class="material-symbols-outlined" id="copyHtmlIcon">code</span>
+        <span id="copyHtmlText">Copy Rendered HTML</span>
+      </button>
+
+      <button id="downloadHtmlBtn" class="btn-secondary" onclick="downloadHtml()">
+        <span class="material-symbols-outlined" id="downloadIcon">download</span>
+        <span id="downloadText">Download HTML</span>
+      </button>
+
+      <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Configure Marked options
+    marked.setOptions({
+      gfm: true,
+      breaks: true,
+      highlight: function (code, lang) {
+        if (lang && hljs.getLanguage(lang)) {
+          try {
+            return hljs.highlight(code, { language: lang }).value;
+          } catch (e) {}
+        }
+        return hljs.highlightAuto(code).value;
+      }
+    });
+
+    let pendingRender = null;
+
+    function updatePreview() {
+      if (pendingRender) cancelAnimationFrame(pendingRender);
+
+      pendingRender = requestAnimationFrame(() => {
+        const rawMarkdown = document.getElementById('markdownInput').value;
+        const previewBox = document.getElementById('previewBox');
+        const statsBar = document.getElementById('statsBar');
+
+        // Update statistics
+        const charCount = rawMarkdown.length;
+        const wordCount = rawMarkdown.trim() === '' ? 0 : rawMarkdown.trim().split(/\s+/).length;
+        statsBar.textContent = `${wordCount} words | ${charCount} chars`;
+
+        if (!rawMarkdown.trim()) {
+          previewBox.innerHTML = '<span style="color: var(--text-secondary);">Live preview will render here...</span>';
+          document.getElementById('hiddenHtmlOutput').value = '';
+          return;
+        }
+
+        try {
+          const parsedHtml = marked.parse(rawMarkdown);
+          const cleanHtml = DOMPurify.sanitize(parsedHtml);
+
+          previewBox.innerHTML = cleanHtml;
+          document.getElementById('hiddenHtmlOutput').value = cleanHtml;
+
+          // Apply syntax highlighting
+          previewBox.querySelectorAll('pre code').forEach((block) => {
+            hljs.highlightElement(block);
+          });
+        } catch (err) {
+          previewBox.innerHTML = `<span style="color: var(--danger-text);">Error parsing Markdown: ${err.message}</span>`;
+        }
+      });
+    }
+
+    function copyHtml() {
+      const htmlVal = document.getElementById('hiddenHtmlOutput').value;
+      if (!htmlVal) return;
+
+      const tempArea = document.createElement('textarea');
+      tempArea.value = htmlVal;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+
+      triggerSuccessButton('copyHtmlBtn', 'copyHtmlIcon', 'copyHtmlText', 'Copied HTML!');
+    }
+
+    function downloadHtml() {
+      const htmlVal = document.getElementById('hiddenHtmlOutput').value;
+      if (!htmlVal) return;
+
+      const fullHtmlDoc = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rendered Document</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<style>
+:root {
+  --bg-color: #f8f9fa;
+  --border-color: #dadce0;
+  --primary-blue: #1a73e8;
+  --text-main: #202124;
+  --text-secondary: #5f6368;
+}
+body {
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 32px;
+  background-color: #ffffff;
+  color: var(--text-main);
+  max-width: 900px;
+  margin: 0 auto;
+}
+.markdown-body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Google Sans', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #202124;
+  word-wrap: break-word;
+}
+.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 {
+  margin-top: 20px;
+  margin-bottom: 12px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: #202124;
+  font-family: 'Google Sans', sans-serif;
+}
+.markdown-body h1 { font-size: 22px; padding-bottom: 6px; border-bottom: 1px solid var(--border-color); }
+.markdown-body h2 { font-size: 18px; padding-bottom: 4px; border-bottom: 1px solid var(--border-color); }
+.markdown-body h3 { font-size: 16px; }
+.markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol, .markdown-body dl, .markdown-body table, .markdown-body pre {
+  margin-top: 0;
+  margin-bottom: 14px;
+}
+.markdown-body blockquote {
+  padding: 8px 16px;
+  color: #5f6368;
+  border-left: 4px solid var(--primary-blue);
+  background-color: var(--bg-color);
+  border-radius: 0 4px 4px 0;
+}
+.markdown-body table {
+  border-spacing: 0;
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+.markdown-body table th, .markdown-body table td {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+}
+.markdown-body table th { font-weight: 600; background-color: var(--bg-color); }
+.markdown-body table tr:nth-child(2n) { background-color: #f8f9fa; }
+.markdown-body code {
+  padding: 2px 6px;
+  margin: 0;
+  font-size: 12px;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-family: 'Roboto Mono', monospace;
+}
+.markdown-body pre {
+  padding: 12px;
+  overflow: auto;
+  font-size: 13px;
+  line-height: 1.45;
+  background-color: var(--bg-color);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+.markdown-body pre code {
+  display: inline;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  background-color: transparent;
+  border: 0;
+}
+.markdown-body ul, .markdown-body ol { padding-left: 24px; }
+.markdown-body hr { height: 2px; margin: 20px 0; background-color: var(--border-color); border: 0; }
+.markdown-body img { max-width: 100%; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="markdown-body">
+${htmlVal}
+</div>
+</body>
+</html>`;
+
+      const blob = new Blob([fullHtmlDoc], { type: 'text/html;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'rendered_document.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      triggerSuccessButton('downloadHtmlBtn', 'downloadIcon', 'downloadText', 'Saved!');
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function clearAll() {
+      const input = document.getElementById('markdownInput');
+      const previewBox = document.getElementById('previewBox');
+
+      input.value = '';
+      previewBox.innerHTML = '<span style="color: var(--text-secondary);">Live preview will render here...</span>';
+      document.getElementById('hiddenHtmlOutput').value = '';
+      document.getElementById('statsBar').textContent = '0 words | 0 chars';
+
+      input.classList.remove('flash-clear');
+      previewBox.classList.remove('flash-clear');
+
+      void input.offsetWidth;
+
+      input.classList.add('flash-clear');
+      previewBox.classList.add('flash-clear');
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+  <!-- Import Papa Parse via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --error-text: #d93025;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 600px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    textarea {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--bg-color);
+      resize: vertical;
+      min-height: 250px;
+      color: var(--text-main);
+      outline: none;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    textarea:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+      background-color: #ffffff;
+    }
+
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: var(--bg-color);
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: var(--bg-color);
+      }
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 140px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="grid">
+      <div class="input-group">
+        <label for="jsonInput">Paste JSON Data</label>
+        <textarea id="jsonInput"
+          placeholder='[&#10;  {&#10;    "id": 1,&#10;    "name": "Jane Doe"&#10;  }&#10;]'></textarea>
+      </div>
+      <div class="input-group">
+        <label for="csvOutput">CSV Output</label>
+        <textarea id="csvOutput" readonly placeholder="Result will appear here..."></textarea>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button id="convertBtn" class="btn-primary" onclick="startConversion()">
+        <span class="material-symbols-outlined" id="convertIcon">table_view</span>
+        <span id="convertText">Convert to CSV</span>
+      </button>
+
+      <button id="copyBtn" class="btn-secondary" onclick="copyResult()">
+        <span class="material-symbols-outlined" id="copyIcon">content_copy</span>
+        <span id="copyText">Copy CSV</span>
+      </button>
+
+      <button id="downloadBtn" class="btn-secondary" onclick="downloadResult()">
+        <span class="material-symbols-outlined" id="downloadIcon">download</span>
+        <span id="downloadText">Download</span>
+      </button>
+
+      <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Recursive function to flatten nested JSON objects
+    function flattenObject(obj, prefix = '') {
+      return Object.keys(obj).reduce((acc, k) => {
+        const pre = prefix.length ? prefix + '.' : '';
+
+        // If it's a null value, keep it null
+        if (obj[k] === null) {
+          acc[pre + k] = null;
+        }
+        // If it's an array, stringify it so it fits perfectly in one CSV cell
+        else if (Array.isArray(obj[k])) {
+          acc[pre + k] = JSON.stringify(obj[k]);
+        }
+        // If it's a nested object, recurse deeper
+        else if (typeof obj[k] === 'object' && obj[k] !== null) {
+          Object.assign(acc, flattenObject(obj[k], pre + k));
+        }
+        // Otherwise, it's a standard flat value
+        else {
+          acc[pre + k] = obj[k];
+        }
+        return acc;
+      }, {});
+    }
+
+    function startConversion() {
+      const btn = document.getElementById('convertBtn');
+      const icon = document.getElementById('convertIcon');
+      const text = document.getElementById('convertText');
+      const jsonText = document.getElementById('jsonInput').value.trim();
+      const output = document.getElementById('csvOutput');
+
+      if (!jsonText) {
+        output.value = "";
+        return;
+      }
+
+      btn.disabled = true;
+      icon.style.display = 'none';
+      text.innerHTML = '<span class="spinner" style="margin-right: 6px;"></span>Processing...';
+      output.style.color = "var(--text-main)";
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          try {
+            let parsedData = JSON.parse(jsonText);
+
+            if (!Array.isArray(parsedData)) {
+              parsedData = [parsedData];
+            }
+
+            // Flatten every object in the array before passing to Papa Parse
+            const flatData = parsedData.map(item => flattenObject(item));
+
+            const csv = Papa.unparse(flatData, {
+              quotes: false,
+              header: true
+            });
+
+            output.value = csv;
+          } catch (error) {
+            output.style.color = "var(--error-text)";
+            output.value = "Error parsing JSON: Invalid syntax.\nDetails: " + error.message;
+          }
+
+          btn.disabled = false;
+          icon.style.display = 'block';
+          text.innerHTML = 'Convert to CSV';
+        });
+      });
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function copyResult() {
+      const output = document.getElementById('csvOutput');
+      if (!output.value || output.value.includes("Error parsing")) return;
+
+      output.select();
+      document.execCommand('copy');
+      triggerSuccessButton('copyBtn', 'copyIcon', 'copyText', 'Copied!');
+    }
+
+    function downloadResult() {
+      const output = document.getElementById('csvOutput').value;
+      if (!output || output.includes("Error parsing")) return;
+
+      const blob = new Blob([output], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'data_converted.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      triggerSuccessButton('downloadBtn', 'downloadIcon', 'downloadText', 'Saved!');
+    }
+
+    function clearAll() {
+      const input = document.getElementById('jsonInput');
+      const output = document.getElementById('csvOutput');
+
+      input.value = '';
+      output.value = '';
+      output.style.color = "var(--text-main)";
+
+      input.classList.remove('flash-clear');
+      output.classList.remove('flash-clear');
+
+      void input.offsetWidth;
+
+      input.classList.add('flash-clear');
+      output.classList.add('flash-clear');
+    }
+  </script>
+</body>
+
+</html>

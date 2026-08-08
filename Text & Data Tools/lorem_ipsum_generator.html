@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lorem Ipsum Placeholder Generator</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background-color: var(--bg-color);
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    select,
+    input[type="number"] {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 8px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    select:focus,
+    input[type="number"]:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Output Panel */
+    .output-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    textarea {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      outline: none;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+      min-height: 280px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    textarea:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+      background-color: #ffffff;
+    }
+
+    .stats-bar {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: normal;
+    }
+
+    /* Animation class for Clear */
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: var(--bg-color);
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: var(--bg-color);
+      }
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 150px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="grid">
+      <!-- Options Panel -->
+      <div class="controls-panel" id="controlsPanel">
+        <div class="control-row">
+          <div class="input-group">
+            <label for="flavorSelect">Text Flavor</label>
+            <select id="flavorSelect" onchange="generateLorem()">
+              <option value="latin" selected>Classic Latin (Lorem Ipsum)</option>
+              <option value="tech">Tech / Developer Ipsum</option>
+              <option value="corporate">Corporate / Business Ipsum</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label for="unitSelect">Generate By</label>
+            <select id="unitSelect" onchange="generateLorem()">
+              <option value="paragraphs" selected>Paragraphs</option>
+              <option value="sentences">Sentences</option>
+              <option value="words">Words</option>
+              <option value="list">Bullet Point List</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="control-row">
+          <div class="input-group">
+            <label for="countInput">Quantity</label>
+            <input type="number" id="countInput" min="1" max="100" value="5" oninput="generateLorem()">
+          </div>
+
+          <div class="input-group">
+            <label for="htmlFormat">HTML Tag Wrapping</label>
+            <select id="htmlFormat" onchange="generateLorem()">
+              <option value="plain" selected>Plain Text</option>
+              <option value="p">&lt;p&gt; Paragraph Tags</option>
+              <option value="li">&lt;li&gt; List Item Tags</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="control-row" style="margin-top: 4px;">
+          <label class="checkbox-label">
+            <input type="checkbox" id="startWithLorem" checked onchange="generateLorem()">
+            Start with "Lorem ipsum dolor sit amet..."
+          </label>
+        </div>
+      </div>
+
+      <!-- Output Panel -->
+      <div class="output-panel">
+        <label for="loremOutput">
+          Generated Placeholder Text
+          <span class="stats-bar" id="statsBar">0 words | 0 chars</span>
+        </label>
+        <textarea id="loremOutput" readonly placeholder="Generated text will appear here..."></textarea>
+      </div>
+    </div>
+
+    <!-- Error Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="copyBtn" class="btn-primary" onclick="copyText()">
+        <span class="material-symbols-outlined" id="copyIcon">content_copy</span>
+        <span id="copyText">Copy Text</span>
+      </button>
+
+      <button id="downloadBtn" class="btn-secondary" onclick="downloadText()">
+        <span class="material-symbols-outlined" id="downloadIcon">download</span>
+        <span id="downloadText">Download Text</span>
+      </button>
+
+      <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const dictionary = {
+      latin: [
+        "lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing", "elit", "sed", "do",
+        "eiusmod", "tempor", "incididunt", "ut", "labore", "et", "dolore", "magna", "aliqua", "ut",
+        "enim", "ad", "minim", "veniam", "quis", "nostrud", "exercitation", "ullamco", "laboris", "nisi",
+        "ut", "aliquip", "ex", "ea", "commodo", "consequat", "duis", "aute", "irure", "in",
+        "reprehenderit", "in", "voluptate", "velit", "esse", "cillum", "dolore", "eu", "fugiat", "nulla",
+        "pariatur", "excepteur", "sint", "occaecat", "cupidatat", "non", "proident", "sunt", "in", "culpa",
+        "qui", "officia", "deserunt", "mollit", "anim", "id", "est", "laborum"
+      ],
+      tech: [
+        "code", "algorithm", "refactor", "api", "container", "microservice", "deployment", "pipeline", "repository",
+        "branch", "commit", "frontend", "backend", "database", "latency", "async", "promise", "interface", "class",
+        "object", "component", "state", "props", "hook", "compile", "runtime", "debug", "test", "coverage", "benchmark",
+        "endpoint", "payload", "json", "token", "auth", "session", "cache", "serverless", "cloud", "cluster"
+      ],
+      corporate: [
+        "synergy", "leverage", "deliverable", "competency", "alignment", "paradigm", "bandwidth", "actionable",
+        "roadmap", "milestone", "stakeholder", "strategy", "scalability", "optimization", "pipeline", "ecosystem",
+        "transformation", "innovation", "value-add", "best-practice", "deep-dive", "touchpoint", "holistic", "streamline",
+        "roi", "kpi", "metrics", "dashboard", "onboarding", "synergize", "impactful", "growth-mindset"
+      ]
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      generateLorem();
+    });
+
+    function getRandomWord(vocab) {
+      return vocab[Math.floor(Math.random() * vocab.length)];
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function generateSentence(vocab, minWords = 6, maxWords = 14) {
+      const len = Math.floor(Math.random() * (maxWords - minWords + 1)) + minWords;
+      const words = [];
+      for (let i = 0; i < len; i++) {
+        words.push(getRandomWord(vocab));
+      }
+      return capitalize(words.join(" ")) + ".";
+    }
+
+    function generateParagraph(vocab, sentenceCount = 5) {
+      const sentences = [];
+      for (let i = 0; i < sentenceCount; i++) {
+        sentences.push(generateSentence(vocab));
+      }
+      return sentences.join(" ");
+    }
+
+    function generateLorem() {
+      const flavor = document.getElementById('flavorSelect').value;
+      const unit = document.getElementById('unitSelect').value;
+      let count = parseInt(document.getElementById('countInput').value, 10);
+      const htmlFormat = document.getElementById('htmlFormat').value;
+      const startWithLorem = document.getElementById('startWithLorem').checked;
+
+      if (isNaN(count) || count < 1) count = 1;
+      if (count > 200) count = 200;
+
+      const vocab = dictionary[flavor] || dictionary.latin;
+      let results = [];
+
+      if (unit === 'words') {
+        let words = [];
+        if (startWithLorem && flavor === 'latin') {
+          words = ["Lorem", "ipsum", "dolor", "sit", "amet,"];
+        }
+        while (words.length < count) {
+          words.push(getRandomWord(vocab));
+        }
+        words = words.slice(0, count);
+        results.push(words.join(" "));
+      } else if (unit === 'sentences') {
+        for (let i = 0; i < count; i++) {
+          if (i === 0 && startWithLorem && flavor === 'latin') {
+            results.push("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+          } else {
+            results.push(generateSentence(vocab));
+          }
+        }
+      } else if (unit === 'paragraphs') {
+        for (let i = 0; i < count; i++) {
+          if (i === 0 && startWithLorem && flavor === 'latin') {
+            results.push("Lorem ipsum dolor sit amet, consectetur adipiscing elit. " + generateParagraph(vocab, 4));
+          } else {
+            results.push(generateParagraph(vocab, 5));
+          }
+        }
+      } else if (unit === 'list') {
+        for (let i = 0; i < count; i++) {
+          if (i === 0 && startWithLorem && flavor === 'latin') {
+            results.push("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+          } else {
+            results.push(generateSentence(vocab, 4, 10));
+          }
+        }
+      }
+
+      // Format HTML tags if selected
+      let formattedOutput = "";
+      if (htmlFormat === 'p') {
+        formattedOutput = results.map(r => `<p>${r}</p>`).join("\n\n");
+      } else if (htmlFormat === 'li') {
+        formattedOutput = "<ul>\n" + results.map(r => `  <li>${r}</li>`).join("\n") + "\n</ul>";
+      } else {
+        formattedOutput = results.join(unit === 'paragraphs' ? "\n\n" : unit === 'list' ? "\n" : " ");
+      }
+
+      const outputEl = document.getElementById('loremOutput');
+      outputEl.value = formattedOutput;
+
+      // Update statistics
+      const charCount = formattedOutput.length;
+      const wordCount = formattedOutput.trim() === '' ? 0 : formattedOutput.trim().split(/\s+/).length;
+      document.getElementById('statsBar').textContent = `${wordCount} words | ${charCount} chars`;
+    }
+
+    function copyText() {
+      const output = document.getElementById('loremOutput');
+      if (!output.value) return;
+
+      output.select();
+      document.execCommand('copy');
+      triggerSuccessButton('copyBtn', 'copyIcon', 'copyText', 'Copied Text!');
+    }
+
+    function downloadText() {
+      const text = document.getElementById('loremOutput').value;
+      if (!text) return;
+
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'placeholder_text.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      triggerSuccessButton('downloadBtn', 'downloadIcon', 'downloadText', 'Saved File!');
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function clearAll() {
+      const output = document.getElementById('loremOutput');
+      output.value = '';
+      document.getElementById('statsBar').textContent = '0 words | 0 chars';
+
+      output.classList.remove('flash-clear');
+      document.getElementById('controlsPanel').classList.remove('flash-clear');
+
+      void output.offsetWidth;
+
+      output.classList.add('flash-clear');
+      document.getElementById('controlsPanel').classList.add('flash-clear');
+    }
+  </script>
+</body>
+
+</html>

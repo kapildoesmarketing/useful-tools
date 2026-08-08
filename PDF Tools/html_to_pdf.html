@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML to PDF Converter</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+  <!-- html2pdf.js bundle via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .label-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    textarea,
+    select {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      outline: none;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 360px;
+      line-height: 1.5;
+    }
+
+    textarea.dragover {
+      border-color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    textarea:focus,
+    select:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+      background-color: #ffffff;
+    }
+
+    /* Page Options Row */
+    .options-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 10px;
+      background-color: var(--bg-color);
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+    }
+
+    /* PDF Viewport Wrapper (PDF Reader Style) */
+    .preview-viewport {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #525659;
+      padding: 20px;
+      overflow: auto;
+      max-height: 440px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+
+    /* Aspect Ratio Paper Sheet Box */
+    .paper-wrapper {
+      background-color: #ffffff;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+      border-radius: 2px;
+      box-sizing: border-box;
+      position: relative;
+      overflow: hidden;
+      transition: aspect-ratio 0.2s ease;
+    }
+
+    .paper-iframe {
+      width: 100%;
+      height: 100%;
+      min-height: 400px;
+      border: none;
+      display: block;
+      background-color: #ffffff;
+    }
+
+    /* Animation class for Clear */
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: var(--bg-color);
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: var(--bg-color);
+      }
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 160px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Page Layout Options -->
+    <div class="options-row" id="optionsRow">
+      <div class="input-group">
+        <label for="pageSize">Page Format</label>
+        <select id="pageSize" onchange="updatePreview()">
+          <option value="a4" selected>A4</option>
+          <option value="letter">US Letter</option>
+          <option value="legal">US Legal</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label for="pageOrientation">Orientation</label>
+        <select id="pageOrientation" onchange="updatePreview()">
+          <option value="portrait" selected>Portrait</option>
+          <option value="landscape">Landscape</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label for="pageMargin">Margin</label>
+        <select id="pageMargin" onchange="updatePreview()">
+          <option value="10" selected>Standard (10mm)</option>
+          <option value="0">None (0mm)</option>
+          <option value="20">Wide (20mm)</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label for="renderScale">Quality Scale</label>
+        <select id="renderScale">
+          <option value="1">1.0x (Standard)</option>
+          <option value="2" selected>2.0x (HD)</option>
+          <option value="3">3.0x (Ultra HD)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Dual View Grid -->
+    <div class="grid">
+      <!-- HTML Input Editor -->
+      <div class="input-group">
+        <label for="htmlInput">
+          HTML & CSS Code
+          <div class="label-actions">
+            <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="document.getElementById('fileUploadInput').click()">
+              <span class="material-symbols-outlined" style="font-size: 14px;">upload_file</span> Upload HTML
+            </button>
+            <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="loadSampleTemplate()">Sample</button>
+          </div>
+        </label>
+        <input type="file" id="fileUploadInput" accept=".html,.htm,.txt" style="display: none;" onchange="handleHtmlFileUpload(event)">
+        <textarea id="htmlInput" placeholder="<h1>Document Title</h1>&#10;<p>Type or upload your HTML code here...</p>" oninput="updatePreview()"></textarea>
+      </div>
+
+      <!-- PDF Paper Sheet Live Preview (Isolated iFrame) -->
+      <div class="input-group">
+        <label>Live Document Sheet Preview</label>
+        <div class="preview-viewport">
+          <div id="paperWrapper" class="paper-wrapper">
+            <iframe id="previewIframe" class="paper-iframe" title="PDF Live Preview"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="convertBtn" class="btn-primary" onclick="convertHtmlToPdf()">
+        <span class="material-symbols-outlined" id="convertIcon">picture_as_pdf</span>
+        <span id="convertText">Download PDF</span>
+      </button>
+
+      <button id="copyHtmlBtn" class="btn-secondary" onclick="copyHtmlCode()">
+        <span class="material-symbols-outlined" id="copyIcon">content_copy</span>
+        <span id="copyText">Copy HTML Code</span>
+      </button>
+
+      <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let renderTimeout = null;
+
+    const sampleHtml = `<div style="font-family: Arial, sans-serif; color: #202124;">
+  <h1 style="color: #1a73e8; border-bottom: 2px solid #dadce0; padding-bottom: 8px; margin-top: 0;">Executive Project Summary</h1>
+  <p style="font-size: 13px; color: #5f6368;">Generated on: <strong>2026-08-07</strong> | Prepared for Internal Teams</p>
+
+  <h2 style="font-size: 15px; margin-top: 20px;">Key Accomplishments</h2>
+  <ul style="line-height: 1.8; font-size: 13px;">
+    <li>100% Client-Side Web Application Suite built for internal hosting.</li>
+    <li>Integrated PDF, Image, Dev, and Text utilities without external server dependencies.</li>
+    <li>High-resolution rendering with customizable page margins and orientation.</li>
+  </ul>
+
+  <h2 style="font-size: 15px; margin-top: 20px;">Project Deliverables</h2>
+  <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px;">
+    <thead>
+      <tr style="background-color: #f8f9fa;">
+        <th style="border: 1px solid #dadce0; padding: 8px 10px; text-align: left;">Tool Name</th>
+        <th style="border: 1px solid #dadce0; padding: 8px 10px; text-align: left;">Category</th>
+        <th style="border: 1px solid #dadce0; padding: 8px 10px; text-align: left;">Security Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="border: 1px solid #dadce0; padding: 8px 10px;">HTML to PDF Converter</td>
+        <td style="border: 1px solid #dadce0; padding: 8px 10px;">PDF Tools</td>
+        <td style="border: 1px solid #dadce0; padding: 8px 10px; color: #137333; font-weight: bold;">100% Client-Side</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid #dadce0; padding: 8px 10px;">QR Code Generator</td>
+        <td style="border: 1px solid #dadce0; padding: 8px 10px;">Dev Tools</td>
+        <td style="border: 1px solid #dadce0; padding: 8px 10px; color: #137333; font-weight: bold;">100% Client-Side</td>
+      </tr>
+    </tbody>
+  </table>
+</div>`;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('htmlInput').value = sampleHtml;
+      setupDragAndDrop();
+      updatePreview();
+    });
+
+    function setupDragAndDrop() {
+      const textarea = document.getElementById('htmlInput');
+
+      ['dragenter', 'dragover'].forEach(eventName => {
+        textarea.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          textarea.classList.add('dragover');
+        }, false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        textarea.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          textarea.classList.remove('dragover');
+        }, false);
+      });
+
+      textarea.addEventListener('drop', (e) => {
+        const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.html') || f.name.endsWith('.htm') || f.name.endsWith('.txt'));
+        if (files.length > 0) {
+          readHtmlFile(files[0]);
+        }
+      });
+    }
+
+    function handleHtmlFileUpload(event) {
+      if (event.target.files.length > 0) {
+        readHtmlFile(event.target.files[0]);
+      }
+    }
+
+    function readHtmlFile(file) {
+      hideStatus();
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('htmlInput').value = e.target.result;
+        updatePreview();
+        showStatus(`Successfully loaded "${file.name}" (${formatFileSize(file.size)}).`, 'success');
+      };
+      reader.onerror = () => {
+        showStatus(`Failed to read file "${file.name}".`, 'error');
+      };
+      reader.readAsText(file);
+    }
+
+    function loadSampleTemplate() {
+      document.getElementById('htmlInput').value = sampleHtml;
+      updatePreview();
+    }
+
+    function updatePreview() {
+      if (renderTimeout) cancelAnimationFrame(renderTimeout);
+
+      renderTimeout = requestAnimationFrame(() => {
+        const rawHtml = document.getElementById('htmlInput').value;
+        const iframe = document.getElementById('previewIframe');
+        const format = document.getElementById('pageSize').value;
+        const orientation = document.getElementById('pageOrientation').value;
+        const margin = parseInt(document.getElementById('pageMargin').value, 10);
+
+        // Aspect ratio dimensions in mm
+        let widthMm = 210;
+        let heightMm = 297;
+        if (format === 'letter') { widthMm = 215.9; heightMm = 279.4; }
+        if (format === 'legal') { widthMm = 215.9; heightMm = 355.6; }
+        if (orientation === 'landscape') {
+          const temp = widthMm;
+          widthMm = heightMm;
+          heightMm = temp;
+        }
+
+        const paperWrapper = document.getElementById('paperWrapper');
+        paperWrapper.style.aspectRatio = `${widthMm} / ${heightMm}`;
+
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        doc.open();
+        doc.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+    }
+    body {
+      padding: ${margin}mm;
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #202124;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+  </style>
+</head>
+<body>
+  ${rawHtml || '<span style="color: #5f6368; font-size: 13px;">HTML render preview will appear here...</span>'}
+</body>
+</html>`);
+        doc.close();
+      });
+    }
+
+    async function convertHtmlToPdf() {
+      hideStatus();
+      const rawHtml = document.getElementById('htmlInput').value.trim();
+      if (!rawHtml) {
+        showStatus('Please enter HTML code first.', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('convertBtn');
+      const icon = document.getElementById('convertIcon');
+      const text = document.getElementById('convertText');
+
+      btn.disabled = true;
+      icon.style.display = 'none';
+      text.innerHTML = '<span class="spinner" style="margin-right: 6px;"></span>Generating PDF...';
+
+      const format = document.getElementById('pageSize').value;
+      const orientation = document.getElementById('pageOrientation').value;
+      const margin = parseInt(document.getElementById('pageMargin').value, 10);
+      const scale = parseFloat(document.getElementById('renderScale').value);
+
+      const iframe = document.getElementById('previewIframe');
+      const doc = iframe.contentDocument || iframe.contentWindow.document;
+      const elementToConvert = doc.body;
+
+      const opt = {
+        margin: margin,
+        filename: 'converted_document.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: scale, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: format, orientation: orientation }
+      };
+
+      try {
+        await html2pdf().set(opt).from(elementToConvert).save();
+        triggerSuccessButton('convertBtn', 'convertIcon', 'convertText', 'Saved PDF!');
+      } catch (err) {
+        showStatus('Error compiling PDF: ' + (err.message || 'Failed to render PDF document.'), 'error');
+        btn.disabled = false;
+        icon.style.display = 'block';
+        text.innerHTML = 'Download PDF';
+      }
+    }
+
+    function copyHtmlCode() {
+      const rawHtml = document.getElementById('htmlInput').value;
+      if (!rawHtml) return;
+
+      const tempArea = document.createElement('textarea');
+      tempArea.value = rawHtml;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+
+      triggerSuccessButton('copyHtmlBtn', 'copyIcon', 'copyText', 'Copied HTML!');
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function clearAll() {
+      document.getElementById('htmlInput').value = '';
+      document.getElementById('fileUploadInput').value = '';
+      hideStatus();
+
+      document.getElementById('optionsRow').classList.remove('flash-clear');
+      document.getElementById('htmlInput').classList.remove('flash-clear');
+
+      void document.getElementById('optionsRow').offsetWidth;
+
+      document.getElementById('optionsRow').classList.add('flash-clear');
+      document.getElementById('htmlInput').classList.add('flash-clear');
+
+      updatePreview();
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+    }
+
+    function hideStatus() {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = 'status-box';
+      statusBox.textContent = '';
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+  </script>
+</body>
+
+</html>

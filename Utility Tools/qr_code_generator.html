@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom QR Code Generator with Logo</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+  <!-- qr-code-styling library via CDN -->
+  <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .controls-column {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .preview-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    input[type="text"],
+    select {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="text"]:focus,
+    select:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .color-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    input[type="color"] {
+      -webkit-appearance: none;
+      border: 1px solid var(--border-color);
+      width: 34px;
+      height: 34px;
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 0;
+      background: none;
+    }
+
+    /* Google Palette Swatches */
+    .palette-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .color-swatch {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 0 1px var(--border-color);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .color-swatch:hover {
+      transform: scale(1.15);
+    }
+
+    .color-swatch.active {
+      box-shadow: 0 0 0 2px var(--primary-blue);
+    }
+
+    /* Logo Upload Dropzone */
+    .logo-upload-zone {
+      border: 1.5px dashed var(--border-color);
+      border-radius: 6px;
+      padding: 12px;
+      text-align: center;
+      background-color: #ffffff;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .logo-upload-zone:hover {
+      border-color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    .logo-preview-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 10px;
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+    }
+
+    .logo-preview-img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+
+    /* Live QR Preview Box */
+    #qrCanvasContainer {
+      background-color: #ffffff;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 200px;
+      min-height: 200px;
+    }
+
+    /* Animation class for Clear */
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: var(--bg-color);
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: var(--bg-color);
+      }
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 150px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="grid">
+      <!-- Customization Controls Column -->
+      <div class="controls-column" id="controlsColumn">
+        <!-- Target Link / Text -->
+        <div class="input-group">
+          <label for="qrText">Target Link or Text</label>
+          <input type="text" id="qrText" placeholder="https://google.com" value="https://google.com" oninput="updateQrCode()">
+        </div>
+
+        <!-- Logo Upload -->
+        <div class="input-group">
+          <label>Center Logo (Optional)</label>
+          <div id="logoUploadZone" class="logo-upload-zone" onclick="document.getElementById('logoInput').click()">
+            <span class="material-symbols-outlined" style="color: var(--primary-blue);">add_photo_alternate</span>
+            <span>Upload Logo Image (PNG / SVG / JPG)</span>
+          </div>
+          <input type="file" id="logoInput" style="display: none;" accept="image/*" onchange="handleLogoSelect(event)">
+          
+          <div id="logoPreviewContainer" class="logo-preview-container" style="display: none;">
+            <img id="logoPreviewImg" class="logo-preview-img" alt="Logo Preview">
+            <span id="logoFileName" style="font-size: 12px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
+            <button class="btn-secondary" style="padding: 2px 6px; font-size: 11px;" onclick="removeLogo()">Remove</button>
+          </div>
+        </div>
+
+        <!-- Styling Options -->
+        <div class="options-grid">
+          <div class="input-group">
+            <label for="dotsStyle">Pattern Style</label>
+            <select id="dotsStyle" onchange="updateQrCode()">
+              <option value="square">Square</option>
+              <option value="dots">Dots</option>
+              <option value="rounded" selected>Rounded</option>
+              <option value="classy">Classy</option>
+              <option value="classy-rounded">Classy Rounded</option>
+              <option value="extra-rounded">Extra Rounded</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label for="cornersStyle">Eye Corners Style</label>
+            <select id="cornersStyle" onchange="updateQrCode()">
+              <option value="square">Square</option>
+              <option value="dot">Dot</option>
+              <option value="extra-rounded" selected>Extra Rounded</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Colors with Palette Swatches -->
+        <div class="options-grid">
+          <div class="input-group">
+            <label for="dotsColor">Dots Color</label>
+            <div class="color-row">
+              <input type="color" id="dotsColor" value="#000000" oninput="syncColorHex('dotsColor', 'dotsHex')">
+              <input type="text" id="dotsHex" value="#000000" style="width: 80px;" oninput="syncHexColor('dotsHex', 'dotsColor')">
+            </div>
+            <!-- Quick Palette Swatches -->
+            <div class="palette-container" id="dotsPalette">
+              <div class="color-swatch active" style="background-color: #000000;" onclick="selectPaletteColor('#000000')" title="Black"></div>
+              <div class="color-swatch" style="background-color: #1a73e8;" onclick="selectPaletteColor('#1a73e8')" title="Google Blue"></div>
+              <div class="color-swatch" style="background-color: #ea4335;" onclick="selectPaletteColor('#ea4335')" title="Google Red"></div>
+              <div class="color-swatch" style="background-color: #fbbc04;" onclick="selectPaletteColor('#fbbc04')" title="Google Yellow"></div>
+              <div class="color-swatch" style="background-color: #34a853;" onclick="selectPaletteColor('#34a853')" title="Google Green"></div>
+              <div class="color-swatch" style="background-color: #673ab7;" onclick="selectPaletteColor('#673ab7')" title="Deep Purple"></div>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="bgColor">Background Color</label>
+            <div class="color-row">
+              <input type="color" id="bgColor" value="#ffffff" oninput="syncColorHex('bgColor', 'bgHex')">
+              <input type="text" id="bgHex" value="#ffffff" style="width: 80px;" oninput="syncHexColor('bgHex', 'bgColor')">
+            </div>
+          </div>
+        </div>
+
+        <!-- Logo Size & Error Correction -->
+        <div class="options-grid">
+          <div class="input-group">
+            <label for="logoSize">Logo Size Scale</label>
+            <select id="logoSize" onchange="updateQrCode()">
+              <option value="0.2">Small (20%)</option>
+              <option value="0.3" selected>Medium (30%)</option>
+              <option value="0.4">Large (40%)</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label for="errorCorrection">Error Correction</label>
+            <select id="errorCorrection" onchange="updateQrCode()">
+              <option value="L">Low (7%)</option>
+              <option value="M">Medium (15%)</option>
+              <option value="Q">Quartile (25%)</option>
+              <option value="H" selected>High (30% - Recommended for Logos)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live QR Preview Column -->
+      <div class="preview-column">
+        <label style="font-weight: 500;">Live QR Code Preview</label>
+        <div id="qrCanvasContainer"></div>
+        <span style="font-size: 12px; color: var(--text-secondary); text-align: center;">Scannable in real-time</span>
+      </div>
+    </div>
+
+    <!-- Error Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="downloadPngBtn" class="btn-primary" onclick="downloadQr('png')">
+        <span class="material-symbols-outlined" id="pngIcon">download</span>
+        <span id="pngText">Download PNG</span>
+      </button>
+
+      <button id="downloadSvgBtn" class="btn-secondary" onclick="downloadQr('svg')">
+        <span class="material-symbols-outlined" id="svgIcon">code</span>
+        <span id="svgText">Download SVG</span>
+      </button>
+
+      <button id="copyImgBtn" class="btn-secondary" onclick="copyQrImage()">
+        <span class="material-symbols-outlined" id="copyIcon">content_copy</span>
+        <span id="copyText">Copy Image</span>
+      </button>
+
+      <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let logoDataUrl = null;
+    let qrCode = null;
+    let updateTimeout = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      qrCode = new QRCodeStyling({
+        width: 220,
+        height: 220,
+        type: 'canvas',
+        data: 'https://google.com',
+        image: '',
+        dotsOptions: {
+          color: '#000000',
+          type: 'rounded'
+        },
+        cornersSquareOptions: {
+          color: '#000000',
+          type: 'extra-rounded'
+        },
+        cornersDotOptions: {
+          color: '#000000',
+          type: 'dot'
+        },
+        backgroundOptions: {
+          color: '#ffffff'
+        },
+        imageOptions: {
+          hideBackgroundDots: true,
+          imageSize: 0.3,
+          margin: 4,
+          crossOrigin: 'anonymous'
+        },
+        qrOptions: {
+          errorCorrectionLevel: 'H'
+        }
+      });
+
+      const container = document.getElementById('qrCanvasContainer');
+      container.innerHTML = '';
+      qrCode.append(container);
+    });
+
+    function updateQrCode() {
+      if (updateTimeout) clearTimeout(updateTimeout);
+
+      updateTimeout = setTimeout(() => {
+        const text = document.getElementById('qrText').value.trim() || 'https://google.com';
+        const dotsStyle = document.getElementById('dotsStyle').value;
+        const cornersStyle = document.getElementById('cornersStyle').value;
+        const dotsColor = document.getElementById('dotsColor').value;
+        const bgColor = document.getElementById('bgColor').value;
+        const logoSize = parseFloat(document.getElementById('logoSize').value);
+        const errorCorrection = document.getElementById('errorCorrection').value;
+
+        qrCode.update({
+          data: text,
+          image: logoDataUrl || '',
+          dotsOptions: {
+            color: dotsColor,
+            type: dotsStyle
+          },
+          cornersSquareOptions: {
+            color: dotsColor,
+            type: cornersStyle
+          },
+          cornersDotOptions: {
+            color: dotsColor,
+            type: cornersStyle === 'dot' ? 'dot' : 'square'
+          },
+          backgroundOptions: {
+            color: bgColor
+          },
+          imageOptions: {
+            hideBackgroundDots: true,
+            imageSize: logoSize,
+            margin: 4
+          },
+          qrOptions: {
+            errorCorrectionLevel: errorCorrection
+          }
+        });
+      }, 100);
+    }
+
+    function selectPaletteColor(hexColor) {
+      document.getElementById('dotsColor').value = hexColor;
+      document.getElementById('dotsHex').value = hexColor;
+
+      // Update active swatch state
+      document.querySelectorAll('#dotsPalette .color-swatch').forEach(swatch => {
+        const bg = swatch.style.backgroundColor;
+        const rgbToHex = rgbStr => {
+          const match = rgbStr.match(/\d+/g);
+          if (!match) return bg;
+          return '#' + match.slice(0, 3).map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
+        };
+        swatch.classList.toggle('active', rgbToHex(bg).toLowerCase() === hexColor.toLowerCase());
+      });
+
+      updateQrCode();
+    }
+
+    function syncColorHex(colorId, hexId) {
+      const val = document.getElementById(colorId).value;
+      document.getElementById(hexId).value = val;
+      updateQrCode();
+    }
+
+    function syncHexColor(hexId, colorId) {
+      const val = document.getElementById(hexId).value;
+      if (/^#[0-9A-F]{6}$/i.test(val)) {
+        document.getElementById(colorId).value = val;
+        updateQrCode();
+      }
+    }
+
+    function handleLogoSelect(event) {
+      const files = event.target.files;
+      if (files.length > 0) {
+        const file = files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          logoDataUrl = e.target.result;
+          document.getElementById('logoPreviewImg').src = logoDataUrl;
+          document.getElementById('logoFileName').textContent = file.name;
+          document.getElementById('logoUploadZone').style.display = 'none';
+          document.getElementById('logoPreviewContainer').style.display = 'flex';
+          updateQrCode();
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function removeLogo() {
+      logoDataUrl = null;
+      document.getElementById('logoInput').value = '';
+      document.getElementById('logoPreviewContainer').style.display = 'none';
+      document.getElementById('logoUploadZone').style.display = 'flex';
+      updateQrCode();
+    }
+
+    function downloadQr(extension) {
+      if (!qrCode) return;
+      const text = document.getElementById('qrText').value.trim() || 'qr_code';
+      const cleanName = text.replace(/[^a-z0-9]/gi, '_').toLowerCase().substring(0, 20) || 'qr_code';
+
+      qrCode.download({
+        name: cleanName,
+        extension: extension
+      });
+
+      if (extension === 'png') {
+        triggerSuccessButton('downloadPngBtn', 'pngIcon', 'pngText', 'Saved PNG!');
+      } else {
+        triggerSuccessButton('downloadSvgBtn', 'svgIcon', 'svgText', 'Saved SVG!');
+      }
+    }
+
+    async function copyQrImage() {
+      try {
+        const blob = await qrCode.getRawData('png');
+        if (!blob) throw new Error('Could not retrieve QR code image blob.');
+
+        if (navigator.clipboard && window.ClipboardItem) {
+          await navigator.clipboard.write([
+            new ClipboardItem({ 'image/png': blob })
+          ]);
+          triggerSuccessButton('copyImgBtn', 'copyIcon', 'copyText', 'Copied Image!');
+        } else {
+          showStatus('Clipboard image copy not supported in this browser version. Use Download PNG.', 'error');
+        }
+      } catch (err) {
+        showStatus('Failed to copy image: ' + err.message, 'error');
+      }
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function clearAll() {
+      document.getElementById('qrText').value = 'https://google.com';
+      document.getElementById('dotsStyle').value = 'rounded';
+      document.getElementById('cornersStyle').value = 'extra-rounded';
+      selectPaletteColor('#000000');
+      document.getElementById('bgColor').value = '#ffffff';
+      document.getElementById('bgHex').value = '#ffffff';
+      document.getElementById('logoSize').value = '0.3';
+      document.getElementById('errorCorrection').value = 'H';
+      removeLogo();
+      hideStatus();
+
+      document.getElementById('controlsColumn').classList.remove('flash-clear');
+      document.getElementById('qrCanvasContainer').classList.remove('flash-clear');
+
+      void document.getElementById('controlsColumn').offsetWidth;
+
+      document.getElementById('controlsColumn').classList.add('flash-clear');
+      document.getElementById('qrCanvasContainer').classList.add('flash-clear');
+
+      updateQrCode();
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+    }
+
+    function hideStatus() {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = 'status-box';
+      statusBox.textContent = '';
+    }
+  </script>
+</body>
+
+</html>

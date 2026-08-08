@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GIF Compressor & Optimizer</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+  <!-- gif.js multi-threaded encoder -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
+  <!-- gifuct-js fallback for GIF frame decoding -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gifuct-js/2.1.2/gifuct-js.min.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Drop Zone */
+    .drop-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      background-color: var(--bg-color);
+      cursor: pointer;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    .drop-zone p {
+      margin: 8px 0 0 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background-color: var(--bg-color);
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 110px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    select,
+    input[type="number"] {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 8px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    select:focus,
+    input[type="number"]:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+    }
+
+    input[type="range"] {
+      flex: 1;
+      accent-color: var(--primary-blue);
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* Comparison Box */
+    .media-box {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      background-color: #ffffff;
+      background-image: linear-gradient(45deg, #eee 25%, transparent 25%), linear-gradient(-45deg, #eee 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #eee 75%), linear-gradient(-45deg, transparent 75%, #eee 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .gif-img {
+      max-width: 100%;
+      max-height: 220px;
+      object-fit: contain;
+    }
+
+    .image-info {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-align: center;
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+
+    /* Savings Badge */
+    .savings-badge {
+      display: inline-block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-top: 4px;
+    }
+
+    /* Progress Container */
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background-color: var(--border-color);
+      border-radius: 3px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background-color: var(--primary-blue);
+      transition: width 0.15s ease;
+    }
+
+    /* Animation class for Clear */
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: var(--bg-color);
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: var(--bg-color);
+      }
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 160px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Drop Zone -->
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <span class="material-symbols-outlined" style="font-size: 36px; color: var(--primary-blue);">compress</span>
+      <p id="dropZoneText">Click or drag & drop an animated GIF file here (High-Speed Multi-Threaded Engine)</p>
+      <input type="file" id="fileInput" class="file-input" accept="image/gif" onchange="handleFileSelect(event)">
+    </div>
+
+    <!-- Options Panel -->
+    <div class="controls-panel" id="controlsPanel">
+      <div class="control-row">
+        <label style="font-weight: 500;">Compression Mode:</label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="compMode" value="manual" checked onchange="toggleCompMode()">
+            Manual Scale & Quality Controls
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="compMode" value="targetSize" onchange="toggleCompMode()">
+            Max Target File Size (KB/MB)
+          </label>
+        </div>
+      </div>
+
+      <!-- Manual Settings -->
+      <div class="control-row" id="manualSettings">
+        <div class="input-group">
+          <label for="scalePercent">Dimension Scale (<span id="scaleVal">80</span>%)</label>
+          <input type="range" id="scalePercent" min="20" max="100" value="80" oninput="document.getElementById('scaleVal').textContent = this.value">
+        </div>
+
+        <div class="input-group">
+          <label for="frameSkip">Frame Decimation</label>
+          <select id="frameSkip">
+            <option value="1" selected>Keep All Frames (100%)</option>
+            <option value="2">Drop Every 2nd Frame (50% Count)</option>
+            <option value="3">Drop 2 in Every 3 Frames (33% Count)</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label for="colorQuality">Encoder Speed / Quality</label>
+          <select id="colorQuality">
+            <option value="20" selected>Fast Speed (Quality 20)</option>
+            <option value="10">High Precision (Quality 10)</option>
+            <option value="30">Ultra Fast (Quality 30)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Target Size Settings -->
+      <div class="control-row" id="targetSizeSettings" style="display: none;">
+        <div class="input-group" style="max-width: 240px;">
+          <label for="targetSizeInput">Max Target Size</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="number" id="targetSizeInput" min="0.1" step="0.5" value="5">
+            <select id="targetSizeUnit" style="width: 80px;">
+              <option value="MB" selected>MB</option>
+              <option value="KB">KB</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Side-by-Side Comparison Grid -->
+    <div class="grid">
+      <!-- Original GIF -->
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <label style="font-weight: 500;">Original GIF</label>
+        <div class="media-box">
+          <span id="noOriginalText" style="color: var(--text-secondary); font-size: 13px;">Original GIF will appear here</span>
+          <img id="originalImg" class="gif-img" style="display: none;" alt="Original GIF">
+        </div>
+        <div id="originalInfo" class="image-info"></div>
+      </div>
+
+      <!-- Compressed GIF -->
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <label style="font-weight: 500;">Compressed Result</label>
+        <div class="media-box">
+          <span id="noCompressedText" style="color: var(--text-secondary); font-size: 13px;">Compressed result will appear here</span>
+          <img id="compressedImg" class="gif-img" style="display: none;" alt="Compressed GIF">
+        </div>
+        <div id="compressedInfo" class="image-info"></div>
+        <div id="savingsBadge" style="text-align: center; display: none;"></div>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar-container" id="progressContainer">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="compressBtn" class="btn-primary" onclick="startCompression()" disabled>
+        <span class="material-symbols-outlined" id="compressIcon">compress</span>
+        <span id="compressText">Compress GIF</span>
+      </button>
+
+      <button id="downloadBtn" class="btn-secondary" onclick="downloadCompressedGif()" disabled>
+        <span class="material-symbols-outlined" id="downloadIcon">download</span>
+        <span id="downloadText">Download GIF</span>
+      </button>
+
+      <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let originalFile = null;
+    let originalDataUrl = null;
+    let decodedGifData = null; // { width, height, numFrames, frames: [{ canvas, delay }] }
+    let compressedBlob = null;
+    let compressedUrl = null;
+    let workerScriptUrl = null;
+
+    const dropZone = document.getElementById('dropZone');
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+      }, false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      const files = Array.from(e.dataTransfer.files).filter(f => f.type === 'image/gif');
+      if (files.length > 0) loadGif(files[0]);
+    });
+
+    function handleFileSelect(event) {
+      if (event.target.files.length > 0) {
+        loadGif(event.target.files[0]);
+      }
+    }
+
+    async function loadGif(file) {
+      hideStatus();
+      originalFile = file;
+
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        decodedGifData = await parseGifBuffer(arrayBuffer);
+
+        originalDataUrl = URL.createObjectURL(file);
+        const origPreview = document.getElementById('originalImg');
+        origPreview.src = originalDataUrl;
+        origPreview.style.display = 'block';
+        document.getElementById('noOriginalText').style.display = 'none';
+
+        document.getElementById('originalInfo').innerHTML = `
+          <strong>Dimensions:</strong> ${decodedGifData.width} × ${decodedGifData.height} px | <strong>Frames:</strong> ${decodedGifData.numFrames} | <strong>Size:</strong> ${formatFileSize(file.size)}
+        `;
+
+        document.getElementById('dropZoneText').textContent = `Loaded: ${file.name} (${decodedGifData.numFrames} frames, ${formatFileSize(file.size)})`;
+        document.getElementById('compressBtn').disabled = false;
+      } catch (err) {
+        showStatus('Error decoding GIF frames: ' + err.message, 'error');
+      }
+
+      if (!workerScriptUrl) {
+        try {
+          const resp = await fetch('https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js');
+          const blob = await resp.blob();
+          workerScriptUrl = URL.createObjectURL(blob);
+        } catch (e) {
+          workerScriptUrl = 'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js';
+        }
+      }
+    }
+
+    async function parseGifBuffer(arrayBuffer) {
+      // Priority 1: Native W3C ImageDecoder API (Pixel-Perfect C++ decoding)
+      if (typeof ImageDecoder !== 'undefined') {
+        try {
+          const decoder = new ImageDecoder({ data: arrayBuffer, type: 'image/gif' });
+          await decoder.tracks.ready;
+          const track = decoder.tracks.selectedTrack;
+          const frameCount = track.frameCount;
+          const frames = [];
+
+          for (let i = 0; i < frameCount; i++) {
+            const frameResult = await decoder.decode({ frameIndex: i });
+            const videoFrame = frameResult.image;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = videoFrame.displayWidth;
+            canvas.height = videoFrame.displayHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoFrame, 0, 0);
+            videoFrame.close();
+
+            const delayMs = Math.max(20, Math.round((frameResult.image.duration || 100000) / 1000));
+            frames.push({ canvas, delay: delayMs });
+          }
+
+          return {
+            width: frames[0].canvas.width,
+            height: frames[0].canvas.height,
+            numFrames: frames.length,
+            frames
+          };
+        } catch (e) {
+          console.warn('ImageDecoder failed, falling back to gifuct-js:', e);
+        }
+      }
+
+      // Priority 2: gifuct-js fallback
+      if (window.gifuct) {
+        const gif = window.gifuct.parseGIF(arrayBuffer);
+        const rawFrames = window.gifuct.decompressFrames(gif, true);
+        const width = gif.lsd.width;
+        const height = gif.lsd.height;
+
+        const mainCanvas = document.createElement('canvas');
+        mainCanvas.width = width;
+        mainCanvas.height = height;
+        const mainCtx = mainCanvas.getContext('2d');
+
+        const frames = [];
+
+        for (let i = 0; i < rawFrames.length; i++) {
+          const frame = rawFrames[i];
+          const dims = frame.dims;
+
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = dims.width;
+          tempCanvas.height = dims.height;
+          const tempCtx = tempCanvas.getContext('2d');
+          const imgData = tempCtx.createImageData(dims.width, dims.height);
+          imgData.data.set(frame.patch);
+          tempCtx.putImageData(imgData, 0, 0);
+
+          if (frame.disposalType === 2) {
+            mainCtx.clearRect(dims.left, dims.top, dims.width, dims.height);
+          }
+
+          mainCtx.drawImage(tempCanvas, dims.left, dims.top);
+
+          const snapshot = document.createElement('canvas');
+          snapshot.width = width;
+          snapshot.height = height;
+          const snapCtx = snapshot.getContext('2d');
+          snapCtx.drawImage(mainCanvas, 0, 0);
+
+          frames.push({
+            canvas: snapshot,
+            delay: Math.max(20, (frame.delay || 10) * 10)
+          });
+        }
+
+        return { width, height, numFrames: frames.length, frames };
+      }
+
+      throw new Error('No compatible GIF decoder available.');
+    }
+
+    function toggleCompMode() {
+      const mode = document.querySelector('input[name="compMode"]:checked').value;
+      document.getElementById('manualSettings').style.display = mode === 'manual' ? 'flex' : 'none';
+      document.getElementById('targetSizeSettings').style.display = mode === 'targetSize' ? 'flex' : 'none';
+    }
+
+    async function startCompression() {
+      hideStatus();
+      if (!originalFile || !decodedGifData) return;
+
+      const mode = document.querySelector('input[name="compMode"]:checked').value;
+
+      if (mode === 'manual') {
+        const scale = parseInt(document.getElementById('scalePercent').value, 10) / 100;
+        const skip = parseInt(document.getElementById('frameSkip').value, 10);
+        const quality = parseInt(document.getElementById('colorQuality').value, 10);
+
+        const blob = await encodeGifWithParams(scale, skip, quality);
+        applyCompressedResult(blob);
+      } else {
+        const targetVal = parseFloat(document.getElementById('targetSizeInput').value);
+        const unit = document.getElementById('targetSizeUnit').value;
+        const targetBytes = unit === 'MB' ? targetVal * 1048576 : targetVal * 1024;
+
+        if (targetBytes >= originalFile.size) {
+          showStatus(`Specified target size (${targetVal} ${unit}) is larger than the original GIF file (${formatFileSize(originalFile.size)}).`, 'error');
+          return;
+        }
+
+        const btn = document.getElementById('compressBtn');
+        const icon = document.getElementById('compressIcon');
+        const text = document.getElementById('compressText');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+
+        btn.disabled = true;
+        icon.style.display = 'none';
+        text.innerHTML = '<span class="spinner" style="margin-right: 6px;"></span>Estimating Target Scale...';
+        progressContainer.style.display = 'block';
+        progressFill.style.width = '20%';
+
+        // 1-Pass Quadratic Scale Estimation Formula: scale ~ sqrt(targetBytes / originalFile.size)
+        const sizeRatio = targetBytes / originalFile.size;
+        let estimatedScale = Math.min(0.95, Math.max(0.3, Math.sqrt(sizeRatio)));
+        let skip = estimatedScale < 0.6 ? 2 : 1;
+
+        progressFill.style.width = '50%';
+        let blob = await encodeGifWithParams(estimatedScale, skip, 20, true);
+
+        // Quick adjustment pass if needed
+        if (blob && blob.size > targetBytes) {
+          progressFill.style.width = '80%';
+          estimatedScale = Math.max(0.25, estimatedScale * 0.85);
+          skip = 2;
+          blob = await encodeGifWithParams(estimatedScale, skip, 25, true);
+        }
+
+        applyCompressedResult(blob);
+        btn.disabled = false;
+        icon.style.display = 'block';
+        text.innerHTML = 'Compress GIF';
+        setTimeout(() => { progressContainer.style.display = 'none'; }, 500);
+      }
+    }
+
+    function encodeGifWithParams(scale, skip, quality, silent = false) {
+      return new Promise((resolve) => {
+        const btn = document.getElementById('compressBtn');
+        const icon = document.getElementById('compressIcon');
+        const text = document.getElementById('compressText');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+
+        if (!silent) {
+          btn.disabled = true;
+          icon.style.display = 'none';
+          text.innerHTML = '<span class="spinner" style="margin-right: 6px;"></span>Compressing All Frames...';
+          progressContainer.style.display = 'block';
+          progressFill.style.width = '0%';
+        }
+
+        const targetW = Math.max(16, Math.round(decodedGifData.width * scale));
+        const targetH = Math.max(16, Math.round(decodedGifData.height * scale));
+
+        const hardwareThreads = Math.min(8, navigator.hardwareConcurrency || 4);
+
+        const gif = new GIF({
+          workers: hardwareThreads,
+          quality: quality,
+          width: targetW,
+          height: targetH,
+          workerScript: workerScriptUrl || 'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js'
+        });
+
+        decodedGifData.frames.forEach((frameObj, idx) => {
+          if (idx % skip === 0) {
+            const scaledCanvas = document.createElement('canvas');
+            scaledCanvas.width = targetW;
+            scaledCanvas.height = targetH;
+            const scaledCtx = scaledCanvas.getContext('2d');
+
+            scaledCtx.drawImage(frameObj.canvas, 0, 0, targetW, targetH);
+            gif.addFrame(scaledCtx, { copy: true, delay: frameObj.delay * skip });
+          }
+        });
+
+        gif.on('progress', function (p) {
+          if (!silent) progressFill.style.width = `${Math.round(p * 100)}%`;
+        });
+
+        gif.on('finished', function (blob) {
+          if (!silent) {
+            btn.disabled = false;
+            icon.style.display = 'block';
+            text.innerHTML = 'Compress GIF';
+            setTimeout(() => { progressContainer.style.display = 'none'; }, 500);
+          }
+          resolve(blob);
+        });
+
+        gif.render();
+      });
+    }
+
+    function applyCompressedResult(blob) {
+      compressedBlob = blob;
+      if (compressedUrl) URL.revokeObjectURL(compressedUrl);
+      compressedUrl = URL.createObjectURL(blob);
+
+      const compPreview = document.getElementById('compressedImg');
+      compPreview.src = compressedUrl;
+      compPreview.style.display = 'block';
+      document.getElementById('noCompressedText').style.display = 'none';
+
+      document.getElementById('compressedInfo').innerHTML = `
+        <strong>Size:</strong> ${formatFileSize(blob.size)}
+      `;
+
+      const savedBytes = originalFile.size - blob.size;
+      const pctSaved = Math.round((savedBytes / originalFile.size) * 100);
+
+      const badge = document.getElementById('savingsBadge');
+      if (pctSaved > 0) {
+        badge.className = 'savings-badge';
+        badge.innerHTML = `🎉 ${pctSaved}% Smaller (Saved ${formatFileSize(savedBytes)})`;
+        badge.style.display = 'inline-block';
+      } else {
+        badge.className = 'savings-badge';
+        badge.style.backgroundColor = 'var(--danger-bg)';
+        badge.style.color = 'var(--danger-text)';
+        badge.innerHTML = `Compressed result is ${formatFileSize(blob.size)}`;
+        badge.style.display = 'inline-block';
+      }
+
+      document.getElementById('downloadBtn').disabled = false;
+      showStatus(`Successfully compressed animated GIF (${formatFileSize(blob.size)}).`, 'success');
+    }
+
+    function downloadCompressedGif() {
+      if (!compressedBlob || !compressedUrl) return;
+
+      const baseName = originalFile.name.substring(0, originalFile.name.lastIndexOf('.')) || 'animated';
+      const a = document.createElement('a');
+      a.href = compressedUrl;
+      a.download = `${baseName}_compressed.gif`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      triggerSuccessButton('downloadBtn', 'downloadIcon', 'downloadText', 'Saved GIF!');
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function clearAll() {
+      if (originalDataUrl) {
+        URL.revokeObjectURL(originalDataUrl);
+        originalDataUrl = null;
+      }
+      if (compressedUrl) {
+        URL.revokeObjectURL(compressedUrl);
+        compressedUrl = null;
+      }
+      originalFile = null;
+      decodedGifData = null;
+      compressedBlob = null;
+
+      document.getElementById('fileInput').value = '';
+      document.getElementById('originalImg').style.display = 'none';
+      document.getElementById('noOriginalText').style.display = 'block';
+      document.getElementById('compressedImg').style.display = 'none';
+      document.getElementById('noCompressedText').style.display = 'block';
+      document.getElementById('originalInfo').innerHTML = '';
+      document.getElementById('compressedInfo').innerHTML = '';
+      document.getElementById('savingsBadge').style.display = 'none';
+      document.getElementById('compressBtn').disabled = true;
+      document.getElementById('downloadBtn').disabled = true;
+      document.getElementById('dropZoneText').textContent = 'Click or drag & drop an animated GIF file here';
+
+      hideStatus();
+
+      dropZone.classList.remove('flash-clear');
+      document.getElementById('controlsPanel').classList.remove('flash-clear');
+
+      void dropZone.offsetWidth;
+
+      dropZone.classList.add('flash-clear');
+      document.getElementById('controlsPanel').classList.add('flash-clear');
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+    }
+
+    function hideStatus() {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = 'status-box';
+      statusBox.textContent = '';
+    }
+
+    function formatFileSize(bytes) {
+      if (!bytes) return '0 B';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+  </script>
+</body>
+
+</html>

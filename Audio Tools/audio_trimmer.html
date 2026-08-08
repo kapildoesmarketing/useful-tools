@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Trimmer & Converter</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+  <!-- lamejs library for MP3 encoding -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.all.min.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Drop Zone */
+    .drop-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      background-color: var(--bg-color);
+      cursor: pointer;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    .drop-zone p {
+      margin: 8px 0 0 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background-color: var(--bg-color);
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 110px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    select,
+    input[type="number"] {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 8px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    select:focus,
+    input[type="number"]:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+    }
+
+    input[type="range"] {
+      flex: 1;
+      accent-color: var(--primary-blue);
+    }
+
+    /* Waveform & Player Box */
+    .media-box {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      background-color: #f1f3f4;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    canvas.waveform-canvas {
+      width: 100%;
+      height: 100px;
+      border-radius: 4px;
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      cursor: crosshair;
+      user-select: none;
+      touch-action: none;
+    }
+
+    audio {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .media-info {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    /* Animation class for Clear */
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: var(--bg-color);
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: var(--bg-color);
+      }
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 160px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Drop Zone -->
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <span class="material-symbols-outlined" style="font-size: 36px; color: var(--primary-blue);">graphic_eq</span>
+      <p id="dropZoneText">Click or drag & drop an audio file here (MP3, WAV, AAC, OGG, M4A, FLAC)</p>
+      <input type="file" id="fileInput" class="file-input" accept="audio/*" onchange="handleFileSelect(event)">
+    </div>
+
+    <div class="grid">
+      <!-- Source Audio Player & Waveform -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <label style="font-weight: 500;">Interactive Audio Waveform (Click & Drag Handles to Select Region)</label>
+        <div class="media-box">
+          <span id="noAudioText" style="color: var(--text-secondary); font-size: 13px;">Upload an audio file to view waveform</span>
+          <canvas id="waveformCanvas" class="waveform-canvas" style="display: none;"></canvas>
+          <audio id="audioPlayer" controls style="display: none;" ontimeupdate="updatePlayerStats()"></audio>
+        </div>
+        <div id="sourceMediaInfo" class="media-info"></div>
+
+        <!-- Trim Controls -->
+        <div class="controls-panel" id="trimControls" style="display: none;">
+          <div class="control-row">
+            <div class="input-group">
+              <label for="startTime">Start Time (sec)</label>
+              <input type="number" id="startTime" min="0" step="0.1" value="0" oninput="validateTrim(); syncPlayerToStart(); drawWaveform(decodedAudioBuffer);">
+            </div>
+            <button class="btn-secondary" style="padding: 4px 8px; font-size: 11px; margin-top: 18px;" onclick="setStartToCurrent()">Set Start</button>
+
+            <div class="input-group">
+              <label for="endTime">End Time (sec)</label>
+              <input type="number" id="endTime" min="0.1" step="0.1" value="5" oninput="validateTrim(); drawWaveform(decodedAudioBuffer);">
+            </div>
+            <button class="btn-secondary" style="padding: 4px 8px; font-size: 11px; margin-top: 18px;" onclick="setEndToCurrent()">Set End</button>
+          </div>
+
+          <div class="control-row">
+            <div class="input-group">
+              <label for="outputFormat">Target Export Format</label>
+              <select id="outputFormat">
+                <option value="wav" selected>WAV (.wav - Lossless 16-bit PCM)</option>
+                <option value="mp3">MP3 (.mp3 - 128 kbps Compressed)</option>
+                <option value="webm">WebM Audio (.webm - Opus)</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label for="volumeGain">Volume Boost (<span id="volVal">100</span>%)</label>
+              <input type="range" id="volumeGain" min="50" max="250" value="100" oninput="document.getElementById('volVal').textContent = this.value">
+            </div>
+          </div>
+
+          <div class="control-row">
+            <div class="input-group">
+              <label for="fadeIn">Fade In</label>
+              <select id="fadeIn">
+                <option value="0" selected>None (0s)</option>
+                <option value="0.5">0.5 Seconds</option>
+                <option value="1.0">1.0 Second</option>
+                <option value="2.0">2.0 Seconds</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label for="fadeOut">Fade Out</label>
+              <select id="fadeOut">
+                <option value="0" selected>None (0s)</option>
+                <option value="0.5">0.5 Seconds</option>
+                <option value="1.0">1.0 Second</option>
+                <option value="2.0">2.0 Seconds</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label for="channelMode">Channels</label>
+              <select id="channelMode">
+                <option value="original" selected>Original Channels</option>
+                <option value="mono">Convert to Mono (1-Channel)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trimmed Result Audio Player -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <label style="font-weight: 500;">Trimmed Audio Result</label>
+        <div class="media-box">
+          <span id="noResultText" style="color: var(--text-secondary); font-size: 13px;">Trimmed audio preview will appear here</span>
+          <audio id="resultAudioPlayer" controls style="display: none;"></audio>
+        </div>
+        <div id="resultMediaInfo" class="media-info"></div>
+      </div>
+    </div>
+
+    <!-- Error Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="trimBtn" class="btn-primary" onclick="trimAudioBuffer()" disabled>
+        <span class="material-symbols-outlined" id="trimIcon">content_cut</span>
+        <span id="trimText">Trim & Encode Audio</span>
+      </button>
+
+      <button id="downloadBtn" class="btn-secondary" onclick="downloadTrimmedAudio()" disabled>
+        <span class="material-symbols-outlined" id="downloadIcon">download</span>
+        <span id="downloadText">Download Audio</span>
+      </button>
+
+      <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let rawAudioFile = null;
+    let audioObjectUrl = null;
+    let decodedAudioBuffer = null;
+    let trimmedAudioBlob = null;
+    let trimmedAudioUrl = null;
+    let trimmedFileExtension = 'wav';
+
+    let isDragging = false;
+    let dragTarget = null;
+
+    const dropZone = document.getElementById('dropZone');
+    const canvas = document.getElementById('waveformCanvas');
+    const player = document.getElementById('audioPlayer');
+
+    window.addEventListener('resize', () => {
+      if (decodedAudioBuffer) drawWaveform(decodedAudioBuffer);
+    });
+
+    player.addEventListener('play', () => {
+      if (!decodedAudioBuffer) return;
+      const startSec = parseFloat(document.getElementById('startTime').value) || 0;
+      const endSec = parseFloat(document.getElementById('endTime').value) || decodedAudioBuffer.duration;
+
+      if (player.currentTime < startSec || player.currentTime >= endSec) {
+        player.currentTime = startSec;
+      }
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+      }, false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('audio/'));
+      if (files.length > 0) loadAudio(files[0]);
+    });
+
+    function handleFileSelect(event) {
+      if (event.target.files.length > 0) {
+        loadAudio(event.target.files[0]);
+      }
+    }
+
+    async function loadAudio(file) {
+      hideStatus();
+      rawAudioFile = file;
+
+      if (audioObjectUrl) URL.revokeObjectURL(audioObjectUrl);
+      audioObjectUrl = URL.createObjectURL(file);
+
+      player.src = audioObjectUrl;
+      player.style.display = 'block';
+      document.getElementById('noAudioText').style.display = 'none';
+
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        decodedAudioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+        const duration = decodedAudioBuffer.duration;
+        document.getElementById('startTime').value = 0;
+        document.getElementById('endTime').value = Math.min(15, Math.round(duration * 10) / 10);
+        document.getElementById('trimControls').style.display = 'flex';
+        document.getElementById('trimBtn').disabled = false;
+        document.getElementById('dropZoneText').textContent = `Loaded: ${file.name} (${Math.round(duration)}s, ${formatFileSize(file.size)})`;
+
+        canvas.style.display = 'block';
+        requestAnimationFrame(() => {
+          drawWaveform(decodedAudioBuffer);
+          setupWaveformInteractivity();
+        });
+        updatePlayerStats();
+      } catch (err) {
+        showStatus('Error decoding audio buffer: ' + err.message, 'error');
+      }
+    }
+
+    function setupWaveformInteractivity() {
+      canvas.onmousedown = (e) => {
+        if (!decodedAudioBuffer) return;
+        const rect = canvas.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const pct = Math.max(0, Math.min(1, clickX / rect.width));
+        const clickSec = Math.round(pct * decodedAudioBuffer.duration * 10) / 10;
+
+        const startSec = parseFloat(document.getElementById('startTime').value) || 0;
+        const endSec = parseFloat(document.getElementById('endTime').value) || decodedAudioBuffer.duration;
+
+        const startPx = (startSec / decodedAudioBuffer.duration) * rect.width;
+        const endPx = (endSec / decodedAudioBuffer.duration) * rect.width;
+
+        const handleMargin = 14;
+
+        if (Math.abs(clickX - startPx) <= handleMargin) {
+          isDragging = true;
+          dragTarget = 'start';
+        } else if (Math.abs(clickX - endPx) <= handleMargin) {
+          isDragging = true;
+          dragTarget = 'end';
+        } else {
+          isDragging = true;
+          dragTarget = 'new';
+          document.getElementById('startTime').value = clickSec;
+          document.getElementById('endTime').value = clickSec;
+        }
+
+        syncPlayerToStart();
+        validateTrim();
+        drawWaveform(decodedAudioBuffer);
+      };
+
+      canvas.onmousemove = (e) => {
+        if (!decodedAudioBuffer) return;
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const pct = Math.max(0, Math.min(1, mouseX / rect.width));
+        const mouseSec = Math.round(pct * decodedAudioBuffer.duration * 10) / 10;
+
+        const startSec = parseFloat(document.getElementById('startTime').value) || 0;
+        const endSec = parseFloat(document.getElementById('endTime').value) || decodedAudioBuffer.duration;
+
+        const startPx = (startSec / decodedAudioBuffer.duration) * rect.width;
+        const endPx = (endSec / decodedAudioBuffer.duration) * rect.width;
+
+        if (!isDragging) {
+          if (Math.abs(mouseX - startPx) <= 14 || Math.abs(mouseX - endPx) <= 14) {
+            canvas.style.cursor = 'ew-resize';
+          } else {
+            canvas.style.cursor = 'crosshair';
+          }
+        } else {
+          canvas.style.cursor = 'ew-resize';
+          if (dragTarget === 'start') {
+            if (mouseSec < endSec) {
+              document.getElementById('startTime').value = Math.max(0, mouseSec);
+              syncPlayerToStart();
+            }
+          } else if (dragTarget === 'end') {
+            if (mouseSec > startSec) {
+              document.getElementById('endTime').value = Math.min(Math.round(decodedAudioBuffer.duration * 10) / 10, mouseSec);
+            }
+          } else if (dragTarget === 'new') {
+            const initStart = parseFloat(document.getElementById('startTime').value) || 0;
+            if (mouseSec >= initStart) {
+              document.getElementById('endTime').value = mouseSec;
+            } else {
+              document.getElementById('startTime').value = mouseSec;
+              syncPlayerToStart();
+            }
+          }
+
+          validateTrim();
+          drawWaveform(decodedAudioBuffer);
+        }
+      };
+
+      window.onmouseup = () => {
+        if (isDragging) {
+          isDragging = false;
+          dragTarget = null;
+          if (canvas) canvas.style.cursor = 'crosshair';
+        }
+      };
+    }
+
+    function syncPlayerToStart() {
+      const startSec = parseFloat(document.getElementById('startTime').value) || 0;
+      if (player) player.currentTime = startSec;
+    }
+
+    function drawWaveform(audioBuffer) {
+      if (!audioBuffer) return;
+      canvas.style.display = 'block';
+
+      const width = canvas.offsetWidth || canvas.parentNode.clientWidth || 400;
+      const height = canvas.offsetHeight || 100;
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext('2d');
+      const data = audioBuffer.getChannelData(0);
+      const step = Math.ceil(data.length / width);
+      const amp = height / 2;
+
+      const startSec = parseFloat(document.getElementById('startTime').value) || 0;
+      const endSec = parseFloat(document.getElementById('endTime').value) || audioBuffer.duration;
+
+      const startPx = Math.floor((startSec / audioBuffer.duration) * width);
+      const endPx = Math.floor((endSec / audioBuffer.duration) * width);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, width, height);
+
+      // Highlight selected trim range
+      ctx.fillStyle = '#e8f0fe';
+      ctx.fillRect(startPx, 0, Math.max(2, endPx - startPx), height);
+
+      for (let i = 0; i < width; i++) {
+        let min = 1.0;
+        let max = -1.0;
+        for (let j = 0; j < step; j++) {
+          const datum = data[(i * step) + j];
+          if (datum < min) min = datum;
+          if (datum > max) max = datum;
+        }
+
+        ctx.fillStyle = (i >= startPx && i <= endPx) ? '#1a73e8' : '#bdc1c6';
+        ctx.fillRect(i, (1 + min) * amp, 1, Math.max(1, (max - min) * amp));
+      }
+
+      // Draw boundary handles with knobs
+      ctx.fillStyle = '#174ea6';
+      ctx.fillRect(startPx - 1, 0, 3, height);
+      ctx.fillRect(endPx - 1, 0, 3, height);
+
+      ctx.fillStyle = '#1a73e8';
+      ctx.beginPath();
+      ctx.arc(startPx, 10, 6, 0, 2 * Math.PI);
+      ctx.arc(startPx, height - 10, 6, 0, 2 * Math.PI);
+      ctx.arc(endPx, 10, 6, 0, 2 * Math.PI);
+      ctx.arc(endPx, height - 10, 6, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+
+    function updatePlayerStats() {
+      if (!decodedAudioBuffer) return;
+
+      const startSec = parseFloat(document.getElementById('startTime').value) || 0;
+      const endSec = parseFloat(document.getElementById('endTime').value) || decodedAudioBuffer.duration;
+
+      // Auto pause when playback reaches end of selected region
+      if (player.currentTime >= endSec && !player.paused) {
+        player.pause();
+        player.currentTime = startSec;
+      }
+
+      document.getElementById('sourceMediaInfo').innerHTML = `
+        <strong>Sample Rate:</strong> ${decodedAudioBuffer.sampleRate} Hz | <strong>Channels:</strong> ${decodedAudioBuffer.numberOfChannels} | <strong>Duration:</strong> ${formatTime(decodedAudioBuffer.duration)} | <strong>Current:</strong> ${formatTime(player.currentTime)}
+      `;
+    }
+
+    function setStartToCurrent() {
+      document.getElementById('startTime').value = Math.round(player.currentTime * 10) / 10;
+      validateTrim();
+      drawWaveform(decodedAudioBuffer);
+    }
+
+    function setEndToCurrent() {
+      document.getElementById('endTime').value = Math.round(player.currentTime * 10) / 10;
+      validateTrim();
+      drawWaveform(decodedAudioBuffer);
+    }
+
+    function validateTrim() {
+      const start = parseFloat(document.getElementById('startTime').value) || 0;
+      const end = parseFloat(document.getElementById('endTime').value) || 0;
+
+      if (end <= start) {
+        showStatus('Trim end time must be greater than start time.', 'error');
+        document.getElementById('trimBtn').disabled = true;
+      } else {
+        hideStatus();
+        document.getElementById('trimBtn').disabled = false;
+      }
+    }
+
+    async function trimAudioBuffer() {
+      hideStatus();
+      if (!decodedAudioBuffer) return;
+
+      const btn = document.getElementById('trimBtn');
+      const icon = document.getElementById('trimIcon');
+      const text = document.getElementById('trimText');
+
+      btn.disabled = true;
+      icon.style.display = 'none';
+      text.innerHTML = '<span class="spinner" style="margin-right: 6px;"></span>Encoding...';
+
+      const sampleRate = decodedAudioBuffer.sampleRate;
+      const sourceChannels = decodedAudioBuffer.numberOfChannels;
+      const channelMode = document.getElementById('channelMode').value;
+      const channels = channelMode === 'mono' ? 1 : sourceChannels;
+
+      const start = parseFloat(document.getElementById('startTime').value) || 0;
+      const end = parseFloat(document.getElementById('endTime').value) || decodedAudioBuffer.duration;
+      const gainMultiplier = (parseInt(document.getElementById('volumeGain').value, 10) || 100) / 100;
+
+      const startSample = Math.floor(start * sampleRate);
+      const endSample = Math.min(decodedAudioBuffer.length, Math.floor(end * sampleRate));
+      const frameCount = endSample - startSample;
+
+      if (frameCount <= 0) {
+        showStatus('Invalid sample range selected.', 'error');
+        btn.disabled = false;
+        icon.style.display = 'block';
+        text.innerHTML = 'Trim & Encode Audio';
+        return;
+      }
+
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const trimmedBuffer = audioCtx.createBuffer(channels, frameCount, sampleRate);
+
+      const fadeInDuration = parseFloat(document.getElementById('fadeIn').value) || 0;
+      const fadeOutDuration = parseFloat(document.getElementById('fadeOut').value) || 0;
+      const fadeInSamples = Math.floor(fadeInDuration * sampleRate);
+      const fadeOutSamples = Math.floor(fadeOutDuration * sampleRate);
+
+      for (let c = 0; c < channels; c++) {
+        const sourceData = decodedAudioBuffer.getChannelData(c < sourceChannels ? c : 0);
+        const targetData = trimmedBuffer.getChannelData(c);
+
+        for (let i = 0; i < frameCount; i++) {
+          let sample = sourceData[startSample + i] * gainMultiplier;
+
+          // Apply Fade In
+          if (fadeInSamples > 0 && i < fadeInSamples) {
+            sample *= (i / fadeInSamples);
+          }
+          // Apply Fade Out
+          if (fadeOutSamples > 0 && i >= (frameCount - fadeOutSamples)) {
+            sample *= ((frameCount - i) / fadeOutSamples);
+          }
+
+          targetData[i] = sample;
+        }
+      }
+
+      const format = document.getElementById('outputFormat').value;
+      trimmedFileExtension = format;
+
+      if (format === 'mp3' && window.lamejs) {
+        trimmedAudioBlob = bufferToMp3(trimmedBuffer, 128);
+      } else {
+        trimmedAudioBlob = bufferToWave(trimmedBuffer, frameCount);
+      }
+
+      if (trimmedAudioUrl) URL.revokeObjectURL(trimmedAudioUrl);
+      trimmedAudioUrl = URL.createObjectURL(trimmedAudioBlob);
+
+      const resultPlayer = document.getElementById('resultAudioPlayer');
+      resultPlayer.src = trimmedAudioUrl;
+      resultPlayer.style.display = 'block';
+      document.getElementById('noResultText').style.display = 'none';
+
+      document.getElementById('resultMediaInfo').innerHTML = `
+        <strong>Duration:</strong> ${formatTime(trimmedBuffer.duration)} | <strong>Format:</strong> ${format.toUpperCase()} | <strong>Size:</strong> ${formatFileSize(trimmedAudioBlob.size)}
+      `;
+
+      document.getElementById('downloadBtn').disabled = false;
+      showStatus(`Successfully trimmed audio (${formatFileSize(trimmedAudioBlob.size)}).`, 'success');
+
+      btn.disabled = false;
+      icon.style.display = 'block';
+      text.innerHTML = 'Trim & Encode Audio';
+    }
+
+    /* MP3 Encoder using lamejs */
+    function bufferToMp3(abuffer, kbps) {
+      const mp3encoder = new lamejs.Mp3Encoder(abuffer.numberOfChannels, abuffer.sampleRate, kbps);
+      const mp3Data = [];
+
+      const left = abuffer.getChannelData(0);
+      const right = abuffer.numberOfChannels > 1 ? abuffer.getChannelData(1) : left;
+
+      const sampleBlockSize = 1152;
+      const leftInt16 = new Int16Array(left.length);
+      const rightInt16 = new Int16Array(right.length);
+
+      for (let i = 0; i < left.length; i++) {
+        let l = Math.max(-1, Math.min(1, left[i]));
+        let r = Math.max(-1, Math.min(1, right[i]));
+        leftInt16[i] = l < 0 ? l * 32768 : l * 32767;
+        rightInt16[i] = r < 0 ? r * 32768 : r * 32767;
+      }
+
+      for (let i = 0; i < leftInt16.length; i += sampleBlockSize) {
+        const leftChunk = leftInt16.subarray(i, i + sampleBlockSize);
+        const rightChunk = rightInt16.subarray(i, i + sampleBlockSize);
+
+        let mp3buf = null;
+        if (abuffer.numberOfChannels === 2) {
+          mp3buf = mp3encoder.encodeBuffer(leftChunk, rightChunk);
+        } else {
+          mp3buf = mp3encoder.encodeBuffer(leftChunk);
+        }
+        if (mp3buf.length > 0) mp3Data.push(mp3buf);
+      }
+
+      const mp3buf = mp3encoder.flush();
+      if (mp3buf.length > 0) mp3Data.push(mp3buf);
+
+      return new Blob(mp3Data, { type: 'audio/mp3' });
+    }
+
+    /* Convert AudioBuffer to WAV File Blob */
+    function bufferToWave(abuffer, len) {
+      const numOfChan = abuffer.numberOfChannels;
+      const length = len * numOfChan * 2 + 44;
+      const buffer = new ArrayBuffer(length);
+      const view = new DataView(buffer);
+      const channels = [];
+      let pos = 0;
+
+      function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
+      function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
+
+      // RIFF chunk
+      setUint32(0x46464952); // "RIFF"
+      setUint32(length - 8);
+      setUint32(0x45564157); // "WAVE"
+
+      // FMT sub-chunk
+      setUint32(0x20746d66); // "fmt "
+      setUint32(16);
+      setUint16(1);  // PCM
+      setUint16(numOfChan);
+      setUint32(abuffer.sampleRate);
+      setUint32(abuffer.sampleRate * 2 * numOfChan);
+      setUint16(numOfChan * 2);
+      setUint16(16);
+
+      // DATA sub-chunk
+      setUint32(0x61746164); // "data"
+      setUint32(length - pos - 4);
+
+      for (let i = 0; i < numOfChan; i++) {
+        channels.push(abuffer.getChannelData(i));
+      }
+
+      let offset = 0;
+      while (offset < len) {
+        for (let i = 0; i < numOfChan; i++) {
+          let sample = Math.max(-1, Math.min(1, channels[i][offset]));
+          sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+          view.setInt16(pos, sample, true);
+          pos += 2;
+        }
+        offset++;
+      }
+
+      return new Blob([buffer], { type: "audio/wav" });
+    }
+
+    function downloadTrimmedAudio() {
+      if (!trimmedAudioBlob || !trimmedAudioUrl) return;
+
+      const baseName = rawAudioFile.name.substring(0, rawAudioFile.name.lastIndexOf('.')) || 'audio';
+      const a = document.createElement('a');
+      a.href = trimmedAudioUrl;
+      a.download = `${baseName}_trimmed.${trimmedFileExtension}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      triggerSuccessButton('downloadBtn', 'downloadIcon', 'downloadText', `Saved ${trimmedFileExtension.toUpperCase()} Audio!`);
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function clearAll() {
+      if (audioObjectUrl) {
+        URL.revokeObjectURL(audioObjectUrl);
+        audioObjectUrl = null;
+      }
+      if (trimmedAudioUrl) {
+        URL.revokeObjectURL(trimmedAudioUrl);
+        trimmedAudioUrl = null;
+      }
+      rawAudioFile = null;
+      decodedAudioBuffer = null;
+      trimmedAudioBlob = null;
+
+      document.getElementById('fileInput').value = '';
+      document.getElementById('audioPlayer').style.display = 'none';
+      document.getElementById('waveformCanvas').style.display = 'none';
+      document.getElementById('resultAudioPlayer').style.display = 'none';
+      document.getElementById('noAudioText').style.display = 'block';
+      document.getElementById('noResultText').style.display = 'block';
+      document.getElementById('trimControls').style.display = 'none';
+      document.getElementById('sourceMediaInfo').innerHTML = '';
+      document.getElementById('resultMediaInfo').innerHTML = '';
+      document.getElementById('trimBtn').disabled = true;
+      document.getElementById('downloadBtn').disabled = true;
+      document.getElementById('dropZoneText').textContent = 'Click or drag & drop an audio file here (MP3, WAV, AAC, OGG, M4A, FLAC)';
+
+      hideStatus();
+
+      dropZone.classList.remove('flash-clear');
+      document.getElementById('controlsPanel').classList.remove('flash-clear');
+
+      void dropZone.offsetWidth;
+
+      dropZone.classList.add('flash-clear');
+      document.getElementById('controlsPanel').classList.add('flash-clear');
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+    }
+
+    function hideStatus() {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = 'status-box';
+      statusBox.textContent = '';
+    }
+
+    function formatTime(seconds) {
+      if (isNaN(seconds)) return '00:00';
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      const ms = Math.floor((seconds % 1) * 10);
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${ms}`;
+    }
+
+    function formatFileSize(bytes) {
+      if (!bytes) return '0 B';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+  </script>
+</body>
+
+</html>

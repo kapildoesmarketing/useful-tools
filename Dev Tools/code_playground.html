@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML/CSS/JS Live Code Playground</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn,
+    .tab-btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Tabs Header */
+    .tabs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 6px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tab-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .tab-btn:hover {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      background-color: #e8f0fe;
+      color: var(--primary-blue);
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    textarea,
+    select {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      outline: none;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 180px;
+      line-height: 1.5;
+    }
+
+    textarea:focus,
+    select:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+      background-color: #ffffff;
+    }
+
+    /* Live Preview & Console Container */
+    .preview-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .preview-frame-wrapper {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      overflow: hidden;
+      min-height: 320px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+
+    iframe {
+      width: 100%;
+      height: 320px;
+      border: none;
+      display: block;
+      background-color: #ffffff;
+    }
+
+    /* Console Drawer */
+    .console-drawer {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #202124;
+      color: #f8f9fa;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      padding: 8px 12px;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+
+    .console-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #9aa0a6;
+      font-size: 11px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      border-bottom: 1px solid #3c4043;
+      padding-bottom: 4px;
+    }
+
+    .console-log { margin: 2px 0; color: #81c995; }
+    .console-warn { margin: 2px 0; color: #fdd663; }
+    .console-error { margin: 2px 0; color: #f28b82; }
+
+    /* Controls Bar */
+    .controls-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Animation class for Clear */
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: var(--bg-color);
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: var(--bg-color);
+      }
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 140px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Controls Header & Library Selector -->
+    <div class="controls-bar">
+      <div class="input-group" style="flex: 1; max-width: 300px;">
+        <select id="librarySelector" onchange="injectLibrary(this.value)">
+          <option value="" selected>+ Add External CDN Library...</option>
+          <option value="tailwind">Tailwind CSS v3</option>
+          <option value="fontawesome">FontAwesome Icons v6</option>
+          <option value="material">Google Material Symbols</option>
+          <option value="chartjs">Chart.js Charts</option>
+        </select>
+      </div>
+
+      <label class="toggle-label">
+        <input type="checkbox" id="autoRunToggle" checked onchange="toggleAutoRun()">
+        Auto-Run Live Code
+      </label>
+
+      <button id="runBtn" class="btn-primary" style="min-width: 110px;" onclick="updatePreview(true)">
+        <span class="material-symbols-outlined" id="runIcon">play_arrow</span>
+        <span id="runText">Run Code</span>
+      </button>
+    </div>
+
+    <!-- Main Grid: Editors on Left, Live Preview on Right -->
+    <div class="grid">
+      <!-- Left Column: Editors (Tabs / Stacked View) -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="tabs-header">
+          <div class="tab-group">
+            <button class="tab-btn active" id="tabHtml" onclick="switchEditorTab('html')">HTML</button>
+            <button class="tab-btn" id="tabCss" onclick="switchEditorTab('css')">CSS</button>
+            <button class="tab-btn" id="tabJs" onclick="switchEditorTab('js')">JS</button>
+            <button class="tab-btn" id="tabAll" onclick="switchEditorTab('all')">Split All 3</button>
+          </div>
+          <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="loadSampleCode()">Sample Code</button>
+        </div>
+
+        <div id="htmlEditorGroup" class="input-group">
+          <label for="htmlInput">HTML</label>
+          <textarea id="htmlInput" placeholder="<!-- Write HTML here -->" oninput="onCodeInput()"></textarea>
+        </div>
+
+        <div id="cssEditorGroup" class="input-group" style="display: none;">
+          <label for="cssInput">CSS</label>
+          <textarea id="cssInput" placeholder="/* Write CSS here */" oninput="onCodeInput()"></textarea>
+        </div>
+
+        <div id="jsEditorGroup" class="input-group" style="display: none;">
+          <label for="jsInput">JavaScript</label>
+          <textarea id="jsInput" placeholder="// Write JavaScript here" oninput="onCodeInput()"></textarea>
+        </div>
+      </div>
+
+      <!-- Right Column: Live Preview & Console Output -->
+      <div class="preview-container">
+        <label style="font-weight: 500;">Live Sandboxed Preview</label>
+        <div class="preview-frame-wrapper">
+          <iframe id="previewIframe" sandbox="allow-scripts allow-modals allow-forms allow-same-origin" title="Code Preview"></iframe>
+        </div>
+
+        <!-- Built-in Console Drawer -->
+        <div class="console-drawer" id="consoleDrawer">
+          <div class="console-header">
+            <span>CONSOLE OUTPUT</span>
+            <button class="btn-secondary" style="padding: 1px 6px; font-size: 10px; color: #9aa0a6; border-color: #3c4043; background: transparent;" onclick="clearConsole()">Clear</button>
+          </div>
+          <div id="consoleLogs">
+            <div style="color: #9aa0a6;">Ready. Console logs will appear here.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="downloadCodeBtn" class="btn-primary" onclick="downloadStandaloneHtml()">
+        <span class="material-symbols-outlined" id="downloadIcon">download</span>
+        <span id="downloadText">Download HTML File</span>
+      </button>
+
+      <button id="copyCodeBtn" class="btn-secondary" onclick="copyFullCode()">
+        <span class="material-symbols-outlined" id="copyIcon">content_copy</span>
+        <span id="copyText">Copy Single-File Code</span>
+      </button>
+
+      <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let activeTab = 'html';
+    let renderTimeout = null;
+    let externalHeadTags = '';
+
+    const sampleHtml = `<div class="card">
+  <div class="icon-box">⚡</div>
+  <h2>Live Code Playground</h2>
+  <p>Modify HTML, CSS, and JS to see instant live updates!</p>
+  <button id="counterBtn" class="btn">Clicks: <span id="count">0</span></button>
+</div>`;
+
+    const sampleCss = `body {
+  font-family: 'Roboto', sans-serif;
+  background: #f8f9fa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+}
+
+.card {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  text-align: center;
+  max-width: 320px;
+}
+
+.icon-box {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+
+h2 {
+  font-family: 'Google Sans', sans-serif;
+  color: #1a73e8;
+  margin: 0 0 8px 0;
+}
+
+p {
+  font-size: 13px;
+  color: #5f6368;
+}
+
+.btn {
+  background-color: #1a73e8;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: 12px;
+  transition: transform 0.15s ease;
+}
+
+.btn:hover {
+  background-color: #174ea6;
+}
+
+.btn:active {
+  transform: scale(0.95);
+}`;
+
+    const sampleJs = `let count = 0;
+const btn = document.getElementById('counterBtn');
+const display = document.getElementById('count');
+
+btn.addEventListener('click', () => {
+  count++;
+  display.textContent = count;
+  console.log('Button clicked! Current count:', count);
+});
+
+console.log('Interactive sample code initialized successfully.');`;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('htmlInput').value = sampleHtml;
+      document.getElementById('cssInput').value = sampleCss;
+      document.getElementById('jsInput').value = sampleJs;
+
+      // Listen to console messages from iframe
+      window.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'console') {
+          appendConsoleLog(event.data.level, event.data.message);
+        }
+      });
+
+      updatePreview(true);
+    });
+
+    function loadSampleCode() {
+      document.getElementById('htmlInput').value = sampleHtml;
+      document.getElementById('cssInput').value = sampleCss;
+      document.getElementById('jsInput').value = sampleJs;
+      updatePreview(true);
+    }
+
+    function switchEditorTab(tab) {
+      activeTab = tab;
+      document.getElementById('tabHtml').classList.toggle('active', tab === 'html');
+      document.getElementById('tabCss').classList.toggle('active', tab === 'css');
+      document.getElementById('tabJs').classList.toggle('active', tab === 'js');
+      document.getElementById('tabAll').classList.toggle('active', tab === 'all');
+
+      const htmlGrp = document.getElementById('htmlEditorGroup');
+      const cssGrp = document.getElementById('cssEditorGroup');
+      const jsGrp = document.getElementById('jsEditorGroup');
+
+      if (tab === 'all') {
+        htmlGrp.style.display = 'flex';
+        cssGrp.style.display = 'flex';
+        jsGrp.style.display = 'flex';
+        document.getElementById('htmlInput').style.minHeight = '120px';
+        document.getElementById('cssInput').style.minHeight = '120px';
+        document.getElementById('jsInput').style.minHeight = '120px';
+      } else {
+        htmlGrp.style.display = tab === 'html' ? 'flex' : 'none';
+        cssGrp.style.display = tab === 'css' ? 'flex' : 'none';
+        jsGrp.style.display = tab === 'js' ? 'flex' : 'none';
+        document.getElementById('htmlInput').style.minHeight = '320px';
+        document.getElementById('cssInput').style.minHeight = '320px';
+        document.getElementById('jsInput').style.minHeight = '320px';
+      }
+    }
+
+    function onCodeInput() {
+      if (document.getElementById('autoRunToggle').checked) {
+        updatePreview(false);
+      }
+    }
+
+    function toggleAutoRun() {
+      if (document.getElementById('autoRunToggle').checked) {
+        updatePreview(false);
+      }
+    }
+
+    function injectLibrary(lib) {
+      if (!lib) return;
+
+      if (lib === 'tailwind') {
+        externalHeadTags += '\n<script src="https://cdn.tailwindcss.com"><\/script>';
+      } else if (lib === 'fontawesome') {
+        externalHeadTags += '\n<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">';
+      } else if (lib === 'material') {
+        externalHeadTags += '\n<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0">';
+      } else if (lib === 'chartjs') {
+        externalHeadTags += '\n<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><\/script>';
+      }
+
+      document.getElementById('librarySelector').value = '';
+      updatePreview(true);
+    }
+
+    function updatePreview(immediate = false) {
+      if (renderTimeout) cancelAnimationFrame(renderTimeout);
+
+      const action = () => {
+        const html = document.getElementById('htmlInput').value;
+        const css = document.getElementById('cssInput').value;
+        const js = document.getElementById('jsInput').value;
+        const iframe = document.getElementById('previewIframe');
+
+        clearConsole();
+
+        // Script wrapper to capture console logs and send to parent
+        const consoleCaptureScript = `
+          <script>
+            (function() {
+              const origLog = console.log;
+              const origWarn = console.warn;
+              const origError = console.error;
+
+              function sendMsg(level, args) {
+                try {
+                  const msg = Array.from(args).map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+                  window.parent.postMessage({ type: 'console', level, message: msg }, '*');
+                } catch(e) {}
+              }
+
+              console.log = function() { sendMsg('log', arguments); origLog.apply(console, arguments); };
+              console.warn = function() { sendMsg('warn', arguments); origWarn.apply(console, arguments); };
+              console.error = function() { sendMsg('error', arguments); origError.apply(console, arguments); };
+
+              window.onerror = function(msg, url, line) {
+                sendMsg('error', ["Uncaught Error: " + msg + " (Line " + line + ")"]);
+              };
+            })();
+          <\/script>
+        `;
+
+        const fullDoc = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap" rel="stylesheet">
+  ${externalHeadTags}
+  <style>
+    ${css}
+  </style>
+  ${consoleCaptureScript}
+</head>
+<body>
+  ${html}
+  <script>
+    try {
+      ${js}
+    } catch(err) {
+      console.error(err.message);
+    }
+  <\/script>
+</body>
+</html>`;
+
+        iframe.srcdoc = fullDoc;
+      };
+
+      if (immediate) {
+        action();
+      } else {
+        renderTimeout = requestAnimationFrame(action);
+      }
+    }
+
+    function appendConsoleLog(level, message) {
+      const container = document.getElementById('consoleLogs');
+      const div = document.createElement('div');
+      div.className = `console-${level}`;
+      div.textContent = `> ${message}`;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function clearConsole() {
+      const container = document.getElementById('consoleLogs');
+      container.innerHTML = '<div style="color: #9aa0a6;">Console cleared.</div>';
+    }
+
+    function downloadStandaloneHtml() {
+      const html = document.getElementById('htmlInput').value;
+      const css = document.getElementById('cssInput').value;
+      const js = document.getElementById('jsInput').value;
+
+      const fullDoc = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Standalone Application</title>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap" rel="stylesheet">
+  ${externalHeadTags}
+  <style>
+    ${css}
+  </style>
+</head>
+<body>
+  ${html}
+  <script>
+    ${js}
+  <\/script>
+</body>
+</html>`;
+
+      const blob = new Blob([fullDoc], { type: 'text/html;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'playground_app.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      triggerSuccessButton('downloadCodeBtn', 'downloadIcon', 'downloadText', 'Saved File!');
+    }
+
+    function copyFullCode() {
+      const html = document.getElementById('htmlInput').value;
+      const css = document.getElementById('cssInput').value;
+      const js = document.getElementById('jsInput').value;
+
+      const fullDoc = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Standalone Application</title>
+  ${externalHeadTags}
+  <style>
+    ${css}
+  </style>
+</head>
+<body>
+  ${html}
+  <script>
+    ${js}
+  <\/script>
+</body>
+</html>`;
+
+      const tempArea = document.createElement('textarea');
+      tempArea.value = fullDoc;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+
+      triggerSuccessButton('copyCodeBtn', 'copyIcon', 'copyText', 'Copied Code!');
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function clearAll() {
+      document.getElementById('htmlInput').value = '';
+      document.getElementById('cssInput').value = '';
+      document.getElementById('jsInput').value = '';
+      externalHeadTags = '';
+      clearConsole();
+
+      document.getElementById('htmlInput').classList.remove('flash-clear');
+      document.getElementById('cssInput').classList.remove('flash-clear');
+      document.getElementById('jsInput').classList.remove('flash-clear');
+
+      void document.getElementById('htmlInput').offsetWidth;
+
+      document.getElementById('htmlInput').classList.add('flash-clear');
+      document.getElementById('cssInput').classList.add('flash-clear');
+      document.getElementById('jsInput').classList.add('flash-clear');
+
+      updatePreview(true);
+    }
+  </script>
+</body>
+
+</html>

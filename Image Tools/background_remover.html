@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Background Remover & Editor</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+  <!-- Cropper.js for visual cropping -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Drop Zone */
+    .drop-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      background-color: var(--bg-color);
+      cursor: pointer;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    .drop-zone p {
+      margin: 8px 0 0 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background-color: var(--bg-color);
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    select,
+    input[type="text"],
+    input[type="number"] {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 8px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    select:focus,
+    input[type="text"]:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+    }
+
+    input[type="range"] {
+      flex: 1;
+      accent-color: var(--primary-blue);
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* Color Swatch Picker */
+    .color-picker-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    input[type="color"] {
+      -webkit-appearance: none;
+      border: 1px solid var(--border-color);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 0;
+      background: none;
+    }
+
+    /* Interactive Preview Container with Checkered Pattern for Transparency */
+    .preview-box {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      background-color: #ffffff;
+      background-image: linear-gradient(45deg, #eee 25%, transparent 25%), linear-gradient(-45deg, #eee 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #eee 75%), linear-gradient(-45deg, transparent 75%, #eee 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+      min-height: 280px;
+      max-height: 380px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .preview-img {
+      max-width: 100%;
+      max-height: 340px;
+      object-fit: contain;
+      cursor: crosshair;
+    }
+
+    .image-info {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-align: center;
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+
+    /* Animation class for Clear */
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: var(--bg-color);
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: var(--bg-color);
+      }
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 170px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Drop Zone -->
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <span class="material-symbols-outlined" style="font-size: 36px; color: var(--primary-blue);">auto_fix_high</span>
+      <p id="dropZoneText">Click or drag & drop an image to remove or replace its background</p>
+      <input type="file" id="fileInput" class="file-input" accept="image/*" onchange="handleFileSelect(event)">
+    </div>
+
+    <div class="grid">
+      <!-- Controls Panel -->
+      <div class="controls-panel" id="controlsPanel">
+        <!-- Keying Method Selection -->
+        <div class="control-row">
+          <div class="input-group">
+            <label for="keyMethod">Removal Method</label>
+            <select id="keyMethod" onchange="processRemoval()">
+              <option value="chroma" selected>Color Sampling / Chroma Match</option>
+              <option value="flood">Contiguous Flood Fill (Edge Preserving)</option>
+              <option value="luminance">High Contrast / Luminance Key</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label>Sampled Color</label>
+            <div class="color-picker-wrapper">
+              <input type="color" id="keyColor" value="#ffffff" onchange="processRemoval()">
+              <span id="keyColorText" style="font-size: 12px; font-family: 'Roboto Mono', monospace;">#FFFFFF</span>
+              <button class="btn-secondary" style="padding: 2px 6px; font-size: 11px;" onclick="enableEyeDropper()" title="Click on image preview to sample color">
+                <span class="material-symbols-outlined" style="font-size: 14px;">colorize</span> Pick
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tolerances & Edge Softness -->
+        <div class="control-row">
+          <div class="input-group">
+            <label for="tolerance">Color Tolerance (<span id="tolVal">30</span>%)</label>
+            <input type="range" id="tolerance" min="1" max="100" value="30" oninput="document.getElementById('tolVal').textContent = this.value; processRemoval();">
+          </div>
+
+          <div class="input-group">
+            <label for="feather">Edge Softness (<span id="featherVal">2</span>px)</label>
+            <input type="range" id="feather" min="0" max="15" value="2" oninput="document.getElementById('featherVal').textContent = this.value; processRemoval();">
+          </div>
+        </div>
+
+        <!-- Background Replacement Mode -->
+        <div class="control-row">
+          <label style="font-weight: 500;">Background Replacement:</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="bgMode" value="transparent" checked onchange="toggleBgOptions()">
+              Transparent
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="bgMode" value="color" onchange="toggleBgOptions()">
+              Solid Color
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="bgMode" value="image" onchange="toggleBgOptions()">
+              Custom Image
+            </label>
+          </div>
+        </div>
+
+        <!-- Background Color Option -->
+        <div class="control-row" id="bgColorRow" style="display: none;">
+          <div class="input-group">
+            <label for="replaceColor">New Background Color</label>
+            <div class="color-picker-wrapper">
+              <input type="color" id="replaceColor" value="#1a73e8" onchange="processRemoval()">
+              <input type="text" id="replaceHex" value="#1a73e8" style="width: 80px;" oninput="document.getElementById('replaceColor').value = this.value; processRemoval();">
+            </div>
+          </div>
+        </div>
+
+        <!-- Background Image Option -->
+        <div class="control-row" id="bgImgRow" style="display: none;">
+          <div class="input-group">
+            <label for="bgFileInput">Upload Background Image</label>
+            <input type="file" id="bgFileInput" accept="image/*" onchange="handleBgImageSelect(event)">
+          </div>
+        </div>
+
+        <!-- Output Format & Quality -->
+        <div class="control-row">
+          <div class="input-group">
+            <label for="outputFormat">Export Format</label>
+            <select id="outputFormat">
+              <option value="image/png" selected>PNG (.png - Transparency)</option>
+              <option value="image/webp">WebP (.webp - High Quality)</option>
+              <option value="image/jpeg">JPEG (.jpg - Solid Background)</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label for="outputQuality">Quality (<span id="qualityVal">90</span>%)</label>
+            <input type="range" id="outputQuality" min="1" max="100" value="90" oninput="document.getElementById('qualityVal').textContent = this.value;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview Column -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <label style="font-weight: 500;">Processed Live Result</label>
+        <div class="preview-box" id="previewBox">
+          <span id="noImageText" style="color: var(--text-secondary); font-size: 13px;">Upload an image to start background removal</span>
+          <img id="resultImg" class="preview-img" style="display: none;" alt="Result Preview" onclick="sampleColorFromClick(event)">
+        </div>
+
+        <div style="display: flex; gap: 8px; justify-content: space-between; align-items: center;">
+          <div id="imageInfo" class="image-info"></div>
+          <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="cropResult()" id="cropBtn" disabled>
+            <span class="material-symbols-outlined" style="font-size: 14px;">crop</span> Crop Result
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="processBtn" class="btn-primary" onclick="processRemoval()">
+        <span class="material-symbols-outlined" id="processIcon">auto_fix_high</span>
+        <span id="processText">Remove Background</span>
+      </button>
+
+      <button id="downloadBtn" class="btn-secondary" onclick="downloadResult()" disabled>
+        <span class="material-symbols-outlined" id="downloadIcon">download</span>
+        <span id="downloadText">Download Image</span>
+      </button>
+
+      <button id="copyBtn" class="btn-secondary" onclick="copyResultImage()" disabled>
+        <span class="material-symbols-outlined" id="copyIcon">content_copy</span>
+        <span id="copyText">Copy Image</span>
+      </button>
+
+      <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let rawImage = null;
+    let rawFileName = '';
+    let rawFileSize = 0;
+    let bgImage = null;
+    let processedCanvas = null;
+    let processedBlob = null;
+    let isEyeDropperActive = false;
+    let cropper = null;
+
+    const dropZone = document.getElementById('dropZone');
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+      }, false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+      if (files.length > 0) loadImage(files[0]);
+    });
+
+    function handleFileSelect(event) {
+      if (event.target.files.length > 0) {
+        loadImage(event.target.files[0]);
+      }
+    }
+
+    function loadImage(file) {
+      hideStatus();
+      rawFileName = file.name;
+      rawFileSize = file.size;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          rawImage = img;
+          autoSampleTopLeftColor();
+          document.getElementById('dropZoneText').textContent = `Loaded: ${file.name} (${formatFileSize(file.size)})`;
+          processRemoval();
+        };
+        img.onerror = () => showStatus('Failed to load image file.', 'error');
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function autoSampleTopLeftColor() {
+      if (!rawImage) return;
+      const canvas = document.createElement('canvas');
+      canvas.width = rawImage.width;
+      canvas.height = rawImage.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(rawImage, 0, 0);
+      const pixel = ctx.getImageData(0, 0, 1, 1).data;
+      const hex = rgbToHex(pixel[0], pixel[1], pixel[2]);
+      document.getElementById('keyColor').value = hex;
+      document.getElementById('keyColorText').textContent = hex.toUpperCase();
+    }
+
+    function enableEyeDropper() {
+      if (!rawImage) return;
+      isEyeDropperActive = true;
+      document.getElementById('resultImg').style.cursor = 'crosshair';
+      showStatus('Click anywhere on the image preview to sample background color.', 'success');
+    }
+
+    function sampleColorFromClick(event) {
+      if (!rawImage || !processedCanvas) return;
+      const img = document.getElementById('resultImg');
+      const rect = img.getBoundingClientRect();
+      const scaleX = rawImage.width / rect.width;
+      const scaleY = rawImage.height / rect.height;
+
+      const x = Math.floor((event.clientX - rect.left) * scaleX);
+      const y = Math.floor((event.clientY - rect.top) * scaleY);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = rawImage.width;
+      canvas.height = rawImage.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(rawImage, 0, 0);
+
+      const pixel = ctx.getImageData(x, y, 1, 1).data;
+      const hex = rgbToHex(pixel[0], pixel[1], pixel[2]);
+
+      document.getElementById('keyColor').value = hex;
+      document.getElementById('keyColorText').textContent = hex.toUpperCase();
+      isEyeDropperActive = false;
+      document.getElementById('resultImg').style.cursor = 'default';
+      hideStatus();
+      processRemoval();
+    }
+
+    function handleBgImageSelect(event) {
+      if (event.target.files.length > 0) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            bgImage = img;
+            processRemoval();
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function toggleBgOptions() {
+      const mode = document.querySelector('input[name="bgMode"]:checked').value;
+      document.getElementById('bgColorRow').style.display = mode === 'color' ? 'flex' : 'none';
+      document.getElementById('bgImgRow').style.display = mode === 'image' ? 'flex' : 'none';
+      processRemoval();
+    }
+
+    function processRemoval() {
+      if (!rawImage) return;
+      hideStatus();
+
+      const btn = document.getElementById('processBtn');
+      const icon = document.getElementById('processIcon');
+      const text = document.getElementById('processText');
+
+      btn.disabled = true;
+      icon.style.display = 'none';
+      text.innerHTML = '<span class="spinner" style="margin-right: 6px;"></span>Processing...';
+
+      requestAnimationFrame(() => {
+        try {
+          const width = rawImage.width;
+          const height = rawImage.height;
+
+          // 1. Keying Canvas (Raw Subject Keying)
+          const keyCanvas = document.createElement('canvas');
+          keyCanvas.width = width;
+          keyCanvas.height = height;
+          const keyCtx = keyCanvas.getContext('2d');
+          keyCtx.drawImage(rawImage, 0, 0);
+
+          const imgData = keyCtx.getImageData(0, 0, width, height);
+          const data = imgData.data;
+
+          const keyColorHex = document.getElementById('keyColor').value;
+          const [keyR, keyG, keyB] = hexToRgb(keyColorHex);
+
+          const method = document.getElementById('keyMethod').value;
+          const tolerance = parseInt(document.getElementById('tolerance').value, 10);
+          const feather = parseInt(document.getElementById('feather').value, 10);
+          const maxDist = (tolerance / 100) * 441.67; // Max Euclidean distance in RGB (sqrt(255^2*3))
+
+          if (method === 'chroma') {
+            for (let i = 0; i < data.length; i += 4) {
+              const dist = Math.sqrt(
+                Math.pow(data[i] - keyR, 2) +
+                Math.pow(data[i + 1] - keyG, 2) +
+                Math.pow(data[i + 2] - keyB, 2)
+              );
+
+              if (dist <= maxDist - feather) {
+                data[i + 3] = 0;
+              } else if (dist <= maxDist) {
+                const alphaFactor = (dist - (maxDist - feather)) / (feather || 1);
+                data[i + 3] = Math.floor(data[i + 3] * alphaFactor);
+              }
+            }
+          } else if (method === 'flood') {
+            // Edge-Contiguous Flood Fill (BFS starting from borders)
+            const visited = new Uint8Array(width * height);
+            const queue = [];
+
+            // Add border pixels to queue
+            for (let x = 0; x < width; x++) {
+              queue.push(x, 0);
+              queue.push(x, height - 1);
+            }
+            for (let y = 1; y < height - 1; y++) {
+              queue.push(0, y);
+              queue.push(width - 1, y);
+            }
+
+            let qHead = 0;
+            while (qHead < queue.length) {
+              const px = queue[qHead++];
+              const py = queue[qHead++];
+              const pIdx = py * width + px;
+
+              if (visited[pIdx]) continue;
+              visited[pIdx] = 1;
+
+              const idx = pIdx * 4;
+              const dist = Math.sqrt(
+                Math.pow(data[idx] - keyR, 2) +
+                Math.pow(data[idx + 1] - keyG, 2) +
+                Math.pow(data[idx + 2] - keyB, 2)
+              );
+
+              if (dist <= maxDist) {
+                data[idx + 3] = 0;
+                // Add 4-neighbors
+                if (px > 0 && !visited[pIdx - 1]) queue.push(px - 1, py);
+                if (px < width - 1 && !visited[pIdx + 1]) queue.push(px + 1, py);
+                if (py > 0 && !visited[pIdx - width]) queue.push(px, py - 1);
+                if (py < height - 1 && !visited[pIdx + width]) queue.push(px, py + 1);
+              }
+            }
+          } else if (method === 'luminance') {
+            // High contrast luminance keying
+            const lumThreshold = (tolerance / 100) * 255;
+            for (let i = 0; i < data.length; i += 4) {
+              const lum = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+              if (lum >= lumThreshold) {
+                data[i + 3] = 0;
+              }
+            }
+          }
+
+          keyCtx.putImageData(imgData, 0, 0);
+
+          // 2. Final Output Composition Canvas
+          const outCanvas = document.createElement('canvas');
+          outCanvas.width = width;
+          outCanvas.height = height;
+          const outCtx = outCanvas.getContext('2d');
+
+          const bgMode = document.querySelector('input[name="bgMode"]:checked').value;
+          if (bgMode === 'color') {
+            outCtx.fillStyle = document.getElementById('replaceColor').value;
+            outCtx.fillRect(0, 0, width, height);
+          } else if (bgMode === 'image' && bgImage) {
+            outCtx.drawImage(bgImage, 0, 0, width, height);
+          }
+
+          outCtx.drawImage(keyCanvas, 0, 0);
+
+          processedCanvas = outCanvas;
+          const format = document.getElementById('outputFormat').value;
+          const quality = parseInt(document.getElementById('outputQuality').value, 10) / 100;
+
+          outCanvas.toBlob((blob) => {
+            processedBlob = blob;
+            const resultImg = document.getElementById('resultImg');
+            resultImg.src = URL.createObjectURL(blob);
+            resultImg.style.display = 'block';
+            document.getElementById('noImageText').style.display = 'none';
+
+            document.getElementById('imageInfo').innerHTML = `
+              <strong>Dimensions:</strong> ${width} × ${height} px | <strong>Output Size:</strong> ${formatFileSize(blob.size)}
+            `;
+
+            document.getElementById('downloadBtn').disabled = false;
+            document.getElementById('copyBtn').disabled = false;
+            document.getElementById('cropBtn').disabled = false;
+
+            btn.disabled = false;
+            icon.style.display = 'block';
+            text.innerHTML = 'Remove Background';
+          }, format, quality);
+
+        } catch (err) {
+          showStatus('Error processing background removal: ' + err.message, 'error');
+          btn.disabled = false;
+          icon.style.display = 'block';
+          text.innerHTML = 'Remove Background';
+        }
+      });
+    }
+
+    function cropResult() {
+      if (!processedCanvas) return;
+      const resultImg = document.getElementById('resultImg');
+
+      if (cropper) {
+        // Apply crop
+        const croppedCanvas = cropper.getCroppedCanvas();
+        if (croppedCanvas) {
+          rawImage = new Image();
+          rawImage.onload = () => {
+            cropper.destroy();
+            cropper = null;
+            document.getElementById('cropBtn').innerHTML = '<span class="material-symbols-outlined" style="font-size: 14px;">crop</span> Crop Result';
+            processRemoval();
+          };
+          rawImage.src = croppedCanvas.toDataURL();
+        }
+      } else {
+        // Enable cropper
+        cropper = new Cropper(resultImg, {
+          viewMode: 1,
+          autoCropArea: 0.9,
+          responsive: true
+        });
+        document.getElementById('cropBtn').innerHTML = '<span class="material-symbols-outlined" style="font-size: 14px;">check</span> Apply Crop';
+      }
+    }
+
+    function downloadResult() {
+      if (!processedBlob) return;
+
+      const format = document.getElementById('outputFormat').value;
+      const ext = format === 'image/png' ? '.png' : format === 'image/webp' ? '.webp' : '.jpg';
+      const baseName = rawFileName.substring(0, rawFileName.lastIndexOf('.')) || 'bg_removed';
+
+      const url = URL.createObjectURL(processedBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${baseName}_no_bg${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      triggerSuccessButton('downloadBtn', 'downloadIcon', 'downloadText', 'Saved Image!');
+    }
+
+    async function copyResultImage() {
+      if (!processedCanvas) return;
+
+      try {
+        const pngBlob = await new Promise(resolve => processedCanvas.toBlob(resolve, 'image/png'));
+        if (navigator.clipboard && window.ClipboardItem) {
+          await navigator.clipboard.write([
+            new ClipboardItem({ 'image/png': pngBlob })
+          ]);
+          triggerSuccessButton('copyBtn', 'copyIcon', 'copyText', 'Copied Image!');
+        } else {
+          showStatus('Clipboard image copy not supported in this browser version. Use Download Image.', 'error');
+        }
+      } catch (err) {
+        showStatus('Failed to copy image: ' + err.message, 'error');
+      }
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function clearAll() {
+      if (cropper) {
+        cropper.destroy();
+        cropper = null;
+      }
+      rawImage = null;
+      bgImage = null;
+      rawFileName = '';
+      rawFileSize = 0;
+      processedCanvas = null;
+      processedBlob = null;
+
+      document.getElementById('fileInput').value = '';
+      document.getElementById('bgFileInput').value = '';
+      document.getElementById('resultImg').style.display = 'none';
+      document.getElementById('noImageText').style.display = 'block';
+      document.getElementById('imageInfo').innerHTML = '';
+      document.getElementById('downloadBtn').disabled = true;
+      document.getElementById('copyBtn').disabled = true;
+      document.getElementById('cropBtn').disabled = true;
+      document.getElementById('dropZoneText').textContent = 'Click or drag & drop an image to remove or replace its background';
+
+      hideStatus();
+
+      dropZone.classList.remove('flash-clear');
+      document.getElementById('controlsPanel').classList.remove('flash-clear');
+
+      void dropZone.offsetWidth;
+
+      dropZone.classList.add('flash-clear');
+      document.getElementById('controlsPanel').classList.add('flash-clear');
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+    }
+
+    function hideStatus() {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = 'status-box';
+      statusBox.textContent = '';
+    }
+
+    function rgbToHex(r, g, b) {
+      return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+    }
+
+    function hexToRgb(hex) {
+      const bigint = parseInt(hex.replace('#', ''), 16);
+      return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
+    }
+
+    function formatFileSize(bytes) {
+      if (!bytes) return '0 B';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+  </script>
+</body>
+
+</html>

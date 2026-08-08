@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SVG to High-Res Image Rasterizer</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Drop Zone */
+    .drop-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      background-color: var(--bg-color);
+      cursor: pointer;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    .drop-zone p {
+      margin: 8px 0 0 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background-color: var(--bg-color);
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 110px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    select,
+    input[type="number"],
+    input[type="color"] {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 8px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    select:focus,
+    input[type="number"]:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+    }
+
+    textarea {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      resize: vertical;
+      min-height: 140px;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: var(--primary-blue);
+      background-color: #ffffff;
+    }
+
+    /* Comparison Box */
+    .media-box {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      background-color: #ffffff;
+      background-image: linear-gradient(45deg, #eee 25%, transparent 25%), linear-gradient(-45deg, #eee 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #eee 75%), linear-gradient(-45deg, transparent 75%, #eee 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .preview-img {
+      max-width: 100%;
+      max-height: 240px;
+      object-fit: contain;
+    }
+
+    .image-info {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-align: center;
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+
+    /* Preset scale buttons */
+    .preset-btn {
+      background-color: white;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+
+    .preset-btn:hover {
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    /* Animation class for Clear */
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: var(--bg-color);
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: var(--bg-color);
+      }
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 170px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Drop Zone -->
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <span class="material-symbols-outlined" style="font-size: 36px; color: var(--primary-blue);">grid_on</span>
+      <p id="dropZoneText">Click or drag & drop a vector .SVG file here</p>
+      <input type="file" id="fileInput" class="file-input" accept=".svg,image/svg+xml" onchange="handleFileSelect(event)">
+    </div>
+
+    <!-- Options Panel -->
+    <div class="controls-panel" id="controlsPanel">
+      <div class="control-row">
+        <label style="font-weight: 500;">Quick Dimension Presets:</label>
+        <button class="preset-btn" onclick="applyPreset(1024)">1024 px</button>
+        <button class="preset-btn" onclick="applyPreset(2048)">2048 px (2K)</button>
+        <button class="preset-btn" onclick="applyPreset(4096)">4096 px (4K)</button>
+        <button class="preset-btn" onclick="applyPreset(8000)">8000 px (8K Ultra)</button>
+        <button class="preset-btn" onclick="applyScaleMultiplier(2)">2x Scale</button>
+        <button class="preset-btn" onclick="applyScaleMultiplier(4)">4x Scale</button>
+      </div>
+
+      <div class="control-row">
+        <div class="input-group">
+          <label for="widthInput">Target Width (px)</label>
+          <input type="number" id="widthInput" min="16" max="16000" step="1" value="2048" oninput="onWidthChange()">
+        </div>
+
+        <div style="display: flex; align-items: center; margin-top: 18px;">
+          <button class="btn-secondary" id="lockAspectBtn" style="padding: 6px;" title="Lock Aspect Ratio" onclick="toggleAspectLock()">
+            <span class="material-symbols-outlined" id="lockIcon">link</span>
+          </button>
+        </div>
+
+        <div class="input-group">
+          <label for="heightInput">Target Height (px)</label>
+          <input type="number" id="heightInput" min="16" max="16000" step="1" value="2048" oninput="onHeightChange()">
+        </div>
+
+        <div class="input-group">
+          <label for="bgFillSelect">Background Fill</label>
+          <select id="bgFillSelect" onchange="onBgSelectChange()">
+            <option value="transparent" selected>Transparent (Alpha PNG)</option>
+            <option value="#ffffff">Solid White (#FFFFFF)</option>
+            <option value="#000000">Solid Black (#000000)</option>
+            <option value="custom">Custom Color...</option>
+          </select>
+        </div>
+
+        <div class="input-group" id="customColorGroup" style="display: none; max-width: 80px;">
+          <label for="customColorPicker">Color</label>
+          <input type="color" id="customColorPicker" value="#1a73e8" style="height: 36px; padding: 2px; width: 100%;">
+        </div>
+
+        <div class="input-group">
+          <label for="exportFormat">Output Format</label>
+          <select id="exportFormat">
+            <option value="png" selected>PNG (32-bit Lossless)</option>
+            <option value="webp">WebM / WebP Image</option>
+            <option value="jpeg">JPEG (Compressed)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dual Inputs Grid -->
+    <div class="grid">
+      <!-- SVG Code Editor -->
+      <div class="input-group">
+        <label for="svgInput">
+          Raw SVG XML Source
+          <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="loadSampleSvg()">Sample Vector</button>
+        </label>
+        <textarea id="svgInput" placeholder="<svg viewBox='0 0 100 100'>...</svg>" oninput="onSvgCodeInput()"></textarea>
+      </div>
+
+      <!-- Live Rasterized Canvas Preview -->
+      <div style="display: flex; flex-direction: column; gap: 4px;">
+        <label style="font-weight: 500;">Rasterized High-Res Preview</label>
+        <div class="media-box">
+          <span id="noPreviewText" style="color: var(--text-secondary); font-size: 13px;">Rasterized preview will appear here</span>
+          <img id="rasterPreviewImg" class="preview-img" style="display: none;" alt="Raster Preview">
+        </div>
+        <div id="rasterInfo" class="image-info"></div>
+      </div>
+    </div>
+
+    <!-- Error Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="rasterizeBtn" class="btn-primary" onclick="startRasterizationProcess()" disabled>
+        <span class="material-symbols-outlined" id="rasterIcon">high_quality</span>
+        <span id="rasterText">Rasterize & Export</span>
+      </button>
+
+      <button id="downloadBtn" class="btn-secondary" onclick="downloadRasterImage()" disabled>
+        <span class="material-symbols-outlined" id="downloadIcon">download</span>
+        <span id="downloadText">Download Image</span>
+      </button>
+
+      <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let rawSvgContent = '';
+    let intrinsicWidth = 300;
+    let intrinsicHeight = 300;
+    let lockAspect = true;
+
+    let rasterizedBlob = null;
+    let rasterizedUrl = null;
+
+    const sampleSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a73e8" />
+      <stop offset="100%" stop-color="#34a853" />
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="100" r="85" fill="url(#grad)" />
+  <path d="M 60 100 L 90 130 L 140 70" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+</svg>`;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('svgInput').value = sampleSvg;
+      setupDragAndDrop();
+      onSvgCodeInput();
+    });
+
+    function setupDragAndDrop() {
+      const dropZone = document.getElementById('dropZone');
+
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          dropZone.classList.add('dragover');
+        }, false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          dropZone.classList.remove('dragover');
+        }, false);
+      });
+
+      dropZone.addEventListener('drop', (e) => {
+        const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.svg') || f.type === 'image/svg+xml');
+        if (files.length > 0) loadSvgFile(files[0]);
+      });
+    }
+
+    function handleFileSelect(event) {
+      if (event.target.files.length > 0) {
+        loadSvgFile(event.target.files[0]);
+      }
+    }
+
+    function loadSvgFile(file) {
+      hideStatus();
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('svgInput').value = e.target.result;
+        document.getElementById('dropZoneText').textContent = `Loaded Vector: ${file.name}`;
+        onSvgCodeInput();
+      };
+      reader.readAsText(file);
+    }
+
+    function loadSampleSvg() {
+      document.getElementById('svgInput').value = sampleSvg;
+      onSvgCodeInput();
+    }
+
+    function onSvgCodeInput() {
+      hideStatus();
+      rawSvgContent = document.getElementById('svgInput').value.trim();
+
+      if (!rawSvgContent) {
+        document.getElementById('rasterizeBtn').disabled = true;
+        document.getElementById('rasterPreviewImg').style.display = 'none';
+        document.getElementById('noPreviewText').style.display = 'block';
+        document.getElementById('rasterInfo').innerHTML = '';
+        return;
+      }
+
+      // Parse intrinsic dimensions
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(rawSvgContent, 'image/svg+xml');
+        const svgEl = doc.querySelector('svg');
+
+        if (svgEl) {
+          const viewBox = svgEl.getAttribute('viewBox');
+          if (viewBox) {
+            const parts = viewBox.split(/[\s,]+/).map(Number);
+            if (parts.length === 4 && parts[2] > 0 && parts[3] > 0) {
+              intrinsicWidth = parts[2];
+              intrinsicHeight = parts[3];
+            }
+          } else {
+            intrinsicWidth = parseFloat(svgEl.getAttribute('width')) || 300;
+            intrinsicHeight = parseFloat(svgEl.getAttribute('height')) || 300;
+          }
+
+          if (lockAspect) {
+            const curW = parseInt(document.getElementById('widthInput').value, 10) || 2048;
+            document.getElementById('heightInput').value = Math.round(curW * (intrinsicHeight / intrinsicWidth));
+          }
+        }
+      } catch (e) {}
+
+      document.getElementById('rasterizeBtn').disabled = false;
+      startRasterizationProcess(true);
+    }
+
+    function toggleAspectLock() {
+      lockAspect = !lockAspect;
+      const btn = document.getElementById('lockAspectBtn');
+      const icon = document.getElementById('lockIcon');
+
+      if (lockAspect) {
+        btn.style.color = 'var(--primary-blue)';
+        icon.textContent = 'link';
+        onWidthChange();
+      } else {
+        btn.style.color = 'var(--text-secondary)';
+        icon.textContent = 'link_off';
+      }
+    }
+
+    function onWidthChange() {
+      if (lockAspect && intrinsicWidth > 0) {
+        const w = parseInt(document.getElementById('widthInput').value, 10) || 100;
+        document.getElementById('heightInput').value = Math.round(w * (intrinsicHeight / intrinsicWidth));
+      }
+    }
+
+    function onHeightChange() {
+      if (lockAspect && intrinsicHeight > 0) {
+        const h = parseInt(document.getElementById('heightInput').value, 10) || 100;
+        document.getElementById('widthInput').value = Math.round(h * (intrinsicWidth / intrinsicHeight));
+      }
+    }
+
+    function applyPreset(presetPx) {
+      document.getElementById('widthInput').value = presetPx;
+      onWidthChange();
+      startRasterizationProcess();
+    }
+
+    function applyScaleMultiplier(mult) {
+      const curW = parseInt(document.getElementById('widthInput').value, 10) || intrinsicWidth;
+      document.getElementById('widthInput').value = Math.round(curW * mult);
+      onWidthChange();
+      startRasterizationProcess();
+    }
+
+    function onBgSelectChange() {
+      const val = document.getElementById('bgFillSelect').value;
+      document.getElementById('customColorGroup').style.display = val === 'custom' ? 'flex' : 'none';
+      startRasterizationProcess();
+    }
+
+    async function startRasterizationProcess(silent = false) {
+      hideStatus();
+      rawSvgContent = document.getElementById('svgInput').value.trim();
+      if (!rawSvgContent) return;
+
+      const targetW = parseInt(document.getElementById('widthInput').value, 10) || 1000;
+      const targetH = parseInt(document.getElementById('heightInput').value, 10) || 1000;
+
+      const bgSelect = document.getElementById('bgFillSelect').value;
+      const bgFill = bgSelect === 'custom' ? document.getElementById('customColorPicker').value : bgSelect;
+      const format = document.getElementById('exportFormat').value;
+
+      const btn = document.getElementById('rasterizeBtn');
+      const icon = document.getElementById('rasterIcon');
+      const text = document.getElementById('rasterText');
+
+      if (!silent) {
+        btn.disabled = true;
+        icon.style.display = 'none';
+        text.innerHTML = '<span class="spinner" style="margin-right: 6px;"></span>Rasterizing Vector...';
+      }
+
+      try {
+        const canvas = await renderSvgToCanvas(rawSvgContent, targetW, targetH, bgFill);
+
+        const mime = format === 'jpeg' ? 'image/jpeg' : (format === 'webp' ? 'image/webp' : 'image/png');
+
+        canvas.toBlob((blob) => {
+          rasterizedBlob = blob;
+          if (rasterizedUrl) URL.revokeObjectURL(rasterizedUrl);
+          rasterizedUrl = URL.createObjectURL(blob);
+
+          const previewImg = document.getElementById('rasterPreviewImg');
+          previewImg.src = rasterizedUrl;
+          previewImg.style.display = 'block';
+          document.getElementById('noPreviewText').style.display = 'none';
+
+          const megaPixels = ((targetW * targetH) / 1000000).toFixed(1);
+          document.getElementById('rasterInfo').innerHTML = `
+            <strong>Dimensions:</strong> ${targetW} × ${targetH} px (${megaPixels} MP) | <strong>Format:</strong> ${format.toUpperCase()} | <strong>Size:</strong> ${formatFileSize(blob.size)}
+          `;
+
+          document.getElementById('downloadBtn').disabled = false;
+          if (!silent) showStatus(`Crisply rasterized vector to ${targetW}×${targetH}px (${formatFileSize(blob.size)}).`, 'success');
+
+          if (!silent) {
+            btn.disabled = false;
+            icon.style.display = 'block';
+            text.innerHTML = 'Rasterize & Export';
+          }
+        }, mime, 0.95);
+      } catch (err) {
+        showStatus('SVG Rasterization error: ' + err.message, 'error');
+        if (!silent) {
+          btn.disabled = false;
+          icon.style.display = 'block';
+          text.innerHTML = 'Rasterize & Export';
+        }
+      }
+    }
+
+    function renderSvgToCanvas(svgStr, targetW, targetH, bgFill) {
+      return new Promise((resolve, reject) => {
+        try {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(svgStr, 'image/svg+xml');
+          const svgEl = doc.querySelector('svg');
+
+          if (!svgEl) {
+            reject(new Error('Invalid SVG syntax.'));
+            return;
+          }
+
+          if (!svgEl.getAttribute('viewBox')) {
+            const w = parseFloat(svgEl.getAttribute('width')) || intrinsicWidth;
+            const h = parseFloat(svgEl.getAttribute('height')) || intrinsicHeight;
+            svgEl.setAttribute('viewBox', `0 0 ${w} ${h}`);
+          }
+
+          svgEl.setAttribute('width', targetW);
+          svgEl.setAttribute('height', targetH);
+
+          const serializer = new XMLSerializer();
+          const cleanSvg = serializer.serializeToString(svgEl);
+
+          const blob = new Blob([cleanSvg], { type: 'image/svg+xml;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = targetW;
+            canvas.height = targetH;
+            const ctx = canvas.getContext('2d');
+
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+
+            if (bgFill && bgFill !== 'transparent') {
+              ctx.fillStyle = bgFill;
+              ctx.fillRect(0, 0, targetW, targetH);
+            }
+
+            ctx.drawImage(img, 0, 0, targetW, targetH);
+            URL.revokeObjectURL(url);
+            resolve(canvas);
+          };
+
+          img.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error('Failed to load SVG into image renderer. Check SVG syntax.'));
+          };
+
+          img.src = url;
+        } catch (e) {
+          reject(e);
+        }
+      });
+    }
+
+    function downloadRasterImage() {
+      if (!rasterizedBlob || !rasterizedUrl) return;
+
+      const format = document.getElementById('exportFormat').value;
+      const targetW = document.getElementById('widthInput').value;
+      const targetH = document.getElementById('heightInput').value;
+
+      const a = document.createElement('a');
+      a.href = rasterizedUrl;
+      a.download = `vector_rasterized_${targetW}x${targetH}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      triggerSuccessButton('downloadBtn', 'downloadIcon', 'downloadText', `Saved ${format.toUpperCase()}!`);
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function clearAll() {
+      if (rasterizedUrl) {
+        URL.revokeObjectURL(rasterizedUrl);
+        rasterizedUrl = null;
+      }
+      rasterizedBlob = null;
+
+      document.getElementById('fileInput').value = '';
+      document.getElementById('svgInput').value = '';
+      document.getElementById('rasterPreviewImg').style.display = 'none';
+      document.getElementById('noPreviewText').style.display = 'block';
+      document.getElementById('rasterInfo').innerHTML = '';
+      document.getElementById('rasterizeBtn').disabled = true;
+      document.getElementById('downloadBtn').disabled = true;
+      document.getElementById('dropZoneText').textContent = 'Click or drag & drop a vector .SVG file here';
+
+      hideStatus();
+
+      dropZone.classList.remove('flash-clear');
+      document.getElementById('controlsPanel').classList.remove('flash-clear');
+
+      void dropZone.offsetWidth;
+
+      dropZone.classList.add('flash-clear');
+      document.getElementById('controlsPanel').classList.add('flash-clear');
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+    }
+
+    function hideStatus() {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = 'status-box';
+      statusBox.textContent = '';
+    }
+
+    function formatFileSize(bytes) {
+      if (!bytes) return '0 B';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+  </script>
+</body>
+
+</html>

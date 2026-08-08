@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dance Team Audio Mixer & Segment Merger</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+  <!-- JSZip for batch export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Drop Zone */
+    .drop-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      background-color: var(--bg-color);
+      cursor: pointer;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    .drop-zone p {
+      margin: 8px 0 0 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    /* Controls Panel */
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background-color: var(--bg-color);
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 110px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    select,
+    input[type="number"] {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 8px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    select:focus,
+    input[type="number"]:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+    }
+
+    input[type="range"] {
+      accent-color: var(--primary-blue);
+    }
+
+    /* Track List Box */
+    .track-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 380px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px;
+      background-color: #ffffff;
+    }
+
+    .track-card {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 13px;
+      transition: all 0.2s ease;
+    }
+
+    .track-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .track-name {
+      font-weight: 500;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .track-badge {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      background-color: #e8f0fe;
+      color: var(--primary-blue);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Track Editor Grid */
+    .track-editor-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 8px;
+      background-color: #ffffff;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      padding: 4px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon-btn:hover {
+      background-color: #e8eaed;
+      color: var(--text-main);
+    }
+
+    /* Waveform Canvas Container */
+    .waveform-box {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      background-color: #1e1e1e;
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    canvas.waveform-canvas {
+      width: 100%;
+      height: 110px;
+      border-radius: 4px;
+    }
+
+    audio {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .progress-bar-bg {
+      height: 8px;
+      background-color: var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background-color: var(--primary-blue);
+      transition: width 0.1s linear;
+    }
+
+    /* Animation class for Clear */
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: var(--bg-color);
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: var(--bg-color);
+      }
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 170px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Drop Zone -->
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <span class="material-symbols-outlined" style="font-size: 36px; color: var(--primary-blue);">queue_music</span>
+      <p id="dropZoneText">Click or drag & drop song tracks here (MP3, WAV, AAC, FLAC, OGG, M4A)</p>
+      <input type="file" id="fileInput" class="file-input" accept="audio/*" multiple onchange="handleFileSelect(event)">
+    </div>
+
+    <!-- Options Panel -->
+    <div class="controls-panel" id="controlsPanel">
+      <div class="control-row">
+        <div class="input-group">
+          <label for="transitionMode">Global Transition Mode</label>
+          <select id="transitionMode" onchange="toggleTransitionOptions()">
+            <option value="crossfade" selected>Smooth Crossfade Overlap</option>
+            <option value="gapless">Gapless Sequential Cut</option>
+            <option value="silence">Custom Silence Gap Between Songs</option>
+          </select>
+        </div>
+
+        <div class="input-group" id="crossfadeGroup">
+          <label for="crossfadeSec">Crossfade Overlap (sec)</label>
+          <input type="number" id="crossfadeSec" min="0.5" max="10" step="0.5" value="2.0">
+        </div>
+
+        <div class="input-group" id="silenceGroup" style="display: none;">
+          <label for="silenceSec">Silence Gap Duration (sec)</label>
+          <input type="number" id="silenceSec" min="0.5" max="10" step="0.5" value="1.0">
+        </div>
+
+        <div class="input-group">
+          <label for="exportFormat" onchange="toggleExportOptions()">Export Format</label>
+          <select id="exportFormat">
+            <option value="mp3" selected>MP3 (.mp3 - High Compatibility)</option>
+            <option value="wav">WAV (.wav - Lossless Uncompressed 16-bit)</option>
+          </select>
+        </div>
+
+        <div class="input-group" id="bitrateGroup">
+          <label for="bitrateSelect">MP3 Quality</label>
+          <select id="bitrateSelect">
+            <option value="320" selected>320 kbps (High Quality)</option>
+            <option value="192">192 kbps (Standard)</option>
+            <option value="128">128 kbps (Compact)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Indicator -->
+    <div class="progress-container" id="progressContainer">
+      <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 500;">
+        <span id="progressText">Mixing dance routine tracks...</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Dance Tracklist Section -->
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-weight: 500;">
+          Dance Routine Segment Queue (<span id="trackCount">0 tracks</span>)
+        </label>
+        <div class="track-list" id="trackList">
+          <div style="text-align: center; color: var(--text-secondary); padding: 36px 12px; font-size: 13px;">
+            Drop song files above to build your dance routine segment mix.
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview Waveform & Player -->
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-weight: 500;">Combined Audio Waveform & Player</label>
+        <div class="waveform-box">
+          <span id="noWaveformText" style="color: #9aa0a6; font-size: 13px;">Merged dance mix preview will appear here</span>
+          <canvas id="waveformCanvas" class="waveform-canvas" style="display: none;"></canvas>
+          <audio id="audioPlayer" controls style="display: none;"></audio>
+        </div>
+        <div id="mergedMediaInfo" style="font-size: 12px; color: var(--text-secondary); text-align: center;"></div>
+      </div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="mergeBtn" class="btn-primary" onclick="startAudioMergeProcess()" disabled>
+        <span class="material-symbols-outlined" id="mergeIcon">graphic_eq</span>
+        <span id="mergeText">Mix & Export Dance Routine</span>
+      </button>
+
+      <button id="downloadBtn" class="btn-secondary" onclick="downloadMergedAudio()" disabled>
+        <span class="material-symbols-outlined" id="downloadIcon">download</span>
+        <span id="downloadText">Download Mix</span>
+      </button>
+
+      <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let trackList = []; // [{ id, file, name, fullDuration, startSec, endSec, volume, speed, fadeInSec, fadeOutSec, buffer }]
+    let mergedAudioBlob = null;
+    let mergedAudioUrl = null;
+    let outputExt = 'mp3';
+
+    const dropZone = document.getElementById('dropZone');
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+      }, false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('audio/'));
+      if (files.length > 0) addTracks(files);
+    });
+
+    function handleFileSelect(event) {
+      if (event.target.files.length > 0) {
+        addTracks(Array.from(event.target.files));
+      }
+    }
+
+    async function addTracks(files) {
+      hideStatus();
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+      for (let file of files) {
+        const id = 't_' + Math.random().toString(36).substring(2, 9);
+        let fullDuration = 0;
+        let buffer = null;
+
+        try {
+          const arrayBuf = await file.arrayBuffer();
+          buffer = await audioCtx.decodeAudioData(arrayBuf);
+          fullDuration = buffer.duration;
+        } catch (e) {}
+
+        trackList.push({
+          id,
+          file,
+          name: file.name,
+          fullDuration,
+          startSec: 0,
+          endSec: Math.round(fullDuration * 10) / 10,
+          volume: 1.0,
+          speed: 1.0,
+          fadeInSec: 0.5,
+          fadeOutSec: 0.5,
+          buffer
+        });
+      }
+
+      renderTrackList();
+      document.getElementById('mergeBtn').disabled = trackList.length < 1;
+      showStatus(`Added ${files.length} track(s) to the dance mix queue.`, 'success');
+    }
+
+    function renderTrackList() {
+      const container = document.getElementById('trackList');
+      document.getElementById('trackCount').textContent = `${trackList.length} track(s)`;
+
+      if (trackList.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; color: var(--text-secondary); padding: 36px 12px; font-size: 13px;">
+            Drop song files above to build your dance routine segment mix.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = trackList.map((t, idx) => {
+        const segLen = Math.max(0, (t.endSec - t.startSec) / (t.speed || 1.0));
+        return `
+          <div class="track-card">
+            <div class="track-header">
+              <span style="font-weight: 500; font-family: 'Roboto Mono', monospace; color: var(--text-secondary); font-size: 11px;">#${idx + 1}</span>
+              <div class="track-name" title="${escapeHtml(t.name)}">${escapeHtml(t.name)}</div>
+              <span class="track-badge">${formatTime(segLen)} snippet</span>
+
+              <div style="display: flex; gap: 4px;">
+                <button class="icon-btn" onclick="duplicateTrack('${t.id}')" title="Duplicate Segment (Extract another clip from this song)">
+                  <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
+                </button>
+                <button class="icon-btn" onclick="moveTrack(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} title="Move Up">
+                  <span class="material-symbols-outlined" style="font-size: 16px;">arrow_upward</span>
+                </button>
+                <button class="icon-btn" onclick="moveTrack(${idx}, 1)" ${idx === trackList.length - 1 ? 'disabled' : ''} title="Move Down">
+                  <span class="material-symbols-outlined" style="font-size: 16px;">arrow_downward</span>
+                </button>
+                <button class="icon-btn" onclick="removeTrack('${t.id}')" title="Remove Track">
+                  <span class="material-symbols-outlined" style="font-size: 16px; color: var(--danger-text);">delete</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="track-editor-grid">
+              <div class="input-group">
+                <label>Trim Start (s)</label>
+                <input type="number" min="0" max="${t.fullDuration}" step="0.1" value="${t.startSec}" onchange="updateTrackParam('${t.id}', 'startSec', this.value)">
+              </div>
+
+              <div class="input-group">
+                <label>Trim End (s)</label>
+                <input type="number" min="0" max="${t.fullDuration}" step="0.1" value="${t.endSec}" onchange="updateTrackParam('${t.id}', 'endSec', this.value)">
+              </div>
+
+              <div class="input-group">
+                <label>Volume (${Math.round(t.volume * 100)}%)</label>
+                <input type="range" min="0.2" max="2.0" step="0.1" value="${t.volume}" oninput="updateTrackParam('${t.id}', 'volume', this.value)">
+              </div>
+
+              <div class="input-group">
+                <label>BPM / Speed (${t.speed}x)</label>
+                <select onchange="updateTrackParam('${t.id}', 'speed', this.value)">
+                  <option value="0.8" ${t.speed == 0.8 ? 'selected' : ''}>0.8x (Slow)</option>
+                  <option value="0.9" ${t.speed == 0.9 ? 'selected' : ''}>0.9x</option>
+                  <option value="1.0" ${t.speed == 1.0 ? 'selected' : ''}>1.0x (Original)</option>
+                  <option value="1.1" ${t.speed == 1.1 ? 'selected' : ''}>1.1x (Upbeat)</option>
+                  <option value="1.2" ${t.speed == 1.2 ? 'selected' : ''}>1.2x (Fast)</option>
+                </select>
+              </div>
+
+              <div class="input-group">
+                <label>Fade In (s)</label>
+                <input type="number" min="0" max="5" step="0.5" value="${t.fadeInSec}" onchange="updateTrackParam('${t.id}', 'fadeInSec', this.value)">
+              </div>
+
+              <div class="input-group">
+                <label>Fade Out (s)</label>
+                <input type="number" min="0" max="5" step="0.5" value="${t.fadeOutSec}" onchange="updateTrackParam('${t.id}', 'fadeOutSec', this.value)">
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateTrackParam(id, param, value) {
+      const track = trackList.find(t => t.id === id);
+      if (track) {
+        track[param] = parseFloat(value) || 0;
+        renderTrackList();
+      }
+    }
+
+    function duplicateTrack(id) {
+      const orig = trackList.find(t => t.id === id);
+      if (!orig) return;
+
+      const dup = {
+        ...orig,
+        id: 't_' + Math.random().toString(36).substring(2, 9),
+        name: orig.name + ' (Snippet 2)'
+      };
+
+      const idx = trackList.findIndex(t => t.id === id);
+      trackList.splice(idx + 1, 0, dup);
+      renderTrackList();
+      showStatus(`Duplicated segment for ${orig.name}.`, 'success');
+    }
+
+    function moveTrack(index, direction) {
+      const target = index + direction;
+      if (target < 0 || target >= trackList.length) return;
+      const temp = trackList[index];
+      trackList[index] = trackList[target];
+      trackList[target] = temp;
+      renderTrackList();
+    }
+
+    function removeTrack(id) {
+      trackList = trackList.filter(t => t.id !== id);
+      renderTrackList();
+      document.getElementById('mergeBtn').disabled = trackList.length < 1;
+    }
+
+    function toggleTransitionOptions() {
+      const mode = document.getElementById('transitionMode').value;
+      document.getElementById('crossfadeGroup').style.display = mode === 'crossfade' ? 'flex' : 'none';
+      document.getElementById('silenceGroup').style.display = mode === 'silence' ? 'flex' : 'none';
+    }
+
+    function toggleExportOptions() {
+      const fmt = document.getElementById('exportFormat').value;
+      document.getElementById('bitrateGroup').style.display = fmt === 'mp3' ? 'flex' : 'none';
+    }
+
+    async function startAudioMergeProcess() {
+      hideStatus();
+      if (trackList.length < 1) {
+        showStatus('Please add at least 1 audio segment to mix.', 'error');
+        return;
+      }
+
+      const startTime = performance.now();
+      const btn = document.getElementById('mergeBtn');
+      const icon = document.getElementById('mergeIcon');
+      const text = document.getElementById('mergeText');
+
+      btn.disabled = true;
+      icon.style.display = 'none';
+      text.innerHTML = '<span class="spinner" style="margin-right: 6px;"></span>Mixing...';
+
+      showProgress(10, 'Decoding track buffers...');
+
+      const mode = document.getElementById('transitionMode').value;
+      const crossfadeSec = parseFloat(document.getElementById('crossfadeSec').value) || 2.0;
+      const silenceSec = parseFloat(document.getElementById('silenceSec').value) || 1.0;
+      const format = document.getElementById('exportFormat').value;
+      outputExt = format;
+      const bitrate = parseInt(document.getElementById('bitrateSelect').value, 10) || 192;
+
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Ensure all buffers are decoded
+        for (let t of trackList) {
+          if (!t.buffer) {
+            const arrayBuf = await t.file.arrayBuffer();
+            t.buffer = await audioCtx.decodeAudioData(arrayBuf);
+          }
+        }
+
+        showProgress(40, 'Rendering dance segments, speed shifts & crossfades...');
+
+        const sampleRate = trackList[0].buffer.sampleRate;
+        const numChannels = Math.max(...trackList.map(t => t.buffer.numberOfChannels));
+        const crossfadeSamples = Math.floor(crossfadeSec * sampleRate);
+        const silenceSamples = Math.floor(silenceSec * sampleRate);
+
+        // Pre-calculate individual segment sample lengths after speed adjustment
+        const segments = trackList.map(t => {
+          const rawDuration = Math.max(0.1, t.endSec - t.startSec);
+          const adjustedDuration = rawDuration / (t.speed || 1.0);
+          const totalSegmentSamples = Math.floor(adjustedDuration * sampleRate);
+          return {
+            track: t,
+            startSample: Math.floor(t.startSec * sampleRate),
+            endSample: Math.min(t.buffer.length, Math.floor(t.endSec * sampleRate)),
+            totalSegmentSamples,
+            fadeInSamples: Math.floor((t.fadeInSec || 0) * sampleRate),
+            fadeOutSamples: Math.floor((t.fadeOutSec || 0) * sampleRate)
+          };
+        });
+
+        // Compute total output audio length
+        let totalOutputSamples = 0;
+        for (let i = 0; i < segments.length; i++) {
+          const len = segments[i].totalSegmentSamples;
+          if (i === 0) {
+            totalOutputSamples += len;
+          } else {
+            if (mode === 'crossfade') {
+              totalOutputSamples += Math.max(0, len - crossfadeSamples);
+            } else if (mode === 'silence') {
+              totalOutputSamples += (len + silenceSamples);
+            } else {
+              totalOutputSamples += len;
+            }
+          }
+        }
+
+        const leftOut = new Float32Array(totalOutputSamples);
+        const rightOut = numChannels === 2 ? new Float32Array(totalOutputSamples) : leftOut;
+
+        let currentOffset = 0;
+
+        for (let i = 0; i < segments.length; i++) {
+          const seg = segments[i];
+          const t = seg.track;
+          const b = t.buffer;
+          const srcLeft = b.getChannelData(0);
+          const srcRight = b.numberOfChannels > 1 ? b.getChannelData(1) : srcLeft;
+
+          const speed = t.speed || 1.0;
+          const volume = t.volume || 1.0;
+          const len = seg.totalSegmentSamples;
+
+          for (let s = 0; s < len; s++) {
+            const targetPos = currentOffset + s;
+            if (targetPos >= totalOutputSamples) break;
+
+            // Nearest-neighbor resampling for speed shift
+            const srcIdx = seg.startSample + Math.floor(s * speed);
+            if (srcIdx >= seg.endSample || srcIdx >= b.length) break;
+
+            let factor = volume;
+
+            // Global Crossfade Overlap
+            if (mode === 'crossfade') {
+              if (i > 0 && s < crossfadeSamples) {
+                factor *= (s / crossfadeSamples);
+              }
+              if (i < segments.length - 1 && s >= len - crossfadeSamples) {
+                factor *= (len - s) / crossfadeSamples;
+              }
+            }
+
+            // Per-track Fade In
+            if (seg.fadeInSamples > 0 && s < seg.fadeInSamples) {
+              factor *= (s / seg.fadeInSamples);
+            }
+
+            // Per-track Fade Out
+            if (seg.fadeOutSamples > 0 && s >= len - seg.fadeOutSamples) {
+              factor *= Math.max(0, (len - s) / seg.fadeOutSamples);
+            }
+
+            leftOut[targetPos] += srcLeft[srcIdx] * factor;
+            if (numChannels === 2) {
+              rightOut[targetPos] += srcRight[srcIdx] * factor;
+            }
+          }
+
+          if (mode === 'crossfade') {
+            currentOffset += Math.max(1, len - crossfadeSamples);
+          } else if (mode === 'silence') {
+            currentOffset += (len + silenceSamples);
+          } else {
+            currentOffset += len;
+          }
+        }
+
+        // Soft Peak Limiter
+        let maxPeak = 0;
+        for (let i = 0; i < totalOutputSamples; i++) {
+          maxPeak = Math.max(maxPeak, Math.abs(leftOut[i]), Math.abs(rightOut[i]));
+        }
+        if (maxPeak > 0.98) {
+          const scale = 0.96 / maxPeak;
+          for (let i = 0; i < totalOutputSamples; i++) {
+            leftOut[i] *= scale;
+            if (numChannels === 2) rightOut[i] *= scale;
+          }
+        }
+
+        if (format === 'mp3') {
+          showProgress(60, 'Parallel Web Worker MP3 encoding...');
+          mergedAudioBlob = await encodeMp3Parallel(leftOut, rightOut, sampleRate, numChannels, bitrate);
+        } else {
+          showProgress(85, 'Exporting WAV PCM...');
+          mergedAudioBlob = bufferToWaveFast(leftOut, rightOut, sampleRate, numChannels);
+        }
+
+        const elapsedSec = ((performance.now() - startTime) / 1000).toFixed(2);
+        showProgress(100, `Dance mix ready in ${elapsedSec}s!`);
+
+        if (mergedAudioUrl) URL.revokeObjectURL(mergedAudioUrl);
+        mergedAudioUrl = URL.createObjectURL(mergedAudioBlob);
+
+        const aPlayer = document.getElementById('audioPlayer');
+        aPlayer.src = mergedAudioUrl;
+        aPlayer.style.display = 'block';
+        document.getElementById('noWaveformText').style.display = 'none';
+
+        drawWaveform(leftOut);
+
+        const totalSec = totalOutputSamples / sampleRate;
+        document.getElementById('mergedMediaInfo').innerHTML = `
+          <strong>Dance Mix Duration:</strong> ${formatTime(totalSec)} | <strong>Format:</strong> ${format.toUpperCase()} | <strong>Size:</strong> ${formatFileSize(mergedAudioBlob.size)}
+        `;
+
+        document.getElementById('downloadBtn').disabled = false;
+        showStatus(`Mixed ${trackList.length} dance segment(s) into ${format.toUpperCase()} (${formatFileSize(mergedAudioBlob.size)}).`, 'success');
+      } catch (err) {
+        showStatus('Merge Error: ' + err.message, 'error');
+      }
+
+      hideProgress();
+      btn.disabled = false;
+      icon.style.display = 'block';
+      text.innerHTML = 'Mix & Export Dance Routine';
+    }
+
+    function drawWaveform(samples) {
+      const canvas = document.getElementById('waveformCanvas');
+      canvas.style.display = 'block';
+      const ctx = canvas.getContext('2d');
+
+      const width = canvas.offsetWidth || 400;
+      const height = canvas.offsetHeight || 100;
+      canvas.width = width;
+      canvas.height = height;
+
+      ctx.fillStyle = '#1e1e1e';
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = '#1a73e8';
+      const step = Math.ceil(samples.length / width);
+      const amp = height / 2;
+
+      for (let i = 0; i < width; i++) {
+        let min = 1.0;
+        let max = -1.0;
+        for (let j = 0; j < step; j++) {
+          const datum = samples[(i * step) + j];
+          if (datum < min) min = datum;
+          if (datum > max) max = datum;
+        }
+        ctx.fillRect(i, (1 + min) * amp, 1, Math.max(1, (max - min) * amp));
+      }
+    }
+
+    /* Parallel Web Worker MP3 Encoder */
+    async function encodeMp3Parallel(left, right, sampleRate, numChannels, kbps) {
+      const numWorkers = Math.min(8, Math.max(2, navigator.hardwareConcurrency || 4));
+      const totalSamples = left.length;
+      const chunkSize = Math.ceil(totalSamples / numWorkers);
+
+      const workerCode = `
+        importScripts('https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.all.min.js');
+
+        self.onmessage = function(e) {
+          const { left, right, sampleRate, numChannels, kbps, chunkIndex } = e.data;
+          const mp3encoder = new lamejs.Mp3Encoder(numChannels, sampleRate, kbps);
+          const mp3Data = [];
+          const sampleBlockSize = 1152;
+          const total = left.length;
+
+          const leftInt16 = new Int16Array(total);
+          const rightInt16 = new Int16Array(total);
+
+          for (let i = 0; i < total; i++) {
+            let l = Math.max(-1, Math.min(1, left[i]));
+            let r = Math.max(-1, Math.min(1, right[i]));
+            leftInt16[i] = l < 0 ? l * 32768 : l * 32767;
+            rightInt16[i] = r < 0 ? r * 32768 : r * 32767;
+          }
+
+          for (let i = 0; i < total; i += sampleBlockSize) {
+            const leftChunk = leftInt16.subarray(i, i + sampleBlockSize);
+            const rightChunk = rightInt16.subarray(i, i + sampleBlockSize);
+
+            let mp3buf = null;
+            if (numChannels === 2) {
+              mp3buf = mp3encoder.encodeBuffer(leftChunk, rightChunk);
+            } else {
+              mp3buf = mp3encoder.encodeBuffer(leftChunk);
+            }
+            if (mp3buf.length > 0) mp3Data.push(mp3buf);
+          }
+
+          const mp3buf = mp3encoder.flush();
+          if (mp3buf.length > 0) mp3Data.push(mp3buf);
+
+          self.postMessage({ chunkIndex, mp3Data });
+        };
+      `;
+
+      const blob = new Blob([workerCode], { type: 'application/javascript' });
+      const workerUrl = URL.createObjectURL(blob);
+
+      const tasks = [];
+      let completedWorkers = 0;
+
+      for (let w = 0; w < numWorkers; w++) {
+        const start = w * chunkSize;
+        const end = Math.min(totalSamples, start + chunkSize);
+        if (start >= totalSamples) break;
+
+        const subLeft = left.slice(start, end);
+        const subRight = numChannels === 2 ? right.slice(start, end) : subLeft;
+
+        tasks.push(new Promise((resolve, reject) => {
+          const worker = new Worker(workerUrl);
+          worker.onmessage = function(e) {
+            completedWorkers++;
+            showProgress(60 + Math.round((completedWorkers / numWorkers) * 35), `Encoding MP3 (${completedWorkers}/${numWorkers} workers)...`);
+            worker.terminate();
+            resolve(e.data);
+          };
+          worker.onerror = function(err) {
+            worker.terminate();
+            reject(err);
+          };
+          worker.postMessage({
+            left: subLeft,
+            right: subRight,
+            sampleRate,
+            numChannels,
+            kbps,
+            chunkIndex: w
+          }, [subLeft.buffer, subRight.buffer]);
+        }));
+      }
+
+      const results = await Promise.all(tasks);
+      URL.revokeObjectURL(workerUrl);
+
+      results.sort((a, b) => a.chunkIndex - b.chunkIndex);
+
+      const combinedMp3Data = [];
+      for (let r of results) {
+        combinedMp3Data.push(...r.mp3Data);
+      }
+
+      return new Blob(combinedMp3Data, { type: 'audio/mp3' });
+    }
+
+    /* Fast WAV PCM Encoder */
+    function bufferToWaveFast(left, right, sampleRate, numOfChan) {
+      const len = left.length;
+      const length = len * numOfChan * 2 + 44;
+      const buffer = new ArrayBuffer(length);
+      const view = new DataView(buffer);
+      let pos = 0;
+
+      function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
+      function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
+
+      setUint32(0x46464952); // "RIFF"
+      setUint32(length - 8);
+      setUint32(0x45564157); // "WAVE"
+
+      setUint32(0x20746d66); // "fmt "
+      setUint32(16);
+      setUint16(1);
+      setUint16(numOfChan);
+      setUint32(sampleRate);
+      setUint32(sampleRate * 2 * numOfChan);
+      setUint16(numOfChan * 2);
+      setUint16(16);
+
+      setUint32(0x61746164); // "data"
+      setUint32(length - pos - 4);
+
+      for (let i = 0; i < len; i++) {
+        let l = Math.max(-1, Math.min(1, left[i]));
+        view.setInt16(pos, l < 0 ? l * 32768 : l * 32767, true);
+        pos += 2;
+
+        if (numOfChan === 2) {
+          let r = Math.max(-1, Math.min(1, right[i]));
+          view.setInt16(pos, r < 0 ? r * 32768 : r * 32767, true);
+          pos += 2;
+        }
+      }
+
+      return new Blob([buffer], { type: "audio/wav" });
+    }
+
+    function downloadMergedAudio() {
+      if (!mergedAudioBlob || !mergedAudioUrl) return;
+
+      const a = document.createElement('a');
+      a.href = mergedAudioUrl;
+      a.download = `dance_mix_${Date.now()}.${outputExt}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      triggerSuccessButton('downloadBtn', 'downloadIcon', 'downloadText', `Saved ${outputExt.toUpperCase()} Mix!`);
+    }
+
+    function showProgress(pct, text) {
+      const container = document.getElementById('progressContainer');
+      container.style.display = 'flex';
+      document.getElementById('progressText').textContent = text;
+      document.getElementById('progressPct').textContent = `${pct}%`;
+      document.getElementById('progressBarFill').style.width = `${pct}%`;
+    }
+
+    function hideProgress() {
+      document.getElementById('progressContainer').style.display = 'none';
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      if (text) text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        if (text) text.innerText = originalText;
+      }, 2000);
+    }
+
+    function clearAll() {
+      if (mergedAudioUrl) {
+        URL.revokeObjectURL(mergedAudioUrl);
+        mergedAudioUrl = null;
+      }
+      trackList = [];
+      mergedAudioBlob = null;
+
+      document.getElementById('fileInput').value = '';
+      document.getElementById('waveformCanvas').style.display = 'none';
+      document.getElementById('audioPlayer').style.display = 'none';
+      document.getElementById('noWaveformText').style.display = 'block';
+      document.getElementById('mergedMediaInfo').innerHTML = '';
+      document.getElementById('mergeBtn').disabled = true;
+      document.getElementById('downloadBtn').disabled = true;
+
+      renderTrackList();
+      hideStatus();
+      hideProgress();
+
+      dropZone.classList.remove('flash-clear');
+      document.getElementById('controlsPanel').classList.remove('flash-clear');
+
+      void dropZone.offsetWidth;
+
+      dropZone.classList.add('flash-clear');
+      document.getElementById('controlsPanel').classList.add('flash-clear');
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+    }
+
+    function hideStatus() {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = 'status-box';
+      statusBox.textContent = '';
+    }
+
+    function formatTime(seconds) {
+      if (isNaN(seconds)) return '00:00';
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function formatFileSize(bytes) {
+      if (!bytes) return '0 B';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+  </script>
+</body>
+
+</html>

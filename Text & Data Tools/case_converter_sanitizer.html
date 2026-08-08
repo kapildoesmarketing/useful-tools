@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Case Converter & Text Sanitizer</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    textarea {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      outline: none;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+      min-height: 220px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    textarea:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+      background-color: #ffffff;
+    }
+
+    /* Controls Panel */
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background-color: var(--bg-color);
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .action-button-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 8px;
+    }
+
+    .btn-action {
+      background-color: white;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-action:hover {
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    /* Stats Bar Header */
+    .stats-bar {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      flex-wrap: wrap;
+      background-color: var(--bg-color);
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+    }
+
+    .stat-item {
+      display: flex;
+      gap: 4px;
+    }
+
+    .stat-item strong {
+      color: var(--text-main);
+    }
+
+    /* Animation class for Clear */
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: var(--bg-color);
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: var(--bg-color);
+      }
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 150px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Live Text Statistics Header -->
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-item">Characters: <strong id="statChars">0</strong></div>
+      <div class="stat-item">Words: <strong id="statWords">0</strong></div>
+      <div class="stat-item">Sentences: <strong id="statSentences">0</strong></div>
+      <div class="stat-item">Paragraphs: <strong id="statParagraphs">0</strong></div>
+      <div class="stat-item">Reading Time: <strong id="statReading">0 min</strong></div>
+    </div>
+
+    <!-- Main Editors Grid -->
+    <div class="grid">
+      <!-- Original Input Text -->
+      <div class="input-group">
+        <label for="textInput">
+          Source Text Input
+          <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="loadSampleText()">Sample Text</button>
+        </label>
+        <textarea id="textInput" placeholder="Type or paste your raw text here..." oninput="updateStats(); transformText(currentAction);"></textarea>
+      </div>
+
+      <!-- Converted / Sanitized Output Text -->
+      <div class="input-group">
+        <label for="textOutput">Converted / Sanitized Result</label>
+        <textarea id="textOutput" readonly placeholder="Transformed result will appear here..."></textarea>
+      </div>
+    </div>
+
+    <!-- Actions Control Panel -->
+    <div class="controls-panel" id="controlsPanel">
+      <label style="font-size: 13px; font-weight: 500;">Case Transformation Actions</label>
+      <div class="action-button-grid">
+        <button class="btn-action" onclick="transformText('uppercase')">UPPERCASE</button>
+        <button class="btn-action" onclick="transformText('lowercase')">lowercase</button>
+        <button class="btn-action" onclick="transformText('title')">Title Case</button>
+        <button class="btn-action" onclick="transformText('sentence')">Sentence case</button>
+        <button class="btn-action" onclick="transformText('camel')">camelCase</button>
+        <button class="btn-action" onclick="transformText('snake')">snake_case</button>
+        <button class="btn-action" onclick="transformText('kebab')">kebab-case</button>
+        <button class="btn-action" onclick="transformText('pascal')">PascalCase</button>
+        <button class="btn-action" onclick="transformText('constant')">CONSTANT_CASE</button>
+        <button class="btn-action" onclick="transformText('alternating')">aLtErNaTiNg cAsE</button>
+      </div>
+
+      <label style="font-size: 13px; font-weight: 500; margin-top: 8px;">Sanitization & Cleaning Tools</label>
+      <div class="action-button-grid">
+        <button class="btn-action" onclick="transformText('stripHtml')">Strip HTML Tags</button>
+        <button class="btn-action" onclick="transformText('stripNonAscii')">Strip Non-ASCII</button>
+        <button class="btn-action" onclick="transformText('removeWhitespace')">Remove Extra Spaces</button>
+        <button class="btn-action" onclick="transformText('removeBlankLines')">Remove Empty Lines</button>
+        <button class="btn-action" onclick="transformText('trimLines')">Trim Line Margins</button>
+        <button class="btn-action" onclick="transformText('dedupeLines')">Remove Duplicate Lines</button>
+        <button class="btn-action" onclick="transformText('singleLine')">Convert to 1 Line</button>
+        <button class="btn-action" onclick="transformText('reverseText')">Reverse Text</button>
+      </div>
+    </div>
+
+    <!-- Error Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="copyBtn" class="btn-primary" onclick="copyResultText()">
+        <span class="material-symbols-outlined" id="copyIcon">content_copy</span>
+        <span id="copyText">Copy Result Text</span>
+      </button>
+
+      <button id="downloadBtn" class="btn-secondary" onclick="downloadTextFile()">
+        <span class="material-symbols-outlined" id="downloadIcon">download</span>
+        <span id="downloadText">Download .txt File</span>
+      </button>
+
+      <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let currentAction = 'title';
+    let renderTimeout = null;
+
+    const sampleText = `<h1>  Welcome to Useful Tools suite!  </h1>
+<p>Transform spreadsheet data into developer-ready code instantly.</p>
+
+   This is a sample PARAGRAPH with   extra   whitespace, <a href="#">HTML tags</a>, 
+AND mixed CASE formatting!  Contact us at support@example.com for help.
+Useful Tools (100% Client-Side local processing).`;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('textInput').value = sampleText;
+      updateStats();
+      transformText('title');
+    });
+
+    function loadSampleText() {
+      document.getElementById('textInput').value = sampleText;
+      updateStats();
+      transformText(currentAction);
+    }
+
+    function updateStats() {
+      const text = document.getElementById('textInput').value;
+
+      const charCount = text.length;
+      const words = text.trim() === '' ? [] : text.trim().split(/\s+/);
+      const wordCount = words.length;
+
+      const sentences = text.trim() === '' ? [] : text.split(/[.!?]+/).filter(Boolean);
+      const sentenceCount = sentences.length;
+
+      const paragraphs = text.trim() === '' ? [] : text.split(/\n\s*\n/).filter(Boolean);
+      const paragraphCount = paragraphs.length;
+
+      const readingTime = Math.ceil(wordCount / 200);
+
+      document.getElementById('statChars').textContent = charCount.toLocaleString();
+      document.getElementById('statWords').textContent = wordCount.toLocaleString();
+      document.getElementById('statSentences').textContent = sentenceCount.toLocaleString();
+      document.getElementById('statParagraphs').textContent = paragraphCount.toLocaleString();
+      document.getElementById('statReading').textContent = `${readingTime} min`;
+    }
+
+    function transformText(action) {
+      if (renderTimeout) cancelAnimationFrame(renderTimeout);
+
+      renderTimeout = requestAnimationFrame(() => {
+        currentAction = action;
+        const text = document.getElementById('textInput').value;
+        let result = '';
+
+        if (!text) {
+          document.getElementById('textOutput').value = '';
+          return;
+        }
+
+        switch (action) {
+          case 'uppercase':
+            result = text.toUpperCase();
+            break;
+          case 'lowercase':
+            result = text.toLowerCase();
+            break;
+          case 'title':
+            result = text.toLowerCase().replace(/(?:^|\s|\/|-)\S/g, match => match.toUpperCase());
+            break;
+          case 'sentence':
+            result = text.toLowerCase().replace(/(^\s*|[.!?]\s+)([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase());
+            break;
+          case 'camel':
+            result = toWords(text).map((w, i) => i === 0 ? w.toLowerCase() : capitalize(w)).join('');
+            break;
+          case 'snake':
+            result = toWords(text).map(w => w.toLowerCase()).join('_');
+            break;
+          case 'kebab':
+            result = toWords(text).map(w => w.toLowerCase()).join('-');
+            break;
+          case 'pascal':
+            result = toWords(text).map(w => capitalize(w)).join('');
+            break;
+          case 'constant':
+            result = toWords(text).map(w => w.toUpperCase()).join('_');
+            break;
+          case 'alternating':
+            result = text.split('').map((c, i) => i % 2 === 0 ? c.toLowerCase() : c.toUpperCase()).join('');
+            break;
+          case 'stripHtml':
+            result = text.replace(/<[^>]*>?/gm, '');
+            break;
+          case 'stripNonAscii':
+            result = text.replace(/[^\x00-\x7F]/g, '');
+            break;
+          case 'removeWhitespace':
+            result = text.replace(/[ \t]+/g, ' ').replace(/\n\s+\n/g, '\n\n');
+            break;
+          case 'removeBlankLines':
+            result = text.split('\n').filter(line => line.trim() !== '').join('\n');
+            break;
+          case 'trimLines':
+            result = text.split('\n').map(line => line.trim()).join('\n');
+            break;
+          case 'dedupeLines':
+            result = [...new Set(text.split('\n'))].join('\n');
+            break;
+          case 'singleLine':
+            result = text.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
+            break;
+          case 'reverseText':
+            result = text.split('').reverse().join('');
+            break;
+          default:
+            result = text;
+        }
+
+        document.getElementById('textOutput').value = result;
+      });
+    }
+
+    function toWords(str) {
+      const clean = str.replace(/<[^>]*>?/gm, '');
+      return clean.replace(/[^a-zA-Z0-9]+/g, ' ').trim().split(/\s+/).filter(Boolean);
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    }
+
+    function copyResultText() {
+      const output = document.getElementById('textOutput');
+      if (!output.value) return;
+
+      output.select();
+      document.execCommand('copy');
+      triggerSuccessButton('copyBtn', 'copyIcon', 'copyText', 'Copied Text!');
+    }
+
+    function downloadTextFile() {
+      const text = document.getElementById('textOutput').value;
+      if (!text) return;
+
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'sanitized_text.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      triggerSuccessButton('downloadBtn', 'downloadIcon', 'downloadText', 'Saved .txt File!');
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function clearAll() {
+      document.getElementById('textInput').value = '';
+      document.getElementById('textOutput').value = '';
+      updateStats();
+
+      document.getElementById('textInput').classList.remove('flash-clear');
+      document.getElementById('textOutput').classList.remove('flash-clear');
+
+      void document.getElementById('textInput').offsetWidth;
+
+      document.getElementById('textInput').classList.add('flash-clear');
+      document.getElementById('textOutput').classList.add('flash-clear');
+    }
+  </script>
+</body>
+
+</html>

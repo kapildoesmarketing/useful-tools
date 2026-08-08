@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Universal Image Format Converter</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+  <!-- JSZip library for batch zipping -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- jsPDF library for Image to PDF conversion -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- UTIF.js library for TIFF decoding and encoding -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/utif/3.1.0/UTIF.min.js"></script>
+  <!-- heic2any library for HEIC/HEIF decoding -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Drop Zone */
+    .drop-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      background-color: var(--bg-color);
+      cursor: pointer;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    .drop-zone p {
+      margin: 8px 0 0 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    /* Controls Panel */
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background-color: var(--bg-color);
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    select {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 8px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    select:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+    }
+
+    input[type="range"] {
+      flex: 1;
+      accent-color: var(--primary-blue);
+    }
+
+    /* File List & Thumbnails */
+    .file-list-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .file-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+      max-height: 320px;
+      overflow-y: auto;
+      padding: 2px;
+    }
+
+    .file-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px;
+      position: relative;
+    }
+
+    .file-card img {
+      max-width: 100%;
+      height: 100px;
+      object-fit: contain;
+      border-radius: 4px;
+      background-color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .file-card-info {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-align: center;
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Format Pill Badge */
+    .format-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      font-size: 10px;
+      font-weight: 500;
+      border-radius: 4px;
+      background-color: #e8f0fe;
+      color: var(--primary-blue);
+      margin-top: 2px;
+    }
+
+    /* Progress Container */
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background-color: var(--border-color);
+      border-radius: 3px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background-color: var(--primary-blue);
+      transition: width 0.2s ease;
+    }
+
+    /* Animation class for Clear */
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: var(--bg-color);
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: var(--bg-color);
+      }
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 150px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Drop Zone -->
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <span class="material-symbols-outlined" style="font-size: 36px; color: var(--primary-blue);">transform</span>
+      <p id="dropZoneText">Click or drag & drop images here (PNG, JPG, WebP, GIF, SVG, BMP, AVIF, ICO, TIFF, HEIC)</p>
+      <input type="file" id="fileInput" class="file-input" accept="image/*,.svg,.ico,.bmp,.avif,.tif,.tiff,.heic,.heif" multiple onchange="handleFileSelect(event)">
+    </div>
+
+    <!-- Controls Panel & File Grid -->
+    <div class="grid">
+      <!-- Options Panel -->
+      <div class="controls-panel" id="controlsPanel">
+        <div id="fileSummary" style="font-size: 13px; color: var(--text-secondary);">
+          No images uploaded yet.
+        </div>
+
+        <div class="control-row">
+          <div class="input-group">
+            <label for="targetFormat">Target Output Format</label>
+            <select id="targetFormat">
+              <option value="png" selected>PNG (.png)</option>
+              <option value="jpeg">JPEG (.jpg)</option>
+              <option value="webp">WebP (.webp)</option>
+              <option value="gif">GIF (.gif)</option>
+              <option value="bmp">BMP (.bmp)</option>
+              <option value="ico">ICO Icon (.ico)</option>
+              <option value="tiff">TIFF (.tif)</option>
+              <option value="svg">Vector SVG (.svg)</option>
+              <option value="pdf">PDF Document (.pdf)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="control-row">
+          <div class="input-group">
+            <label for="imgQuality">Compression Quality (<span id="qualityVal">90</span>%)</label>
+            <input type="range" id="imgQuality" min="1" max="100" value="90" oninput="document.getElementById('qualityVal').textContent = this.value;">
+          </div>
+        </div>
+
+        <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.4;">
+          <strong>Supported Inputs:</strong> PNG, JPEG, WebP, GIF, SVG, BMP, AVIF, ICO, TIFF, HEIC/HEIF.
+        </div>
+      </div>
+
+      <!-- File Thumbnails Grid -->
+      <div class="file-list-container">
+        <label>Uploaded / Converted Files</label>
+        <div id="fileGrid" class="file-grid">
+          <div style="font-size: 13px; color: var(--text-secondary); text-align: center; padding: 24px; grid-column: 1 / -1;">
+            Uploaded image thumbnails will appear here...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar-container" id="progressContainer">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="convertBtn" class="btn-primary" onclick="startBatchConversion()">
+        <span class="material-symbols-outlined" id="convertIcon">sync</span>
+        <span id="convertText">Convert Images</span>
+      </button>
+
+      <button id="downloadZipBtn" class="btn-secondary" onclick="downloadZip()" disabled>
+        <span class="material-symbols-outlined" id="downloadIcon">folder_zip</span>
+        <span id="downloadText">Download ZIP</span>
+      </button>
+
+      <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let uploadedItems = []; // Array of { file, name, size, dataUrl, imgElement, width, height, convertedBlob, convertedUrl, convertedName }
+
+    const dropZone = document.getElementById('dropZone');
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+      }, false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      const files = Array.from(e.dataTransfer.files);
+      if (files.length > 0) addFiles(files);
+    });
+
+    function handleFileSelect(event) {
+      if (event.target.files.length > 0) {
+        addFiles(Array.from(event.target.files));
+      }
+    }
+
+    async function addFiles(files) {
+      hideStatus();
+
+      for (const file of files) {
+        try {
+          let dataUrl = '';
+          const nameLower = file.name.toLowerCase();
+
+          if (nameLower.endsWith('.heic') || nameLower.endsWith('.heif')) {
+            // HEIC decoding via heic2any
+            const conversionResult = await heic2any({ blob: file, toType: 'image/png' });
+            const singleBlob = Array.isArray(conversionResult) ? conversionResult[0] : conversionResult;
+            dataUrl = await readFileAsDataURL(singleBlob);
+          } else if (nameLower.endsWith('.tif') || nameLower.endsWith('.tiff')) {
+            // TIFF decoding via UTIF.js
+            const arrayBuffer = await file.arrayBuffer();
+            const ifds = UTIF.decode(arrayBuffer);
+            if (ifds.length === 0) throw new Error('Invalid TIFF document.');
+            UTIF.decodeImage(arrayBuffer, ifds[0]);
+            const rgba = UTIF.toRGBA8(ifds[0]);
+
+            const canvas = document.createElement('canvas');
+            canvas.width = ifds[0].width;
+            canvas.height = ifds[0].height;
+            const ctx = canvas.getContext('2d');
+            const imgData = ctx.createImageData(canvas.width, canvas.height);
+            imgData.data.set(rgba);
+            ctx.putImageData(imgData, 0, 0);
+            dataUrl = canvas.toDataURL('image/png');
+          } else {
+            // Standard Web formats (PNG, JPG, WebP, GIF, SVG, BMP, AVIF, ICO)
+            dataUrl = await readFileAsDataURL(file);
+          }
+
+          const img = await loadImageElement(dataUrl);
+
+          uploadedItems.push({
+            file,
+            name: file.name,
+            size: file.size,
+            dataUrl,
+            imgElement: img,
+            width: img.width,
+            height: img.height,
+            convertedBlob: null,
+            convertedUrl: null,
+            convertedName: ''
+          });
+        } catch (err) {
+          showStatus(`Error loading image "${file.name}": ${err.message}`, 'error');
+        }
+      }
+
+      document.getElementById('fileSummary').innerHTML = `
+        Loaded <strong>${uploadedItems.length}</strong> image file(s).
+      `;
+      document.getElementById('dropZoneText').textContent = `${uploadedItems.length} file(s) ready for conversion.`;
+
+      renderGrid();
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('fileGrid');
+
+      if (uploadedItems.length === 0) {
+        grid.innerHTML = `<div style="font-size: 13px; color: var(--text-secondary); text-align: center; padding: 24px; grid-column: 1 / -1;">Uploaded image thumbnails will appear here...</div>`;
+        return;
+      }
+
+      grid.innerHTML = uploadedItems.map((item, idx) => `
+        <div class="file-card">
+          <img src="${item.convertedUrl || item.dataUrl}" alt="${escapeHtml(item.name)}">
+          <div class="file-card-info" title="${escapeHtml(item.name)}">
+            <strong>${escapeHtml(item.name)}</strong><br>
+            ${item.width}×${item.height} | ${formatFileSize(item.convertedBlob ? item.convertedBlob.size : item.size)}
+            ${item.convertedName ? `<br><span class="format-badge">${item.convertedName.split('.').pop().toUpperCase()}</span>` : ''}
+          </div>
+          ${item.convertedBlob ? `
+            <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="downloadSingle(${idx})">
+              <span class="material-symbols-outlined" style="font-size: 14px;">download</span> Save
+            </button>
+          ` : `
+            <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px; color: var(--danger-text);" onclick="removeFile(${idx})">
+              Remove
+            </button>
+          `}
+        </div>
+      `).join('');
+    }
+
+    function removeFile(idx) {
+      uploadedItems.splice(idx, 1);
+      document.getElementById('fileSummary').innerHTML = uploadedItems.length > 0 ? `Loaded <strong>${uploadedItems.length}</strong> image file(s).` : 'No images uploaded yet.';
+      renderGrid();
+    }
+
+    async function startBatchConversion() {
+      hideStatus();
+      if (uploadedItems.length === 0) {
+        showStatus('Please upload at least one image file first.', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('convertBtn');
+      const icon = document.getElementById('convertIcon');
+      const text = document.getElementById('convertText');
+      const progressContainer = document.getElementById('progressContainer');
+      const progressFill = document.getElementById('progressFill');
+
+      btn.disabled = true;
+      icon.style.display = 'none';
+      text.innerHTML = '<span class="spinner" style="margin-right: 6px;"></span>Converting...';
+      progressContainer.style.display = 'block';
+      progressFill.style.width = '0%';
+
+      const targetFormat = document.getElementById('targetFormat').value;
+      const quality = parseInt(document.getElementById('imgQuality').value, 10) / 100;
+
+      requestAnimationFrame(async () => {
+        try {
+          for (let i = 0; i < uploadedItems.length; i++) {
+            const item = uploadedItems[i];
+            const baseName = item.name.substring(0, item.name.lastIndexOf('.')) || 'converted_image';
+
+            if (targetFormat === 'pdf') {
+              // Convert Image to PDF via jsPDF
+              const { jsPDF } = window.jspdf;
+              const pdf = new jsPDF({
+                orientation: item.width > item.height ? 'landscape' : 'portrait',
+                unit: 'px',
+                format: [item.width, item.height]
+              });
+              pdf.addImage(item.dataUrl, 'JPEG', 0, 0, item.width, item.height);
+              const pdfArrayBuffer = pdf.output('arraybuffer');
+              item.convertedBlob = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
+              item.convertedName = `${baseName}.pdf`;
+            } else if (targetFormat === 'svg') {
+              // Convert Image to Vector SVG wrapper
+              item.convertedBlob = canvasToSvgBlob(item.imgElement, item.width, item.height, item.dataUrl);
+              item.convertedName = `${baseName}.svg`;
+            } else if (targetFormat === 'ico') {
+              // Convert Image to ICO Icon
+              item.convertedBlob = await canvasToIcoBlob(item.imgElement, item.width, item.height);
+              item.convertedName = `${baseName}.ico`;
+            } else if (targetFormat === 'bmp') {
+              // Convert Image to BMP
+              item.convertedBlob = canvasToBmpBlob(item.imgElement, item.width, item.height);
+              item.convertedName = `${baseName}.bmp`;
+            } else if (targetFormat === 'tiff') {
+              // Convert Image to TIFF via UTIF.js
+              item.convertedBlob = canvasToTiffBlob(item.imgElement, item.width, item.height);
+              item.convertedName = `${baseName}.tif`;
+            } else {
+              // Convert to PNG, JPEG, WebP, GIF
+              const mimeType = targetFormat === 'jpeg' ? 'image/jpeg' : targetFormat === 'webp' ? 'image/webp' : targetFormat === 'gif' ? 'image/gif' : 'image/png';
+              const ext = targetFormat === 'jpeg' ? 'jpg' : targetFormat;
+
+              const canvas = document.createElement('canvas');
+              canvas.width = item.width;
+              canvas.height = item.height;
+              const ctx = canvas.getContext('2d');
+
+              if (targetFormat === 'jpeg') {
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, item.width, item.height);
+              }
+              ctx.drawImage(item.imgElement, 0, 0);
+
+              const blob = await new Promise(resolve => canvas.toBlob(resolve, mimeType, quality));
+              item.convertedBlob = blob || new Blob([], { type: mimeType });
+              item.convertedName = `${baseName}.${ext}`;
+            }
+
+            if (item.convertedUrl) URL.revokeObjectURL(item.convertedUrl);
+            item.convertedUrl = URL.createObjectURL(item.convertedBlob);
+
+            const pct = Math.round(((i + 1) / uploadedItems.length) * 100);
+            progressFill.style.width = `${pct}%`;
+          }
+
+          renderGrid();
+          showStatus(`Successfully converted ${uploadedItems.length} image(s) to ${targetFormat.toUpperCase()}.`, 'success');
+          document.getElementById('downloadZipBtn').disabled = false;
+        } catch (err) {
+          showStatus('Error during image conversion: ' + err.message, 'error');
+        } finally {
+          btn.disabled = false;
+          icon.style.display = 'block';
+          text.innerHTML = 'Convert Images';
+          setTimeout(() => { progressContainer.style.display = 'none'; }, 500);
+        }
+      });
+    }
+
+    /* Helper Conversion Functions */
+    function canvasToBmpBlob(imgElement, width, height) {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, width, height);
+      ctx.drawImage(imgElement, 0, 0);
+
+      const imgData = ctx.getImageData(0, 0, width, height);
+      const rowSize = Math.floor((24 * width + 31) / 32) * 4;
+      const pixelArraySize = rowSize * height;
+      const fileLength = 54 + pixelArraySize;
+      const buffer = new ArrayBuffer(fileLength);
+      const view = new DataView(buffer);
+
+      view.setUint16(0, 0x4d42, true); // BM
+      view.setUint32(2, fileLength, true);
+      view.setUint32(10, 54, true);
+      view.setUint32(14, 40, true);
+      view.setInt32(18, width, true);
+      view.setInt32(22, -height, true); // top-down
+      view.setUint16(26, 1, true);
+      view.setUint16(28, 24, true);
+      view.setUint32(34, pixelArraySize, true);
+
+      let pos = 54;
+      const data = imgData.data;
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const i = (y * width + x) * 4;
+          view.setUint8(pos++, data[i + 2]); // B
+          view.setUint8(pos++, data[i + 1]); // G
+          view.setUint8(pos++, data[i]);     // R
+        }
+        while (pos % 4 !== 0) pos++;
+      }
+      return new Blob([buffer], { type: 'image/bmp' });
+    }
+
+    function canvasToSvgBlob(imgElement, width, height, dataUrl) {
+      const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <image width="${width}" height="${height}" xlink:href="${dataUrl}"/>
+</svg>`;
+      return new Blob([svgContent], { type: 'image/svg+xml' });
+    }
+
+    async function canvasToIcoBlob(imgElement, width, height) {
+      const icoCanvas = document.createElement('canvas');
+      const size = Math.min(256, Math.max(width, height));
+      icoCanvas.width = size;
+      icoCanvas.height = size;
+      const ctx = icoCanvas.getContext('2d');
+      ctx.drawImage(imgElement, 0, 0, size, size);
+
+      const pngBlob = await new Promise(res => icoCanvas.toBlob(res, 'image/png'));
+      const pngBuffer = await pngBlob.arrayBuffer();
+      const pngBytes = new Uint8Array(pngBuffer);
+
+      const headerSize = 6 + 16;
+      const icoBuffer = new ArrayBuffer(headerSize + pngBytes.length);
+      const view = new DataView(icoBuffer);
+
+      view.setUint16(0, 0, true);
+      view.setUint16(2, 1, true); // ICO
+      view.setUint16(4, 1, true);
+
+      view.setUint8(6, size >= 256 ? 0 : size);
+      view.setUint8(7, size >= 256 ? 0 : size);
+      view.setUint8(8, 0);
+      view.setUint8(9, 0);
+      view.setUint16(10, 1, true);
+      view.setUint16(12, 32, true);
+      view.setUint32(14, pngBytes.length, true);
+      view.setUint32(18, 22, true);
+
+      const uint8View = new Uint8Array(icoBuffer);
+      uint8View.set(pngBytes, 22);
+
+      return new Blob([icoBuffer], { type: 'image/x-icon' });
+    }
+
+    function canvasToTiffBlob(imgElement, width, height) {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(imgElement, 0, 0);
+      const imgData = ctx.getImageData(0, 0, width, height);
+
+      const tiffBuffer = UTIF.encodeImage(imgData.data, width, height);
+      return new Blob([tiffBuffer], { type: 'image/tiff' });
+    }
+
+    function downloadSingle(idx) {
+      const item = uploadedItems[idx];
+      if (!item || !item.convertedBlob) return;
+
+      const a = document.createElement('a');
+      a.href = item.convertedUrl;
+      a.download = item.convertedName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    async function downloadZip() {
+      const convertedFiles = uploadedItems.filter(i => i.convertedBlob);
+      if (convertedFiles.length === 0) return;
+
+      const zip = new JSZip();
+      convertedFiles.forEach(item => {
+        zip.file(item.convertedName, item.convertedBlob);
+      });
+
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'converted_images.zip';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      triggerSuccessButton('downloadZipBtn', 'downloadIcon', 'downloadText', 'Saved ZIP!');
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function clearAll() {
+      uploadedItems.forEach(i => {
+        if (i.convertedUrl) URL.revokeObjectURL(i.convertedUrl);
+      });
+      uploadedItems = [];
+
+      document.getElementById('fileInput').value = '';
+      document.getElementById('fileSummary').innerHTML = 'No images uploaded yet.';
+      document.getElementById('dropZoneText').textContent = 'Click or drag & drop images here (PNG, JPG, WebP, GIF, SVG, BMP, AVIF, ICO, TIFF, HEIC)';
+      document.getElementById('downloadZipBtn').disabled = true;
+      hideStatus();
+      renderGrid();
+
+      dropZone.classList.remove('flash-clear');
+      document.getElementById('controlsPanel').classList.remove('flash-clear');
+
+      void dropZone.offsetWidth;
+
+      dropZone.classList.add('flash-clear');
+      document.getElementById('controlsPanel').classList.add('flash-clear');
+    }
+
+    function readFileAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = err => reject(err);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function loadImageElement(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = err => reject(err);
+        img.src = src;
+      });
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+    }
+
+    function hideStatus() {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = 'status-box';
+      statusBox.textContent = '';
+    }
+
+    function formatFileSize(bytes) {
+      if (!bytes) return '0 B';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+  </script>
+</body>
+
+</html>

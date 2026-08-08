@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Coin Toss & Decision Flipper</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Face Legend Bar */
+    .legend-bar {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .badge-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+
+    /* 3D Coin Stage */
+    .coin-stage {
+      perspective: 800px;
+      height: 230px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f1f3f4;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .coin {
+      width: 140px;
+      height: 140px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 2s cubic-bezier(0.15, 0.85, 0.35, 1.15);
+      cursor: pointer;
+    }
+
+    .coin-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), inset 0 0 0 5px rgba(255, 255, 255, 0.4);
+      user-select: none;
+      box-sizing: border-box;
+    }
+
+    .coin-heads {
+      background: linear-gradient(135deg, #3ddc84 0%, #1da456 100%);
+      color: white;
+      transform: rotateY(0deg);
+    }
+
+    .coin-tails {
+      background: linear-gradient(135deg, #ffffff 0%, #f1f3f4 100%);
+      color: #202124;
+      border: 2px solid var(--border-color);
+      transform: rotateY(180deg);
+    }
+
+    .face-label {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      margin-top: 6px;
+    }
+
+    .coin-heads .face-label {
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    }
+
+    .coin-tails .face-label {
+      color: #535353;
+    }
+
+    /* Stats Panel */
+    .stats-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background-color: var(--bg-color);
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .stat-card {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .stat-val {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .stat-lbl {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    /* History List */
+    .history-box {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      max-height: 110px;
+      overflow-y: auto;
+      padding: 8px;
+      font-size: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .history-tag {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: 500;
+    }
+
+    .tag-heads {
+      background-color: #e6f4ea;
+      color: #137333;
+    }
+
+    .tag-tails {
+      background-color: #f1f3f4;
+      color: #202124;
+      border: 1px solid var(--border-color);
+    }
+
+    /* Result Banner */
+    .result-banner {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 18px;
+      font-weight: 500;
+      text-align: center;
+      padding: 10px;
+      border-radius: 6px;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      transition: all 0.3s ease;
+    }
+
+    /* Animation class for Clear */
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: var(--bg-color);
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: var(--bg-color);
+      }
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 150px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Visual Face Legend -->
+    <div class="legend-bar">
+      <div class="legend-item">
+        <div class="badge-icon" style="background-color: #3DDC84;">
+          <svg viewBox="0 0 100 70" width="18" height="14">
+            <path d="M 18 55 A 32 32 0 0 1 82 55 Z" fill="#FFFFFF"/>
+            <line x1="33" y1="26" x2="25" y2="12" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round"/>
+            <line x1="67" y1="26" x2="75" y2="12" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round"/>
+            <circle cx="36" cy="40" r="4" fill="#3DDC84"/>
+            <circle cx="64" cy="40" r="4" fill="#3DDC84"/>
+          </svg>
+        </div>
+        <strong>HEADS</strong> = Android Bugdroid
+      </div>
+
+      <div style="color: var(--border-color);">|</div>
+
+      <div class="legend-item">
+        <div class="badge-icon" style="background-color: #ffffff; border: 1px solid var(--border-color);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="12" viewBox="0 0 64 43">
+            <path shape-rendering="crispEdges" fill-rule="evenodd" fill="#535353" d="M32,0h16v2h2v9h-10v2h6v2h-8v4h4v4h-2v-2h-2v7h-2v3h-2v2h-2v8h2v2h-4v-6h-2v-2h-2v2h-2v2h-2v2h2v2h-4v-8h-2v-2h-2v-2h-2v-2h-2v-2h-2v-12h2v4h2v2h2v2h4v-2h2v-2h3v-2h3v-2h2v-13h2zM34,3h2v2h-2zM0,35h16v1h-16zM36,35h28v1h-28zM55,38h3v1h-3zM6,39h4v1h-4zM41,41h1v1h-1zM0,42h4v1h-4zM14,42h2v1h-2zM48,42h4v1h-4z"/>
+          </svg>
+        </div>
+        <strong>TAILS</strong> = Chrome Dino
+      </div>
+    </div>
+
+    <!-- Interactive Grid -->
+    <div class="grid">
+      <!-- 3D Coin Stage -->
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div class="coin-stage" onclick="flipSingleCoin()">
+          <div class="coin" id="coinEl">
+            <!-- Heads (Android Bugdroid) -->
+            <div class="coin-face coin-heads">
+              <svg viewBox="0 0 100 70" width="68" height="48">
+                <path d="M 18 55 A 32 32 0 0 1 82 55 Z" fill="#FFFFFF"/>
+                <line x1="33" y1="26" x2="25" y2="12" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round"/>
+                <line x1="67" y1="26" x2="75" y2="12" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round"/>
+                <circle cx="36" cy="40" r="4" fill="#3DDC84"/>
+                <circle cx="64" cy="40" r="4" fill="#3DDC84"/>
+              </svg>
+              <div class="face-label">HEADS</div>
+            </div>
+
+            <!-- Tails (Chrome Dino - White Background) -->
+            <div class="coin-face coin-tails">
+              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="43" viewBox="0 0 64 43">
+                <path shape-rendering="crispEdges" fill-rule="evenodd" fill="#535353" d="M32,0h16v2h2v9h-10v2h6v2h-8v4h4v4h-2v-2h-2v7h-2v3h-2v2h-2v8h2v2h-4v-6h-2v-2h-2v2h-2v2h-2v2h2v2h-4v-8h-2v-2h-2v-2h-2v-2h-2v-2h-2v-12h2v4h2v2h2v2h4v-2h2v-2h3v-2h3v-2h2v-13h2zM34,3h2v2h-2zM0,35h16v1h-16zM36,35h28v1h-28zM55,38h3v1h-3zM6,39h4v1h-4zM41,41h1v1h-1zM0,42h4v1h-4zM14,42h2v1h-2zM48,42h4v1h-4z"/>
+              </svg>
+              <div class="face-label">TAILS</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="result-banner" id="resultBanner">
+          Click coin or Flip button to toss!
+        </div>
+      </div>
+
+      <!-- Stats & History Panel -->
+      <div class="stats-panel" id="statsPanel">
+        <label style="font-weight: 500;">Flip Statistics</label>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-val" id="statTotal">0</div>
+            <div class="stat-lbl">Total Flips</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" id="statHeads" style="color: #137333;">0 (0%)</div>
+            <div class="stat-lbl">Heads (Android)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" id="statTails" style="color: var(--text-main);">0 (0%)</div>
+            <div class="stat-lbl">Tails (Dino)</div>
+          </div>
+        </div>
+
+        <label style="font-weight: 500; margin-top: 4px;">Recent Flips History</label>
+        <div class="history-box" id="historyBox">
+          <span style="color: var(--text-secondary);">Flip history will appear here...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="flipBtn" class="btn-primary" onclick="flipSingleCoin()">
+        <span class="material-symbols-outlined">casino</span>
+        Flip Coin
+      </button>
+
+      <button class="btn-secondary" onclick="flipMultiple(5)">
+        Flip 5×
+      </button>
+
+      <button class="btn-secondary" onclick="flipMultiple(10)">
+        Flip 10×
+      </button>
+
+      <button class="btn-secondary" onclick="resetStats()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">restart_alt</span>
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let totalFlips = 0;
+    let headsCount = 0;
+    let tailsCount = 0;
+    let historyList = [];
+    let currentDegrees = 0;
+    let isFlipping = false;
+
+    function playCoinSound() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(987.77, audioCtx.currentTime); // B5 note
+        osc.frequency.exponentialRampToValueAtTime(1318.51, audioCtx.currentTime + 0.08); // E6 note
+
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.25);
+      } catch (e) {}
+    }
+
+    function flipSingleCoin() {
+      if (isFlipping) return;
+      isFlipping = true;
+      playCoinSound();
+
+      const coin = document.getElementById('coinEl');
+      const btn = document.getElementById('flipBtn');
+      btn.disabled = true;
+
+      // 50/50 Random outcome (0 = Heads, 1 = Tails)
+      const outcome = Math.floor(Math.random() * 2);
+
+      // Full 5 rotations (1800deg) + outcome face (0 or 180deg)
+      const extraRotations = 1800;
+      const targetFaceDeg = outcome === 0 ? 0 : 180;
+
+      // Calculate smooth cumulative rotation
+      const baseRotation = Math.ceil(currentDegrees / 360) * 360;
+      currentDegrees = baseRotation + extraRotations + targetFaceDeg;
+
+      coin.style.transform = `rotateY(${currentDegrees}deg)`;
+
+      document.getElementById('resultBanner').textContent = 'Flipping...';
+
+      setTimeout(() => {
+        isFlipping = false;
+        btn.disabled = false;
+        recordOutcome(outcome);
+      }, 2000);
+    }
+
+    function flipMultiple(count) {
+      if (isFlipping) return;
+      isFlipping = true;
+      playCoinSound();
+
+      const btn = document.getElementById('flipBtn');
+      btn.disabled = true;
+
+      let flipsDone = 0;
+      const interval = setInterval(() => {
+        const outcome = Math.floor(Math.random() * 2);
+        recordOutcome(outcome, true);
+
+        // Visual nudge
+        currentDegrees += outcome === 0 ? 360 : 540;
+        document.getElementById('coinEl').style.transform = `rotateY(${currentDegrees}deg)`;
+
+        flipsDone++;
+        if (flipsDone >= count) {
+          clearInterval(interval);
+          isFlipping = false;
+          btn.disabled = false;
+          updateStatsDisplay();
+        }
+      }, 150);
+    }
+
+    function recordOutcome(outcome, batch = false) {
+      totalFlips++;
+      const isHeads = outcome === 0;
+
+      if (isHeads) {
+        headsCount++;
+        historyList.unshift('HEADS');
+      } else {
+        tailsCount++;
+        historyList.unshift('TAILS');
+      }
+
+      if (historyList.length > 30) historyList.pop();
+
+      if (!batch) updateStatsDisplay();
+
+      const banner = document.getElementById('resultBanner');
+      if (isHeads) {
+        banner.textContent = '🎉 Result: HEADS (Android Bugdroid)!';
+        banner.style.backgroundColor = '#e6f4ea';
+        banner.style.color = '#137333';
+        banner.style.borderColor = '#c3e6cb';
+      } else {
+        banner.textContent = '🎉 Result: TAILS (Chrome Dino)!';
+        banner.style.backgroundColor = '#ffffff';
+        banner.style.color = '#202124';
+        banner.style.borderColor = 'var(--border-color)';
+      }
+    }
+
+    function updateStatsDisplay() {
+      document.getElementById('statTotal').textContent = totalFlips;
+
+      const headsPct = totalFlips > 0 ? Math.round((headsCount / totalFlips) * 100) : 0;
+      const tailsPct = totalFlips > 0 ? Math.round((tailsCount / totalFlips) * 100) : 0;
+
+      document.getElementById('statHeads').textContent = `${headsCount} (${headsPct}%)`;
+      document.getElementById('statTails').textContent = `${tailsCount} (${tailsPct}%)`;
+
+      const historyBox = document.getElementById('historyBox');
+      if (historyList.length === 0) {
+        historyBox.innerHTML = `<span style="color: var(--text-secondary);">Flip history will appear here...</span>`;
+      } else {
+        historyBox.innerHTML = historyList.map(item => `
+          <span class="history-tag ${item === 'HEADS' ? 'tag-heads' : 'tag-tails'}">
+            ${item === 'HEADS' ? '🤖 Heads' : '🦖 Tails'}
+          </span>
+        `).join('');
+      }
+    }
+
+    function resetStats() {
+      totalFlips = 0;
+      headsCount = 0;
+      tailsCount = 0;
+      historyList = [];
+      currentDegrees = 0;
+
+      document.getElementById('coinEl').style.transform = 'rotateY(0deg)';
+      document.getElementById('resultBanner').textContent = 'Click coin or Flip button to toss!';
+      document.getElementById('resultBanner').style.backgroundColor = 'var(--bg-color)';
+      document.getElementById('resultBanner').style.color = 'var(--text-main)';
+      document.getElementById('resultBanner').style.borderColor = 'var(--border-color)';
+
+      updateStatsDisplay();
+
+      const panel = document.getElementById('statsPanel');
+      panel.classList.remove('flash-clear');
+      void panel.offsetWidth;
+      panel.classList.add('flash-clear');
+    }
+  </script>
+</body>
+
+</html>

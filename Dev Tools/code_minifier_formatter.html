@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Universal Code Minifier & Formatter</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    textarea,
+    select {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      outline: none;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 240px;
+      line-height: 1.5;
+    }
+
+    textarea.dragover {
+      border-color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    textarea:focus,
+    select:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+      background-color: #ffffff;
+    }
+
+    /* Controls Panel */
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background-color: var(--bg-color);
+      padding: 12px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Savings Badge */
+    .savings-badge {
+      display: inline-block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    /* Animation class for Clear */
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: var(--bg-color);
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: var(--bg-color);
+      }
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 150px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Controls Panel -->
+    <div class="controls-panel" id="controlsPanel">
+      <div class="control-row">
+        <div class="input-group" style="max-width: 220px;">
+          <label for="languageSelect">Code Language</label>
+          <select id="languageSelect" onchange="processCode()">
+            <option value="json" selected>JSON Data</option>
+            <option value="css">CSS Stylesheets</option>
+            <option value="html">HTML Markup</option>
+            <option value="javascript">JavaScript (JS)</option>
+            <option value="sql">SQL Query</option>
+            <option value="xml">XML / SVG Vector</option>
+          </select>
+        </div>
+
+        <div class="input-group" style="max-width: 200px;">
+          <label for="indentSelect">Indent Spacing</label>
+          <select id="indentSelect" onchange="processCode()">
+            <option value="2" selected>2 Spaces (Standard)</option>
+            <option value="4">4 Spaces</option>
+            <option value="tab">1 Tab Character</option>
+          </select>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 18px; align-items: center;">
+          <label class="checkbox-label">
+            <input type="checkbox" id="stripComments" checked onchange="processCode()">
+            Strip Comments
+          </label>
+
+          <label class="checkbox-label">
+            <input type="checkbox" id="sortJsonKeys" checked onchange="processCode()">
+            Sort JSON Keys
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dual Code Editor Grid -->
+    <div class="grid">
+      <!-- Input Code -->
+      <div class="input-group">
+        <label for="codeInput">
+          Source Code Input (<span id="sourceSize">0 B</span>)
+          <div style="display: flex; gap: 6px;">
+            <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="document.getElementById('fileUploadInput').click()">Upload File</button>
+            <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="loadSampleCode()">Sample</button>
+          </div>
+        </label>
+        <input type="file" id="fileUploadInput" style="display: none;" onchange="handleFileUpload(event)">
+        <textarea id="codeInput" placeholder="Paste or drop your code file here..." oninput="processCode()"></textarea>
+      </div>
+
+      <!-- Output Code -->
+      <div class="input-group">
+        <label for="codeOutput">
+          Processed Result (<span id="resultSize">0 B</span>)
+          <span id="savingsBadge" class="savings-badge" style="display: none;"></span>
+        </label>
+        <textarea id="codeOutput" readonly placeholder="Minified or formatted result will appear here..."></textarea>
+      </div>
+    </div>
+
+    <!-- Error Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="minifyBtn" class="btn-primary" onclick="triggerMinify()">
+        <span class="material-symbols-outlined">compress</span>
+        Minify Code
+      </button>
+
+      <button id="formatBtn" class="btn-secondary" onclick="triggerFormat()">
+        <span class="material-symbols-outlined">code</span>
+        Format / Beautify
+      </button>
+
+      <button id="copyBtn" class="btn-secondary" onclick="copyOutputCode()">
+        <span class="material-symbols-outlined" id="copyIcon">content_copy</span>
+        <span id="copyText">Copy Result</span>
+      </button>
+
+      <button id="downloadBtn" class="btn-secondary" onclick="downloadResultFile()">
+        <span class="material-symbols-outlined" id="downloadIcon">download</span>
+        <span id="downloadText">Download File</span>
+      </button>
+
+      <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let mode = 'minify'; // 'minify' or 'format'
+    let renderTimeout = null;
+
+    const samples = {
+      json: `{\n  "name": "Useful Tools",\n  "version": "1.0.0",\n  "security": "100% Client-Side",\n  "features": ["PDF Tools", "Image Tools", "Dev Tools", "Video Tools"]\n}`,
+      css: `/* Global Reset */\nbody {\n  margin: 0;\n  padding: 16px;\n  background-color: #ffffff;\n  color: #202124;\n}\n.container {\n  display: flex;\n  flex-direction: column;\n}`,
+      html: `<!DOCTYPE html>\n<html>\n  <head>\n    <!-- Title -->\n    <title>Useful Tools Suite</title>\n  </head>\n  <body>\n    <div class="container">\n      <h1>Client-Side Tools</h1>\n    </div>\n  </body>\n</html>`,
+      javascript: `// Calculate total size\nfunction calculateSavings(orig, min) {\n  /* Multi-line comment */\n  const diff = orig - min;\n  const pct = (diff / orig) * 100;\n  return Math.round(pct);\n}`,
+      sql: `SELECT u.id, u.name, o.order_date, o.total_amount\nFROM users u\nLEFT JOIN orders o ON u.id = o.user_id\nWHERE o.status = 'COMPLETED'\nORDER BY o.order_date DESC;`,
+      xml: `<?xml version="1.0" encoding="UTF-8"?>\n<note>\n  <to>Developer</to>\n  <from>Antigravity</from>\n  <heading>Notice</heading>\n  <body>100% Client-side local execution</body>\n</note>`
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('codeInput').value = samples.json;
+      setupDragAndDrop();
+      processCode();
+    });
+
+    function setupDragAndDrop() {
+      const textarea = document.getElementById('codeInput');
+
+      ['dragenter', 'dragover'].forEach(eventName => {
+        textarea.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          textarea.classList.add('dragover');
+        }, false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        textarea.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          textarea.classList.remove('dragover');
+        }, false);
+      });
+
+      textarea.addEventListener('drop', (e) => {
+        const files = Array.from(e.dataTransfer.files);
+        if (files.length > 0) handleFileRead(files[0]);
+      });
+    }
+
+    function handleFileUpload(event) {
+      if (event.target.files.length > 0) {
+        handleFileRead(event.target.files[0]);
+      }
+    }
+
+    function handleFileRead(file) {
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (['json', 'css', 'html', 'js', 'sql', 'xml', 'svg'].includes(ext)) {
+        document.getElementById('languageSelect').value = ext === 'svg' ? 'xml' : (ext === 'js' ? 'javascript' : ext);
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('codeInput').value = e.target.result;
+        processCode();
+      };
+      reader.readAsText(file);
+    }
+
+    function loadSampleCode() {
+      const lang = document.getElementById('languageSelect').value;
+      document.getElementById('codeInput').value = samples[lang] || samples.json;
+      processCode();
+    }
+
+    function triggerMinify() {
+      mode = 'minify';
+      processCode();
+    }
+
+    function triggerFormat() {
+      mode = 'format';
+      processCode();
+    }
+
+    function processCode() {
+      if (renderTimeout) cancelAnimationFrame(renderTimeout);
+
+      renderTimeout = requestAnimationFrame(() => {
+        hideStatus();
+        const input = document.getElementById('codeInput').value;
+        document.getElementById('sourceSize').textContent = formatFileSize(input.length);
+
+        if (!input.trim()) {
+          document.getElementById('codeOutput').value = '';
+          document.getElementById('resultSize').textContent = '0 B';
+          document.getElementById('savingsBadge').style.display = 'none';
+          return;
+        }
+
+        const lang = document.getElementById('languageSelect').value;
+        const indentVal = document.getElementById('indentSelect').value;
+        const indent = indentVal === 'tab' ? '\t' : ' '.repeat(parseInt(indentVal, 10));
+        const stripC = document.getElementById('stripComments').checked;
+        const sortK = document.getElementById('sortJsonKeys').checked;
+
+        let result = '';
+
+        try {
+          if (lang === 'json') {
+            let parsed = JSON.parse(input);
+            if (sortK && typeof parsed === 'object' && parsed !== null) {
+              parsed = sortObjectKeys(parsed);
+            }
+            result = mode === 'minify' ? JSON.stringify(parsed) : JSON.stringify(parsed, null, indent);
+          } else if (lang === 'css') {
+            result = mode === 'minify' ? minifyCss(input, stripC) : formatCss(input);
+          } else if (lang === 'html') {
+            result = mode === 'minify' ? minifyHtml(input, stripC) : formatHtml(input, indent);
+          } else if (lang === 'javascript') {
+            result = mode === 'minify' ? minifyJs(input, stripC) : formatJs(input, indent);
+          } else if (lang === 'sql') {
+            result = mode === 'minify' ? minifySql(input, stripC) : formatSql(input);
+          } else if (lang === 'xml') {
+            result = mode === 'minify' ? minifyXml(input, stripC) : formatXml(input, indent);
+          }
+
+          document.getElementById('codeOutput').value = result;
+          document.getElementById('resultSize').textContent = formatFileSize(result.length);
+
+          const savedBytes = input.length - result.length;
+          const pctSaved = Math.round((savedBytes / input.length) * 100);
+
+          const badge = document.getElementById('savingsBadge');
+          if (mode === 'minify' && savedBytes > 0) {
+            badge.textContent = `🎉 ${pctSaved}% Smaller (Saved ${formatFileSize(savedBytes)})`;
+            badge.style.display = 'inline-block';
+          } else {
+            badge.style.display = 'none';
+          }
+        } catch (err) {
+          showStatus(`Syntax Error in ${lang.toUpperCase()}: ${err.message}`, 'error');
+        }
+      });
+    }
+
+    /* JSON Key Sorter */
+    function sortObjectKeys(obj) {
+      if (Array.isArray(obj)) {
+        return obj.map(sortObjectKeys);
+      } else if (typeof obj === 'object' && obj !== null) {
+        return Object.keys(obj).sort().reduce((acc, key) => {
+          acc[key] = sortObjectKeys(obj[key]);
+          return acc;
+        }, {});
+      }
+      return obj;
+    }
+
+    /* CSS Minifier & Formatter */
+    function minifyCss(code, stripComments) {
+      let clean = code;
+      if (stripComments) clean = clean.replace(/\/\*[\s\S]*?\*\//g, '');
+      return clean.replace(/\s+/g, ' ')
+        .replace(/\s*([{}:;,])\s*/g, '$1')
+        .replace(/;\}/g, '}')
+        .trim();
+    }
+
+    function formatCss(code) {
+      return code.replace(/\s*\{\s*/g, ' {\n  ')
+        .replace(/;\s*/g, ';\n  ')
+        .replace(/\s*\}\s*/g, '\n}\n\n')
+        .replace(/\n  \}/g, '\n}')
+        .trim();
+    }
+
+    /* HTML Minifier & Formatter */
+    function minifyHtml(code, stripComments) {
+      let clean = code;
+      if (stripComments) clean = clean.replace(/<!--[\s\S]*?-->/g, '');
+      return clean.replace(/>\s+</g, '><')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function formatHtml(code, indent) {
+      let pad = 0;
+      return code.replace(/>\s*</g, '><')
+        .replace(/(<[^\/>]+>|<[^\/>]+$)/g, '$1\n')
+        .split('\n')
+        .map(line => {
+          let indentLevel = 0;
+          if (line.match(/<\/.+>/)) pad -= 1;
+          indentLevel = pad;
+          if (line.match(/<[^!#\/][^>]*[^\/]>$/)) pad += 1;
+          return indent.repeat(Math.max(0, indentLevel)) + line;
+        })
+        .join('\n')
+        .trim();
+    }
+
+    /* JavaScript Minifier & Formatter */
+    function minifyJs(code, stripComments) {
+      let clean = code;
+      if (stripComments) {
+        clean = clean.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*/g, '');
+      }
+      return clean.replace(/^\s*[\r\n]/gm, '')
+        .replace(/\s+/g, ' ')
+        .replace(/\s*([=+\-*\/%{}();,:<>&|!])\s*/g, '$1')
+        .trim();
+    }
+
+    function formatJs(code, indent) {
+      return code.replace(/;\s*/g, ';\n')
+        .replace(/\{\s*/g, ' {\n')
+        .replace(/\}\s*/g, '\n}\n')
+        .trim();
+    }
+
+    /* SQL Minifier & Formatter */
+    function minifySql(code, stripComments) {
+      let clean = code;
+      if (stripComments) clean = clean.replace(/--.*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
+      return clean.replace(/\s+/g, ' ').trim();
+    }
+
+    function formatSql(code) {
+      const keywords = ['SELECT', 'FROM', 'WHERE', 'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', 'JOIN', 'GROUP BY', 'ORDER BY', 'HAVING', 'LIMIT', 'INSERT INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE FROM'];
+      let formatted = code.replace(/\s+/g, ' ');
+
+      keywords.forEach(kw => {
+        const regex = new RegExp(`\\b${kw}\\b`, 'gi');
+        formatted = formatted.replace(regex, `\n${kw}`);
+      });
+
+      return formatted.trim();
+    }
+
+    /* XML / SVG Minifier & Formatter */
+    function minifyXml(code, stripComments) {
+      let clean = code;
+      if (stripComments) clean = clean.replace(/<!--[\s\S]*?-->/g, '');
+      return clean.replace(/>\s+</g, '><').replace(/\s+/g, ' ').trim();
+    }
+
+    function formatXml(code, indent) {
+      return formatHtml(code, indent);
+    }
+
+    function copyOutputCode() {
+      const output = document.getElementById('codeOutput');
+      if (!output.value) return;
+
+      output.select();
+      document.execCommand('copy');
+      triggerSuccessButton('copyBtn', 'copyIcon', 'copyText', 'Copied Result!');
+    }
+
+    function downloadResultFile() {
+      const code = document.getElementById('codeOutput').value;
+      if (!code) return;
+
+      const lang = document.getElementById('languageSelect').value;
+      const extMap = { json: 'json', css: 'css', html: 'html', javascript: 'js', sql: 'sql', xml: 'xml' };
+      const ext = extMap[lang] || 'txt';
+
+      const blob = new Blob([code], { type: 'text/plain;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `minified_code.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      triggerSuccessButton('downloadBtn', 'downloadIcon', 'downloadText', 'Saved File!');
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function clearAll() {
+      document.getElementById('codeInput').value = '';
+      document.getElementById('codeOutput').value = '';
+      document.getElementById('sourceSize').textContent = '0 B';
+      document.getElementById('resultSize').textContent = '0 B';
+      document.getElementById('savingsBadge').style.display = 'none';
+
+      hideStatus();
+
+      document.getElementById('codeInput').classList.remove('flash-clear');
+      document.getElementById('codeOutput').classList.remove('flash-clear');
+
+      void document.getElementById('codeInput').offsetWidth;
+
+      document.getElementById('codeInput').classList.add('flash-clear');
+      document.getElementById('codeOutput').classList.add('flash-clear');
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+    }
+
+    function hideStatus() {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = 'status-box';
+      statusBox.textContent = '';
+    }
+
+    function formatFileSize(bytes) {
+      if (!bytes) return '0 B';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 600px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-main);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    textarea,
+    .output-box {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      outline: none;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+      line-height: 1.5;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 200px;
+    }
+
+    .output-box {
+      min-height: 250px;
+      background-color: #ffffff;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      overflow-y: auto;
+    }
+
+    textarea:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+      background-color: #ffffff;
+    }
+
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: var(--bg-color);
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: var(--bg-color);
+      }
+    }
+
+    /* Diff highlighting styles */
+    .diff-add {
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      text-decoration: none;
+      border-radius: 2px;
+    }
+
+    .diff-remove {
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      text-decoration: line-through;
+      border-radius: 2px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 140px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="grid">
+      <div class="input-group">
+        <label for="originalInput">Original Text</label>
+        <textarea id="originalInput" placeholder="Paste your original text or code here..."></textarea>
+      </div>
+      <div class="input-group">
+        <label for="modifiedInput">Modified Text</label>
+        <textarea id="modifiedInput" placeholder="Paste the updated text or code here..."></textarea>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button id="compareBtn" class="btn-primary" onclick="compareText()">
+        <span class="material-symbols-outlined" id="compareIcon">difference</span>
+        <span id="compareText">Compare</span>
+      </button>
+
+      <button id="swapBtn" class="btn-secondary" onclick="swapText()">
+        <span class="material-symbols-outlined">swap_horiz</span>
+        Swap
+      </button>
+
+      <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+
+    <div class="input-group" style="margin-top: 8px;">
+      <label>Diff Result</label>
+      <div id="diffOutput" class="output-box">Result will appear here...</div>
+    </div>
+  </div>
+
+  <script>
+    // We store our Web Worker logic as a string so it can be built on the fly
+    const workerScript = `
+      // Import the library directly into the background worker
+      importScripts('https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.1.0/diff.min.js');
+      
+      self.onmessage = function(e) {
+        const { original, modified } = e.data;
+        // Run the heavy math
+        const diffResult = Diff.diffWordsWithSpace(original, modified);
+        // Send the result back to the main UI thread
+        self.postMessage(diffResult);
+      };
+    `;
+
+    function compareText() {
+      const original = document.getElementById('originalInput').value;
+      const modified = document.getElementById('modifiedInput').value;
+      const output = document.getElementById('diffOutput');
+      const btn = document.getElementById('compareBtn');
+      const icon = document.getElementById('compareIcon');
+      const text = document.getElementById('compareText');
+
+      if (!original && !modified) {
+        output.innerHTML = '<span style="color: var(--text-secondary);">Please enter text in both fields to compare.</span>';
+        return;
+      }
+
+      // 1. Update UI to show loading state
+      btn.disabled = true;
+      icon.style.display = 'none';
+      text.innerHTML = '<span class="spinner" style="margin-right: 6px;"></span>Comparing...';
+      output.innerHTML = '<span style="color: var(--text-secondary);">Analyzing large dataset in background...</span>';
+
+      // 2. Create the Inline Web Worker
+      const blob = new Blob([workerScript], { type: 'application/javascript' });
+      const worker = new Worker(URL.createObjectURL(blob));
+
+      // 3. Listen for the worker to finish
+      worker.onmessage = function (e) {
+        const diff = e.data;
+        const fragment = document.createDocumentFragment();
+
+        diff.forEach((part) => {
+          const span = document.createElement('span');
+          span.textContent = part.value; // Safe against XSS
+
+          if (part.added) {
+            span.classList.add('diff-add');
+          } else if (part.removed) {
+            span.classList.add('diff-remove');
+          }
+
+          fragment.appendChild(span);
+        });
+
+        // Update DOM
+        output.innerHTML = '';
+        output.appendChild(fragment);
+
+        // Reset UI
+        btn.disabled = false;
+        icon.style.display = 'block';
+        text.innerHTML = 'Compare';
+
+        // Kill the worker to free up memory
+        worker.terminate();
+      };
+
+      // 4. Send the text to the worker to start the job
+      worker.postMessage({ original, modified });
+    }
+
+    function swapText() {
+      const originalInput = document.getElementById('originalInput');
+      const modifiedInput = document.getElementById('modifiedInput');
+
+      const temp = originalInput.value;
+      originalInput.value = modifiedInput.value;
+      modifiedInput.value = temp;
+
+      if (originalInput.value || modifiedInput.value) {
+        compareText();
+      }
+    }
+
+    function clearAll() {
+      const original = document.getElementById('originalInput');
+      const modified = document.getElementById('modifiedInput');
+      const output = document.getElementById('diffOutput');
+
+      original.value = '';
+      modified.value = '';
+      output.innerHTML = 'Result will appear here...';
+
+      original.classList.remove('flash-clear');
+      modified.classList.remove('flash-clear');
+      output.classList.remove('flash-clear');
+
+      void original.offsetWidth;
+
+      original.classList.add('flash-clear');
+      modified.classList.add('flash-clear');
+      output.classList.add('flash-clear');
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV to Markdown Table Converter</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+  <!-- PapaParse for fast CSV parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/papaparse/5.4.1/papaparse.min.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    textarea,
+    select {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      outline: none;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 220px;
+      line-height: 1.5;
+    }
+
+    textarea.dragover {
+      border-color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    textarea:focus,
+    select:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+      background-color: #ffffff;
+    }
+
+    /* Controls Panel */
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background-color: var(--bg-color);
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Rendered HTML Table Preview */
+    .table-preview-container {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      overflow-x: auto;
+      max-height: 240px;
+    }
+
+    table.rendered-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    table.rendered-table th,
+    table.rendered-table td {
+      border: 1px solid var(--border-color);
+      padding: 8px 10px;
+      text-align: left;
+    }
+
+    table.rendered-table th {
+      background-color: var(--bg-color);
+      font-weight: 500;
+    }
+
+    /* Animation class for Clear */
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: var(--bg-color);
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: var(--bg-color);
+      }
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 170px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Controls Options -->
+    <div class="controls-panel" id="controlsPanel">
+      <div class="control-row">
+        <div class="input-group">
+          <label for="colAlign">Column Alignment</label>
+          <select id="colAlign" onchange="convertCsvToMarkdown()">
+            <option value="left" selected>Left Aligned (|:---|)</option>
+            <option value="center">Center Aligned (|:---:|)</option>
+            <option value="right">Right Aligned (|---:|)</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label for="delimiterSelect">Delimiter</label>
+          <select id="delimiterSelect" onchange="convertCsvToMarkdown()">
+            <option value="" selected>Auto Detect</option>
+            <option value=",">Comma (,)</option>
+            <option value="&#9;">Tab (\t)</option>
+            <option value=";">Semicolon (;)</option>
+            <option value="|">Pipe (|)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="control-row">
+        <label class="checkbox-label">
+          <input type="checkbox" id="hasHeader" checked onchange="convertCsvToMarkdown()">
+          First Row is Header
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="prettyPadding" checked onchange="convertCsvToMarkdown()">
+          Pretty Space Padding
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="escapePipes" checked onchange="convertCsvToMarkdown()">
+          Escape Pipe Symbols (\|)
+        </label>
+      </div>
+    </div>
+
+    <!-- Dual Input/Output Grid -->
+    <div class="grid">
+      <!-- Input CSV Editor -->
+      <div class="input-group">
+        <label for="csvInput">
+          Source CSV / TSV Data
+          <div style="display: flex; gap: 6px;">
+            <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="document.getElementById('fileUploadInput').click()">Upload CSV</button>
+            <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="loadSampleCsv()">Sample</button>
+          </div>
+        </label>
+        <input type="file" id="fileUploadInput" accept=".csv,.tsv,.txt" style="display: none;" onchange="handleFileUpload(event)">
+        <textarea id="csvInput" placeholder="Name, Role, Status&#10;Alice, Engineer, Active&#10;Bob, Designer, Active" oninput="convertCsvToMarkdown()"></textarea>
+      </div>
+
+      <!-- Output Markdown Code -->
+      <div class="input-group">
+        <label for="markdownOutput">Generated GFM Markdown Table Code</label>
+        <textarea id="markdownOutput" readonly placeholder="| Name | Role | Status |&#10;|:---|:---|:---|&#10;| Alice | Engineer | Active |"></textarea>
+      </div>
+    </div>
+
+    <!-- Live Rendered Table Preview -->
+    <div class="input-group">
+      <label>Rendered HTML Table Preview</label>
+      <div class="table-preview-container" id="tablePreview">
+        <div style="font-size: 13px; color: var(--text-secondary); text-align: center; padding: 24px;">
+          Rendered table preview will appear here...
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="copyBtn" class="btn-primary" onclick="copyMarkdown()">
+        <span class="material-symbols-outlined" id="copyIcon">content_copy</span>
+        <span id="copyText">Copy Markdown Table</span>
+      </button>
+
+      <button id="downloadBtn" class="btn-secondary" onclick="downloadMarkdownFile()">
+        <span class="material-symbols-outlined" id="downloadIcon">download</span>
+        <span id="downloadText">Download .md File</span>
+      </button>
+
+      <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let renderTimeout = null;
+
+    const sampleCsv = `Tool Name, Category, Security Guarantee, Performance
+HTML to PDF Converter, PDF Tools, 100% Client-Side, HD Render
+Video to GIF Converter, Video Tools, 100% Client-Side, Multi-Threaded
+URL Parameter Parser, Dev Tools, 100% Client-Side, Real-Time`;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('csvInput').value = sampleCsv;
+      setupDragAndDrop();
+      convertCsvToMarkdown();
+    });
+
+    function setupDragAndDrop() {
+      const textarea = document.getElementById('csvInput');
+
+      ['dragenter', 'dragover'].forEach(eventName => {
+        textarea.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          textarea.classList.add('dragover');
+        }, false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        textarea.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          textarea.classList.remove('dragover');
+        }, false);
+      });
+
+      textarea.addEventListener('drop', (e) => {
+        const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.csv') || f.name.endsWith('.tsv') || f.name.endsWith('.txt'));
+        if (files.length > 0) readCsvFile(files[0]);
+      });
+    }
+
+    function handleFileUpload(event) {
+      if (event.target.files.length > 0) {
+        readCsvFile(event.target.files[0]);
+      }
+    }
+
+    function readCsvFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('csvInput').value = e.target.result;
+        convertCsvToMarkdown();
+      };
+      reader.readAsText(file);
+    }
+
+    function loadSampleCsv() {
+      document.getElementById('csvInput').value = sampleCsv;
+      convertCsvToMarkdown();
+    }
+
+    function convertCsvToMarkdown() {
+      if (renderTimeout) cancelAnimationFrame(renderTimeout);
+
+      renderTimeout = requestAnimationFrame(() => {
+        hideStatus();
+        const rawCsv = document.getElementById('csvInput').value.trim();
+
+        if (!rawCsv) {
+          document.getElementById('markdownOutput').value = '';
+          document.getElementById('tablePreview').innerHTML = `<div style="font-size: 13px; color: var(--text-secondary); text-align: center; padding: 24px;">Rendered table preview will appear here...</div>`;
+          return;
+        }
+
+        const delimiter = document.getElementById('delimiterSelect').value;
+        const hasHeader = document.getElementById('hasHeader').checked;
+        const pretty = document.getElementById('prettyPadding').checked;
+        const escapeP = document.getElementById('escapePipes').checked;
+        const alignMode = document.getElementById('colAlign').value;
+
+        const parseResult = Papa.parse(rawCsv, {
+          delimiter: delimiter || undefined,
+          skipEmptyLines: true
+        });
+
+        if (parseResult.errors && parseResult.errors.length > 0 && parseResult.data.length === 0) {
+          showStatus('Error parsing CSV data: ' + parseResult.errors[0].message, 'error');
+          return;
+        }
+
+        const rows = parseResult.data;
+        if (rows.length === 0) return;
+
+        // Determine max column count
+        let colCount = 0;
+        rows.forEach(r => colCount = Math.max(colCount, r.length));
+
+        // Format cells
+        const formattedRows = rows.map(r => {
+          const newRow = [];
+          for (let c = 0; c < colCount; c++) {
+            let val = (r[c] !== undefined && r[c] !== null) ? String(r[c]).trim() : '';
+            if (escapeP) val = val.replace(/\|/g, '\\|');
+            newRow.push(val);
+          }
+          return newRow;
+        });
+
+        // Header and Body rows
+        let headerRow = [];
+        let bodyRows = [];
+
+        if (hasHeader) {
+          headerRow = formattedRows[0];
+          bodyRows = formattedRows.slice(1);
+        } else {
+          headerRow = Array.from({ length: colCount }, (_, i) => `Column ${i + 1}`);
+          bodyRows = formattedRows;
+        }
+
+        // Calculate max column widths for pretty padding
+        const colWidths = Array(colCount).fill(3);
+        if (pretty) {
+          headerRow.forEach((val, i) => colWidths[i] = Math.max(colWidths[i], val.length));
+          bodyRows.forEach(row => {
+            row.forEach((val, i) => colWidths[i] = Math.max(colWidths[i], val.length));
+          });
+        }
+
+        // Alignment indicator
+        let alignStr = ':---';
+        if (alignMode === 'center') alignStr = ':---:';
+        if (alignMode === 'right') alignStr = '---:';
+
+        // Build Markdown lines
+        const mdLines = [];
+
+        // Header Line
+        const padCell = (val, len) => pretty ? val.padEnd(len, ' ') : val;
+
+        const headerLine = '| ' + headerRow.map((val, i) => padCell(val, colWidths[i])).join(' | ') + ' |';
+        mdLines.push(headerLine);
+
+        // Separator Line
+        const sepLine = '| ' + colWidths.map(len => {
+          if (alignMode === 'center') return ':' + '-'.repeat(Math.max(1, len - 2)) + ':';
+          if (alignMode === 'right') return '-'.repeat(Math.max(1, len - 1)) + ':';
+          return ':' + '-'.repeat(Math.max(1, len - 1));
+        }).join(' | ') + ' |';
+        mdLines.push(sepLine);
+
+        // Body Lines
+        bodyRows.forEach(row => {
+          const line = '| ' + row.map((val, i) => padCell(val, colWidths[i])).join(' | ') + ' |';
+          mdLines.push(line);
+        });
+
+        const finalMarkdown = mdLines.join('\n');
+        document.getElementById('markdownOutput').value = finalMarkdown;
+
+        // Render HTML Preview
+        renderHtmlPreview(headerRow, bodyRows, alignMode);
+      });
+    }
+
+    function renderHtmlPreview(headerRow, bodyRows, alignMode) {
+      const alignStyle = `text-align: ${alignMode};`;
+
+      const ths = headerRow.map(h => `<th style="${alignStyle}">${escapeHtml(h)}</th>`).join('');
+      const trs = bodyRows.map(row => `
+        <tr>
+          ${row.map(cell => `<td style="${alignStyle}">${escapeHtml(cell)}</td>`).join('')}
+        </tr>
+      `).join('');
+
+      const tableHtml = `
+        <table class="rendered-table">
+          <thead>
+            <tr>${ths}</tr>
+          </thead>
+          <tbody>
+            ${trs}
+          </tbody>
+        </table>
+      `;
+
+      document.getElementById('tablePreview').innerHTML = tableHtml;
+    }
+
+    function copyMarkdown() {
+      const output = document.getElementById('markdownOutput');
+      if (!output.value) return;
+
+      output.select();
+      document.execCommand('copy');
+      triggerSuccessButton('copyBtn', 'copyIcon', 'copyText', 'Copied Table!');
+    }
+
+    function downloadMarkdownFile() {
+      const md = document.getElementById('markdownOutput').value;
+      if (!md) return;
+
+      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'table.md';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      triggerSuccessButton('downloadBtn', 'downloadIcon', 'downloadText', 'Saved .md File!');
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function clearAll() {
+      document.getElementById('csvInput').value = '';
+      document.getElementById('markdownOutput').value = '';
+      document.getElementById('tablePreview').innerHTML = `<div style="font-size: 13px; color: var(--text-secondary); text-align: center; padding: 24px;">Rendered table preview will appear here...</div>`;
+      hideStatus();
+
+      document.getElementById('csvInput').classList.remove('flash-clear');
+      document.getElementById('markdownOutput').classList.remove('flash-clear');
+
+      void document.getElementById('csvInput').offsetWidth;
+
+      document.getElementById('csvInput').classList.add('flash-clear');
+      document.getElementById('markdownOutput').classList.add('flash-clear');
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+    }
+
+    function hideStatus() {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = 'status-box';
+      statusBox.textContent = '';
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+  </script>
+</body>
+
+</html>

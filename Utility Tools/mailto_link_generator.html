@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mailto Link & HTML Generator</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    input[type="text"],
+    textarea {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      outline: none;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 140px;
+      line-height: 1.5;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+      background-color: #ffffff;
+    }
+
+    .output-box {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      min-height: 80px;
+      word-break: break-all;
+      white-space: pre-wrap;
+      overflow-y: auto;
+    }
+
+    /* Animation class for Clear */
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: var(--bg-color);
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: var(--bg-color);
+      }
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 150px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="grid">
+      <!-- Input Column -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="input-group">
+          <label for="toInput">To (Recipients)</label>
+          <input type="text" id="toInput" placeholder="recipient@example.com, team@example.com" oninput="generateMailto()">
+        </div>
+
+        <div class="grid" style="gap: 12px;">
+          <div class="input-group">
+            <label for="ccInput">CC (Carbon Copy)</label>
+            <input type="text" id="ccInput" placeholder="cc@example.com" oninput="generateMailto()">
+          </div>
+
+          <div class="input-group">
+            <label for="bccInput">BCC (Blind Carbon Copy)</label>
+            <input type="text" id="bccInput" placeholder="bcc@example.com" oninput="generateMailto()">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="subjectInput">Subject Line</label>
+          <input type="text" id="subjectInput" placeholder="e.g. Project Update & Feedback" oninput="generateMailto()">
+        </div>
+
+        <div class="input-group">
+          <label for="bodyInput">Email Body Template</label>
+          <textarea id="bodyInput" placeholder="Hi Team,&#10;&#10;Here is the project update..." oninput="generateMailto()"></textarea>
+        </div>
+
+        <div class="input-group">
+          <label for="linkTextInput">Anchor Text for HTML Link</label>
+          <input type="text" id="linkTextInput" placeholder="Send Email" value="Send Email" oninput="generateMailto()">
+        </div>
+      </div>
+
+      <!-- Preview Column -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="input-group">
+          <label>
+            Generated Mailto URL
+            <span id="charCounter" style="font-size: 11px; color: var(--text-secondary);">0 chars</span>
+          </label>
+          <div id="mailtoOutput" class="output-box">mailto:</div>
+        </div>
+
+        <div class="input-group">
+          <label>HTML `<a>` Anchor Tag Code</label>
+          <div id="htmlOutput" class="output-box">&lt;a href="mailto:"&gt;Send Email&lt;/a&gt;</div>
+        </div>
+
+        <!-- Warning box if URL exceeds mail client limits -->
+        <div id="warningBox" class="status-box error" style="display: none;"></div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="copyUrlBtn" class="btn-primary" onclick="copyMailtoUrl()">
+        <span class="material-symbols-outlined" id="copyUrlIcon">link</span>
+        <span id="copyUrlText">Copy Mailto Link</span>
+      </button>
+
+      <button id="copyHtmlBtn" class="btn-secondary" onclick="copyHtmlCode()">
+        <span class="material-symbols-outlined" id="copyHtmlIcon">code</span>
+        <span id="copyHtmlText">Copy HTML Code</span>
+      </button>
+
+      <button id="testLinkBtn" class="btn-secondary" onclick="testMailtoLink()">
+        <span class="material-symbols-outlined">open_in_new</span>
+        Test Email Link
+      </button>
+
+      <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let generatedMailtoUrl = 'mailto:';
+    let generatedHtmlTag = '<a href="mailto:">Send Email</a>';
+    let renderTimeout = null;
+
+    function generateMailto() {
+      if (renderTimeout) cancelAnimationFrame(renderTimeout);
+
+      renderTimeout = requestAnimationFrame(() => {
+        const toVal = document.getElementById('toInput').value.trim();
+        const ccVal = document.getElementById('ccInput').value.trim();
+        const bccVal = document.getElementById('bccInput').value.trim();
+        const subjectVal = document.getElementById('subjectInput').value.trim();
+        const bodyVal = document.getElementById('bodyInput').value;
+        const linkText = document.getElementById('linkTextInput').value.trim() || 'Send Email';
+
+        function encodeEmailList(emailStr) {
+          return encodeURIComponent(emailStr).replace(/%2C/gi, ',').replace(/%40/gi, '@');
+        }
+
+        let url = 'mailto:' + encodeEmailList(toVal);
+        const params = [];
+
+        if (ccVal) {
+          params.push('cc=' + encodeEmailList(ccVal));
+        }
+        if (bccVal) {
+          params.push('bcc=' + encodeEmailList(bccVal));
+        }
+        if (subjectVal) {
+          params.push('subject=' + encodeURIComponent(subjectVal));
+        }
+        if (bodyVal) {
+          params.push('body=' + encodeURIComponent(bodyVal));
+        }
+
+        if (params.length > 0) {
+          url += '?' + params.join('&');
+        }
+
+        generatedMailtoUrl = url;
+        generatedHtmlTag = `<a href="${escapeHtml(url)}">${escapeHtml(linkText)}</a>`;
+
+        document.getElementById('mailtoOutput').textContent = generatedMailtoUrl;
+        document.getElementById('htmlOutput').textContent = generatedHtmlTag;
+
+        const urlLength = generatedMailtoUrl.length;
+        document.getElementById('charCounter').textContent = `${urlLength} chars`;
+
+        const warningBox = document.getElementById('warningBox');
+        if (urlLength > 2000) {
+          warningBox.style.display = 'block';
+          warningBox.textContent = `Warning: Mailto link length (${urlLength} chars) exceeds 2,000 characters and may be truncated by Outlook or webmail clients.`;
+        } else {
+          warningBox.style.display = 'none';
+        }
+      });
+    }
+
+    function copyMailtoUrl() {
+      if (!generatedMailtoUrl) return;
+
+      const tempArea = document.createElement('textarea');
+      tempArea.value = generatedMailtoUrl;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+
+      triggerSuccessButton('copyUrlBtn', 'copyUrlIcon', 'copyUrlText', 'Copied Link!');
+    }
+
+    function copyHtmlCode() {
+      if (!generatedHtmlTag) return;
+
+      const tempArea = document.createElement('textarea');
+      tempArea.value = generatedHtmlTag;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+
+      triggerSuccessButton('copyHtmlBtn', 'copyHtmlIcon', 'copyHtmlText', 'Copied HTML!');
+    }
+
+    function testMailtoLink() {
+      if (!generatedMailtoUrl) return;
+      window.location.href = generatedMailtoUrl;
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function clearAll() {
+      document.getElementById('toInput').value = '';
+      document.getElementById('ccInput').value = '';
+      document.getElementById('bccInput').value = '';
+      document.getElementById('subjectInput').value = '';
+      document.getElementById('bodyInput').value = '';
+      document.getElementById('linkTextInput').value = 'Send Email';
+      document.getElementById('warningBox').style.display = 'none';
+
+      document.getElementById('toInput').classList.remove('flash-clear');
+      document.getElementById('bodyInput').classList.remove('flash-clear');
+
+      void document.getElementById('toInput').offsetWidth;
+
+      document.getElementById('toInput').classList.add('flash-clear');
+      document.getElementById('bodyInput').classList.add('flash-clear');
+
+      generateMailto();
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+  </script>
+</body>
+
+</html>

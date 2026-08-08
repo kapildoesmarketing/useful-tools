@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Thumbnail Downloader</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500&family=Roboto:wght@400;500&family=Roboto+Mono&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+  <!-- JSZip for batch download -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    input[type="text"] {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      outline: none;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+      background-color: #ffffff;
+    }
+
+    /* Thumbnail Card */
+    .thumb-card {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .thumb-img-container {
+      width: 100%;
+      height: 180px;
+      background-color: var(--bg-color);
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border-color);
+    }
+
+    .thumb-img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .thumb-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .res-badge {
+      font-family: 'Roboto Mono', monospace;
+      font-weight: 500;
+      background-color: #e8f0fe;
+      color: var(--primary-blue);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Animation class for Clear */
+    .flash-clear {
+      animation: clearPulse 0.4s ease-out;
+    }
+
+    @keyframes clearPulse {
+      0% {
+        background-color: var(--bg-color);
+      }
+
+      50% {
+        background-color: #e8eaed;
+      }
+
+      100% {
+        background-color: var(--bg-color);
+      }
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 170px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- URL Input Group -->
+    <div class="input-group">
+      <label for="ytUrl">YouTube Video / Shorts / Music Link</label>
+      <div style="display: flex; gap: 8px;">
+        <input type="text" id="ytUrl" style="flex: 1;" placeholder="Paste YouTube link (e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ)" oninput="handleUrlChange()">
+        <button class="btn-primary" style="min-width: 130px;" onclick="extractThumbnails()">
+          <span class="material-symbols-outlined">image</span>
+          Get Thumbnails
+        </button>
+        <button class="btn-secondary" onclick="loadSampleLink()">Sample</button>
+      </div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Thumbnail Grid -->
+    <div class="grid" id="thumbnailGrid">
+      <div style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 36px; background-color: var(--bg-color); border: 1px dashed var(--border-color); border-radius: 8px;">
+        Paste a YouTube URL above to view and download all HD cover thumbnail resolutions.
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="downloadZipBtn" class="btn-primary" onclick="downloadAllAsZip()" disabled>
+        <span class="material-symbols-outlined" id="zipIcon">download_for_offline</span>
+        <span id="zipText">Download All as ZIP</span>
+      </button>
+
+      <button id="copyUrlBtn" class="btn-secondary" onclick="copyCleanLink()" disabled>
+        <span class="material-symbols-outlined" id="copyIcon">content_copy</span>
+        <span id="copyText">Copy Clean Video Link</span>
+      </button>
+
+      <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let currentVideoId = null;
+    let availableThumbnails = []; // [{ label, res, url, name }]
+
+    const sampleUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('ytUrl').value = sampleUrl;
+      extractThumbnails();
+    });
+
+    function loadSampleLink() {
+      document.getElementById('ytUrl').value = sampleUrl;
+      extractThumbnails();
+    }
+
+    function extractYouTubeId(url) {
+      if (!url) return null;
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    function handleUrlChange() {
+      const url = document.getElementById('ytUrl').value.trim();
+      const videoId = extractYouTubeId(url);
+      if (videoId && videoId !== currentVideoId) {
+        extractThumbnails();
+      }
+    }
+
+    async function extractThumbnails() {
+      hideStatus();
+      const url = document.getElementById('ytUrl').value.trim();
+      const videoId = extractYouTubeId(url);
+
+      if (!videoId) {
+        showStatus('Please enter a valid YouTube video, Shorts, or Music link.', 'error');
+        return;
+      }
+
+      currentVideoId = videoId;
+      availableThumbnails = [
+        { label: 'HD Maximum Resolution', res: '1920 × 1080', url: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`, code: 'maxres' },
+        { label: 'Standard Definition', res: '640 × 480', url: `https://img.youtube.com/vi/${videoId}/sddefault.jpg`, code: 'sd' },
+        { label: 'High Quality', res: '480 × 360', url: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`, code: 'hq' },
+        { label: 'Medium Quality', res: '320 × 180', url: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`, code: 'mq' },
+        { label: 'Small Thumbnail', res: '120 × 90', url: `https://img.youtube.com/vi/${videoId}/default.jpg`, code: 'default' }
+      ];
+
+      renderThumbnailGrid();
+      document.getElementById('downloadZipBtn').disabled = false;
+      document.getElementById('copyUrlBtn').disabled = false;
+      showStatus('Fetched all 5 YouTube cover thumbnail resolutions!', 'success');
+    }
+
+    function renderThumbnailGrid() {
+      const grid = document.getElementById('thumbnailGrid');
+
+      grid.innerHTML = availableThumbnails.map((item, idx) => `
+        <div class="thumb-card">
+          <div class="thumb-img-container">
+            <img class="thumb-img" src="${item.url}" alt="${item.label}" onerror="this.onerror=null; this.src='https://img.youtube.com/vi/${currentVideoId}/hqdefault.jpg';">
+          </div>
+          <div class="thumb-info">
+            <strong>${escapeHtml(item.label)}</strong>
+            <span class="res-badge">${item.res}</span>
+          </div>
+          <div style="display: flex; gap: 6px; margin-top: 4px;">
+            <button class="btn-primary" style="flex: 1; padding: 6px 8px; font-size: 12px; min-width: 0;" onclick="downloadSingleThumbnail(${idx})">
+              <span class="material-symbols-outlined" style="font-size: 16px;">download</span>
+              Download JPG
+            </button>
+            <button class="btn-secondary" style="padding: 6px 8px; font-size: 12px;" onclick="copyImageUrl('${item.url}')">
+              Copy Link
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function downloadSingleThumbnail(index) {
+      const item = availableThumbnails[index];
+      if (!item) return;
+
+      try {
+        const resp = await fetch(item.url);
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `yt_thumb_${currentVideoId}_${item.code}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        // Fallback direct link download
+        const a = document.createElement('a');
+        a.href = item.url;
+        a.download = `yt_thumb_${currentVideoId}_${item.code}.jpg`;
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    }
+
+    async function downloadAllAsZip() {
+      if (availableThumbnails.length === 0 || !window.JSZip) return;
+
+      const btn = document.getElementById('downloadZipBtn');
+      const icon = document.getElementById('zipIcon');
+      const text = document.getElementById('zipText');
+
+      btn.disabled = true;
+      icon.style.display = 'none';
+      text.innerHTML = '<span class="spinner" style="margin-right: 6px;"></span>Zipping...';
+
+      const zip = new JSZip();
+
+      for (let item of availableThumbnails) {
+        try {
+          const resp = await fetch(item.url);
+          const blob = await resp.blob();
+          zip.file(`yt_thumb_${currentVideoId}_${item.code}.jpg`, blob);
+        } catch (e) {}
+      }
+
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(zipBlob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `yt_thumbnails_${currentVideoId}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      btn.disabled = false;
+      icon.style.display = 'block';
+      text.innerHTML = 'Download All as ZIP';
+      triggerSuccessButton('downloadZipBtn', 'zipIcon', 'zipText', 'Downloaded ZIP!');
+    }
+
+    function copyImageUrl(url) {
+      const dummy = document.createElement('input');
+      document.body.appendChild(dummy);
+      dummy.value = url;
+      dummy.select();
+      document.execCommand('copy');
+      document.body.removeChild(dummy);
+      showStatus('Direct image URL copied to clipboard!', 'success');
+    }
+
+    function copyCleanLink() {
+      if (!currentVideoId) return;
+      const cleanLink = `https://www.youtube.com/watch?v=${currentVideoId}`;
+      const dummy = document.createElement('input');
+      document.body.appendChild(dummy);
+      dummy.value = cleanLink;
+      dummy.select();
+      document.execCommand('copy');
+      document.body.removeChild(dummy);
+
+      triggerSuccessButton('copyUrlBtn', 'copyIcon', 'copyText', 'Link Copied!');
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function clearAll() {
+      currentVideoId = null;
+      availableThumbnails = [];
+
+      document.getElementById('ytUrl').value = '';
+      document.getElementById('thumbnailGrid').innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 36px; background-color: var(--bg-color); border: 1px dashed var(--border-color); border-radius: 8px;">
+          Paste a YouTube URL above to view and download all HD cover thumbnail resolutions.
+        </div>
+      `;
+
+      document.getElementById('downloadZipBtn').disabled = true;
+      document.getElementById('copyUrlBtn').disabled = true;
+
+      hideStatus();
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+    }
+
+    function hideStatus() {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = 'status-box';
+      statusBox.textContent = '';
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+  </script>
+</body>
+
+</html>
