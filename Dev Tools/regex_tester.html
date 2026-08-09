@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interactive RegEx Tester & Matcher Studio</title>
+  <title>Interactive RegEx Tester, Railroad Diagram & AST Studio</title>
   <link
     href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Roboto:wght@400;500&family=Roboto+Mono:wght@500;700&display=swap"
     rel="stylesheet">
@@ -36,6 +36,7 @@
     }
 
     h2,
+    h3,
     .btn {
       font-family: 'Google Sans', sans-serif;
     }
@@ -191,7 +192,6 @@
       resize: none;
     }
 
-    /* Highlighted Match Span Styles */
     mark.match-even {
       background-color: #fef08a;
       color: #713f12;
@@ -204,9 +204,55 @@
       border-radius: 3px;
     }
 
-    /* Capture Group Breakdown Table */
+    /* Railroad Diagram Visualizer Box */
+    .railroad-container {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 140px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .railroad-svg {
+      max-width: 100%;
+      overflow: visible;
+    }
+
+    /* AST Breakdown Tree View */
+    .ast-container {
+      max-height: 220px;
+      overflow-y: auto;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+    }
+
+    .ast-node {
+      margin-left: 12px;
+      padding: 2px 0;
+    }
+
+    .ast-type {
+      color: var(--primary-blue);
+      font-weight: 700;
+    }
+
+    .ast-val {
+      color: #d97706;
+    }
+
+    /* Capture Group Table */
     .groups-table-container {
-      max-height: 260px;
+      max-height: 220px;
       overflow-y: auto;
       border: 1px solid var(--border-color);
       border-radius: 6px;
@@ -246,13 +292,6 @@
       padding: 10px 14px;
       border-radius: 6px;
       display: none;
-    }
-
-    .status-box.success {
-      display: block;
-      background-color: var(--success-bg);
-      color: var(--success-text);
-      border: 1px solid #c3e6cb;
     }
 
     .status-box.error {
@@ -368,9 +407,17 @@
       </div>
     </div>
 
+    <!-- Railroad Diagram Visualizer Card -->
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <label style="font-weight: 700; font-size: 13px; color: var(--primary-blue);">Visual RegEx Railroad Flowchart Diagram</label>
+      <div class="railroad-container" id="railroadBox">
+        <!-- Dynamic SVG Railroad Diagram inserted here -->
+      </div>
+    </div>
+
     <div class="grid">
-      <!-- Left: Test Text Input with Synchronized Live Highlight -->
-      <div style="display: flex; flex-direction: column; gap: 8px;">
+      <!-- Left: Test Text Input & AST Breakdown -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <label style="font-weight: 500;">Test String Input</label>
           <span style="font-size: 11px; color: var(--text-secondary);" id="matchCounter">0 Matches</span>
@@ -381,15 +428,17 @@
           <textarea class="editor-textarea" id="testText" placeholder="Paste test string here..." oninput="evaluateRegex()" onscroll="syncScroll()"></textarea>
         </div>
 
-        <!-- Real-Time Replacement Tester -->
-        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
-          <label style="font-size: 12px; font-weight: 500;">Substitution / Replace With ($1, $2):</label>
-          <input type="text" id="replaceInput" placeholder="Replacement string..." style="font-family: 'Roboto Mono', monospace; font-size: 12px; padding: 6px 8px; border: 1px solid var(--border-color); border-radius: 6px;" oninput="evaluateRegex()">
+        <!-- RegEx AST Breakdown Tree View -->
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <label style="font-weight: 500; font-size: 12px;">Abstract Syntax Tree (AST) Token Breakdown</label>
+          <div class="ast-container" id="astBox">
+            <!-- AST tree nodes -->
+          </div>
         </div>
       </div>
 
       <!-- Right: Capture Group Breakdown Table & Replace Output -->
-      <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="display: flex; flex-direction: column; gap: 12px;">
         <label style="font-weight: 500;">Matches & Capture Groups Breakdown</label>
 
         <div class="groups-table-container">
@@ -412,8 +461,14 @@
           </table>
         </div>
 
+        <!-- Real-Time Replacement Tester -->
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <label style="font-size: 12px; font-weight: 500;">Substitution / Replace With ($1, $2):</label>
+          <input type="text" id="replaceInput" placeholder="Replacement string..." style="font-family: 'Roboto Mono', monospace; font-size: 12px; padding: 6px 8px; border: 1px solid var(--border-color); border-radius: 6px;" oninput="evaluateRegex()">
+        </div>
+
         <!-- Replacement Result Output Box -->
-        <div id="replacementBox" style="display: none; flex-direction: column; gap: 4px; margin-top: 4px;">
+        <div id="replacementBox" style="display: none; flex-direction: column; gap: 4px;">
           <label style="font-size: 12px; font-weight: 500;">Replaced Result Output:</label>
           <div id="replaceOutput" style="font-family: 'Roboto Mono', monospace; font-size: 12px; padding: 8px; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 6px; white-space: pre-wrap; word-break: break-all; max-height: 80px; overflow-y: auto;"></div>
         </div>
@@ -505,7 +560,6 @@
       const backdrop = document.getElementById('editorBackdrop');
       const tableBody = document.getElementById('groupsTableBody');
       const counter = document.getElementById('matchCounter');
-      const statusBox = document.getElementById('statusBox');
 
       activeMatches = [];
 
@@ -513,6 +567,8 @@
         backdrop.innerHTML = escapeHtml(text);
         tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 32px;">No RegEx pattern entered.</td></tr>';
         counter.textContent = '0 Matches';
+        renderAst([]);
+        renderRailroad([]);
         hideStatus();
         return;
       }
@@ -526,8 +582,15 @@
         backdrop.innerHTML = escapeHtml(text);
         tableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--danger-text); padding: 24px;">Syntax Error: ${escapeHtml(e.message)}</td></tr>`;
         counter.textContent = 'Invalid Pattern';
+        renderAst([]);
+        renderRailroad([]);
         return;
       }
+
+      // Parse Tokens for AST & Railroad Diagram
+      const astTokens = parseRegexToAst(patternStr);
+      renderAst(astTokens);
+      renderRailroad(astTokens);
 
       if (!text) {
         backdrop.innerHTML = '';
@@ -545,7 +608,7 @@
         let safetyLoop = 0;
         while ((match = regex.exec(text)) !== null) {
           matches.push(match);
-          if (match.index === regex.lastIndex) regex.lastIndex++; // Prevent infinite zero-width match loop
+          if (match.index === regex.lastIndex) regex.lastIndex++;
           if (++safetyLoop > 5000) break;
         }
       } else {
@@ -573,7 +636,7 @@
       highlightedHTML += escapeHtml(text.slice(lastIndex));
       backdrop.innerHTML = highlightedHTML + '\n';
 
-      // Build Capture Groups Breakdown Table
+      // Build Capture Groups Table
       if (matches.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 32px;">No pattern matches found in test string.</td></tr>';
       } else {
@@ -616,6 +679,135 @@
       } else {
         replaceBox.style.display = 'none';
       }
+    }
+
+    /* RegEx AST Tokenizer */
+    function parseRegexToAst(pattern) {
+      const tokens = [];
+      let i = 0;
+
+      while (i < pattern.length) {
+        const char = pattern[i];
+
+        if (char === '\\') {
+          const next = pattern[i + 1] || '';
+          if (next === 'b' || next === 'B') tokens.push({ type: 'Anchor', val: `\\${next} (Word Boundary)` });
+          else if (next === 'd' || next === 'D') tokens.push({ type: 'CharClass', val: `\\${next} (Digits)` });
+          else if (next === 'w' || next === 'W') tokens.push({ type: 'CharClass', val: `\\${next} (Word Chars)` });
+          else if (next === 's' || next === 'S') tokens.push({ type: 'CharClass', val: `\\${next} (Whitespace)` });
+          else tokens.push({ type: 'EscapedChar', val: `\\${next}` });
+          i += 2;
+        } else if (char === '[') {
+          let closeIdx = pattern.indexOf(']', i);
+          if (closeIdx === -1) closeIdx = pattern.length - 1;
+          const classStr = pattern.substring(i, closeIdx + 1);
+          tokens.push({ type: 'CharSet', val: classStr });
+          i = closeIdx + 1;
+        } else if (char === '(') {
+          let groupType = 'CapturingGroup';
+          if (pattern.startsWith('(?:', i)) groupType = 'NonCapturingGroup';
+          else if (pattern.startsWith('(?<', i)) groupType = 'NamedGroup';
+          tokens.push({ type: groupType, val: '(' });
+          i++;
+        } else if (char === ')') {
+          tokens.push({ type: 'GroupEnd', val: ')' });
+          i++;
+        } else if (char === '+' || char === '*' || char === '?') {
+          tokens.push({ type: 'Quantifier', val: char });
+          i++;
+        } else if (char === '{') {
+          let closeIdx = pattern.indexOf('}', i);
+          if (closeIdx !== -1) {
+            tokens.push({ type: 'Quantifier', val: pattern.substring(i, closeIdx + 1) });
+            i = closeIdx + 1;
+          } else {
+            tokens.push({ type: 'Literal', val: char });
+            i++;
+          }
+        } else if (char === '^' || char === '$') {
+          tokens.push({ type: 'Anchor', val: char === '^' ? '^ (Start)' : '$ (End)' });
+          i++;
+        } else if (char === '|') {
+          tokens.push({ type: 'Alternation', val: '| (OR)' });
+          i++;
+        } else {
+          tokens.push({ type: 'Literal', val: char });
+          i++;
+        }
+      }
+
+      return tokens;
+    }
+
+    function renderAst(tokens) {
+      const container = document.getElementById('astBox');
+      if (!tokens || tokens.length === 0) {
+        container.innerHTML = '<span style="color: var(--text-secondary);">No AST tokens to display.</span>';
+        return;
+      }
+
+      container.innerHTML = tokens.map((t, idx) => `
+        <div class="ast-node">
+          #${idx + 1} <span class="ast-type">${escapeHtml(t.type)}</span>: <span class="ast-val">${escapeHtml(t.val)}</span>
+        </div>
+      `).join('');
+    }
+
+    /* Render SVG Railroad Diagram Flowchart */
+    function renderRailroad(tokens) {
+      const box = document.getElementById('railroadBox');
+      if (!tokens || tokens.length === 0) {
+        box.innerHTML = '<span style="font-size: 12px; color: var(--text-secondary);">Enter a valid RegEx pattern to generate Railroad Diagram</span>';
+        return;
+      }
+
+      let currentX = 40;
+      const startY = 30;
+      const nodeWidth = 70;
+      const gap = 30;
+
+      let svgContent = `<path d="M 10 ${startY} L 40 ${startY}" stroke="#1a73e8" stroke-width="2" fill="none"/>`;
+      svgContent += `<circle cx="10" cy="${startY}" r="5" fill="#1a73e8"/>`;
+
+      tokens.forEach((t) => {
+        let label = t.val;
+        if (label.length > 12) label = label.substring(0, 10) + '..';
+
+        let boxColor = '#e8f0fe';
+        let strokeColor = '#1a73e8';
+        let textColor = '#174ea6';
+
+        if (t.type === 'Quantifier') {
+          boxColor = '#fef3c7'; strokeColor = '#d97706'; textColor = '#b45309';
+        } else if (t.type === 'CharSet' || t.type === 'CharClass') {
+          boxColor = '#dcfce7'; strokeColor = '#16a34a'; textColor = '#15803d';
+        } else if (t.type.includes('Group')) {
+          boxColor = '#f3e8ff'; strokeColor = '#9333ea'; textColor = '#7e22ce';
+        }
+
+        // Connecting Line
+        svgContent += `<path d="M ${currentX} ${startY} L ${currentX + gap} ${startY}" stroke="#1a73e8" stroke-width="2" fill="none"/>`;
+        currentX += gap;
+
+        // Node Box
+        svgContent += `
+          <rect x="${currentX}" y="${startY - 18}" width="${nodeWidth}" height="36" rx="6" fill="${boxColor}" stroke="${strokeColor}" stroke-width="1.5"/>
+          <text x="${currentX + nodeWidth / 2}" y="${startY + 4}" font-family="'Roboto Mono', monospace" font-size="11" font-weight="600" fill="${textColor}" text-anchor="middle">${escapeHtml(label)}</text>
+        `;
+
+        currentX += nodeWidth;
+      });
+
+      // End Anchor
+      svgContent += `<path d="M ${currentX} ${startY} L ${currentX + 30} ${startY}" stroke="#1a73e8" stroke-width="2" fill="none"/>`;
+      svgContent += `<circle cx="${currentX + 35}" cy="${startY}" r="5" fill="#1a73e8"/>`;
+
+      const totalW = Math.max(300, currentX + 50);
+      box.innerHTML = `
+        <svg class="railroad-svg" width="${totalW}" height="60" viewBox="0 0 ${totalW} 60">
+          ${svgContent}
+        </svg>
+      `;
     }
 
     function copyPattern() {
