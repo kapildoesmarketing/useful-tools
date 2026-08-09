@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sample Data & Mock Generator Studio</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Roboto:wght@400;500&family=Roboto+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 860px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Preset Quick Starter Chips */
+    .preset-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .preset-chip {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .preset-chip:hover {
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    /* Schema Builder Panel */
+    .schema-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background-color: var(--bg-color);
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .field-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 10px;
+    }
+
+    .field-row input[type="text"],
+    .field-row select {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      padding: 6px 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      outline: none;
+    }
+
+    /* Format Tabs & Data Output Block */
+    .output-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .format-tabs {
+      display: flex;
+      gap: 6px;
+      background-color: var(--bg-color);
+      padding: 4px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    .format-btn {
+      background: none;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .format-btn.active {
+      background-color: #ffffff;
+      color: var(--primary-blue);
+      font-weight: 700;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    pre.data-output {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      background-color: #1e1e1e;
+      color: #d4d4d4;
+      padding: 14px;
+      border-radius: 8px;
+      height: 380px;
+      overflow: auto;
+      margin: 0;
+      white-space: pre;
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 140px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Preset Quick Starters -->
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <label style="font-weight: 500;">Quick Schema Starters:</label>
+      <div class="preset-bar">
+        <button class="preset-chip" onclick="applyPreset('users')">👥 User Profiles</button>
+        <button class="preset-chip" onclick="applyPreset('orders')">🛒 E-Commerce Orders</button>
+        <button class="preset-chip" onclick="applyPreset('employees')">🏢 Corporate Employees</button>
+        <button class="preset-chip" onclick="applyPreset('saas')">💻 SaaS API Logs</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Left: Column Schema Builder -->
+      <div class="schema-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label style="font-weight: 700; font-size: 13px; color: var(--primary-blue);">Column Schema Builder</label>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <label for="rowCountInput" style="font-size: 12px;">Rows:</label>
+            <select id="rowCountInput" onchange="generateData()" style="font-family: 'Roboto Mono', monospace; font-size: 12px; padding: 4px;">
+              <option value="10" selected>10 Rows</option>
+              <option value="25">25 Rows</option>
+              <option value="50">50 Rows</option>
+              <option value="100">100 Rows</option>
+              <option value="500">500 Rows</option>
+              <option value="1000">1,000 Rows</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="fieldsContainer" style="display: flex; flex-direction: column; gap: 8px; max-height: 330px; overflow-y: auto;">
+          <!-- Field Rows inserted dynamically -->
+        </div>
+
+        <button class="btn-secondary" style="align-self: flex-start; margin-top: 4px;" onclick="addFieldRow()">
+          <span class="material-symbols-outlined">add</span> Add Field Column
+        </button>
+      </div>
+
+      <!-- Right: Generated Output Stream -->
+      <div class="output-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="format-tabs">
+            <button class="format-btn active" id="tabJson" onclick="setFormat('json')">JSON</button>
+            <button class="format-btn" id="tabCsv" onclick="setFormat('csv')">CSV</button>
+            <button class="format-btn" id="tabSql" onclick="setFormat('sql')">SQL</button>
+            <button class="format-btn" id="tabMarkdown" onclick="setFormat('markdown')">Markdown</button>
+            <button class="format-btn" id="tabTsv" onclick="setFormat('tsv')">TSV</button>
+          </div>
+
+          <span style="font-size: 11px; color: var(--text-secondary);" id="dataStats">10 Records</span>
+        </div>
+
+        <pre class="data-output" id="dataOutput">/* Generated sample data will appear here */</pre>
+      </div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="copyBtn" class="btn-primary" onclick="copyGeneratedData()">
+        <span class="material-symbols-outlined" id="copyIcon">content_copy</span>
+        <span id="copyText">Copy Data</span>
+      </button>
+
+      <button class="btn-secondary" onclick="downloadDataFile()">
+        <span class="material-symbols-outlined">download</span>
+        Download File
+      </button>
+
+      <button class="btn-secondary" onclick="generateData()">
+        <span class="material-symbols-outlined">refresh</span>
+        Regenerate Random
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let outputFormat = 'json'; // 'json', 'csv', 'sql', 'markdown', 'tsv'
+    let fields = [];
+
+    // Mock Data Dictionaries for realistic generation
+    const firstNames = ['James', 'Emma', 'Liam', 'Olivia', 'Noah', 'Sophia', 'Ethan', 'Ava', 'Mason', 'Isabella', 'Kapil', 'Rahul', 'Priya', 'Aarav', 'Neha'];
+    const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Pidhwani', 'Sharma', 'Patel', 'Verma', 'Kumar'];
+    const domains = ['gmail.com', 'yahoo.com', 'outlook.com', 'techcorp.io', 'acme.org', 'usefultools.dev'];
+    const companies = ['Acme Corp', 'Stark Tech', 'Cyberdyne Systems', 'Wayne Enterprises', 'Globex Corp', 'Umbrella Tech'];
+    const departments = ['Engineering', 'Marketing', 'Sales', 'Product Design', 'Customer Support', 'Finance', 'Human Resources'];
+    const cities = ['New York', 'San Francisco', 'London', 'Berlin', 'Mumbai', 'Tokyo', 'Sydney', 'Toronto', 'Singapore', 'Dubai'];
+    const countries = ['United States', 'United Kingdom', 'Germany', 'India', 'Japan', 'Australia', 'Canada', 'Singapore', 'UAE'];
+    const statuses = ['Active', 'Pending', 'Completed', 'Processing', 'Cancelled', 'Archived'];
+    const products = ['Wireless Earbuds', 'Smart Watch', 'Mechanical Keyboard', '4K Monitor', 'Ergonomic Desk Chair', 'USB-C Dock'];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      applyPreset('users');
+    });
+
+    function applyPreset(presetType) {
+      if (presetType === 'users') {
+        fields = [
+          { name: 'id', type: 'autoid', options: '' },
+          { name: 'first_name', type: 'firstname', options: '' },
+          { name: 'last_name', type: 'lastname', options: '' },
+          { name: 'email', type: 'email', options: '' },
+          { name: 'city', type: 'city', options: '' },
+          { name: 'is_active', type: 'boolean', options: '' }
+        ];
+      } else if (presetType === 'orders') {
+        fields = [
+          { name: 'order_id', type: 'uuid', options: '' },
+          { name: 'customer_name', type: 'fullname', options: '' },
+          { name: 'product', type: 'product', options: '' },
+          { name: 'price', type: 'number', options: '10,299' },
+          { name: 'status', type: 'picklist', options: 'Completed, Processing, Pending, Cancelled' },
+          { name: 'order_date', type: 'date', options: '' }
+        ];
+      } else if (presetType === 'employees') {
+        fields = [
+          { name: 'emp_id', type: 'autoid', options: '' },
+          { name: 'full_name', type: 'fullname', options: '' },
+          { name: 'company', type: 'company', options: '' },
+          { name: 'department', type: 'department', options: '' },
+          { name: 'salary', type: 'number', options: '45000,140000' }
+        ];
+      } else if (presetType === 'saas') {
+        fields = [
+          { name: 'uuid', type: 'uuid', options: '' },
+          { name: 'ip_address', type: 'ip', options: '' },
+          { name: 'country', type: 'country', options: '' },
+          { name: 'created_at', type: 'date', options: '' }
+        ];
+      }
+
+      renderFieldsSchema();
+      generateData();
+    }
+
+    function renderFieldsSchema() {
+      const container = document.getElementById('fieldsContainer');
+      container.innerHTML = '';
+
+      fields.forEach((f, idx) => {
+        const row = document.createElement('div');
+        row.className = 'field-row';
+
+        row.innerHTML = `
+          <input type="text" value="${escapeHtml(f.name)}" style="width: 110px;" onchange="fields[${idx}].name=this.value; generateData();">
+          <select style="flex: 1;" onchange="fields[${idx}].type=this.value; generateData();">
+            <option value="autoid" ${f.type === 'autoid' ? 'selected' : ''}>Auto ID (1, 2, 3...)</option>
+            <option value="uuid" ${f.type === 'uuid' ? 'selected' : ''}>UUID (v4)</option>
+            <option value="fullname" ${f.type === 'fullname' ? 'selected' : ''}>Full Name</option>
+            <option value="firstname" ${f.type === 'firstname' ? 'selected' : ''}>First Name</option>
+            <option value="lastname" ${f.type === 'lastname' ? 'selected' : ''}>Last Name</option>
+            <option value="email" ${f.type === 'email' ? 'selected' : ''}>Email Address</option>
+            <option value="company" ${f.type === 'company' ? 'selected' : ''}>Company Name</option>
+            <option value="department" ${f.type === 'department' ? 'selected' : ''}>Department</option>
+            <option value="city" ${f.type === 'city' ? 'selected' : ''}>City</option>
+            <option value="country" ${f.type === 'country' ? 'selected' : ''}>Country</option>
+            <option value="ip" ${f.type === 'ip' ? 'selected' : ''}>IP Address</option>
+            <option value="product" ${f.type === 'product' ? 'selected' : ''}>Product Name</option>
+            <option value="number" ${f.type === 'number' ? 'selected' : ''}>Random Number</option>
+            <option value="boolean" ${f.type === 'boolean' ? 'selected' : ''}>Boolean (True/False)</option>
+            <option value="date" ${f.type === 'date' ? 'selected' : ''}>Random Date</option>
+            <option value="picklist" ${f.type === 'picklist' ? 'selected' : ''}>Custom Picklist</option>
+          </select>
+          <span class="material-symbols-outlined" style="font-size: 16px; cursor: pointer; color: var(--text-secondary);" onclick="removeFieldRow(${idx})">close</span>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function addFieldRow() {
+      fields.push({ name: `column_${fields.length + 1}`, type: 'firstname', options: '' });
+      renderFieldsSchema();
+      generateData();
+    }
+
+    function removeFieldRow(idx) {
+      if (fields.length > 1) {
+        fields.splice(idx, 1);
+        renderFieldsSchema();
+        generateData();
+      }
+    }
+
+    function setFormat(fmt) {
+      outputFormat = fmt;
+      document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`tab${fmt.charAt(0).toUpperCase() + fmt.slice(1)}`).classList.add('active');
+      generateData();
+    }
+
+    function getRandomItem(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function generateFieldValue(fieldType, rowIndex, optionsStr) {
+      if (fieldType === 'autoid') return rowIndex + 1;
+      if (fieldType === 'uuid') return 'f81d4fae-7dec-11d0-a765-00a0c91e' + Math.floor(Math.random() * 8999 + 1000);
+      if (fieldType === 'firstname') return getRandomItem(firstNames);
+      if (fieldType === 'lastname') return getRandomItem(lastNames);
+      if (fieldType === 'fullname') return `${getRandomItem(firstNames)} ${getRandomItem(lastNames)}`;
+      if (fieldType === 'email') return `${getRandomItem(firstNames).toLowerCase()}.${getRandomItem(lastNames).toLowerCase()}@${getRandomItem(domains)}`;
+      if (fieldType === 'company') return getRandomItem(companies);
+      if (fieldType === 'department') return getRandomItem(departments);
+      if (fieldType === 'city') return getRandomItem(cities);
+      if (fieldType === 'country') return getRandomItem(countries);
+      if (fieldType === 'ip') return `${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;
+      if (fieldType === 'product') return getRandomItem(products);
+      if (fieldType === 'number') {
+        let min = 10, max = 1000;
+        if (optionsStr && optionsStr.includes(',')) {
+          const parts = optionsStr.split(',').map(n => parseInt(n.trim(), 10));
+          if (!isNaN(parts[0])) min = parts[0];
+          if (!isNaN(parts[1])) max = parts[1];
+        }
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+      if (fieldType === 'boolean') return Math.random() > 0.5;
+      if (fieldType === 'date') {
+        const d = new Date(Date.now() - Math.floor(Math.random() * 10000000000));
+        return d.toISOString().split('T')[0];
+      }
+      if (fieldType === 'picklist') {
+        const items = optionsStr ? optionsStr.split(',').map(s => s.trim()) : statuses;
+        return getRandomItem(items);
+      }
+      return 'Sample Data';
+    }
+
+    function generateData() {
+      const numRows = parseInt(document.getElementById('rowCountInput').value, 10) || 10;
+      const records = [];
+
+      for (let r = 0; r < numRows; r++) {
+        const obj = {};
+        fields.forEach(f => {
+          obj[f.name || 'col'] = generateFieldValue(f.type, r, f.options);
+        });
+        records.push(obj);
+      }
+
+      document.getElementById('dataStats').textContent = `${numRows.toLocaleString()} Records`;
+
+      const outPre = document.getElementById('dataOutput');
+      const colNames = fields.map(f => f.name || 'col');
+
+      if (outputFormat === 'json') {
+        outPre.textContent = JSON.stringify(records, null, 2);
+      } else if (outputFormat === 'csv') {
+        let csv = colNames.join(',') + '\n';
+        records.forEach(row => {
+          csv += colNames.map(col => `"${String(row[col]).replace(/"/g, '""')}"`).join(',') + '\n';
+        });
+        outPre.textContent = csv;
+      } else if (outputFormat === 'tsv') {
+        let tsv = colNames.join('\t') + '\n';
+        records.forEach(row => {
+          tsv += colNames.map(col => row[col]).join('\t') + '\n';
+        });
+        outPre.textContent = tsv;
+      } else if (outputFormat === 'sql') {
+        let sql = `-- Generated SQL Sample Inserts\n`;
+        records.forEach(row => {
+          const vals = colNames.map(col => typeof row[col] === 'number' || typeof row[col] === 'boolean' ? row[col] : `'${String(row[col]).replace(/'/g, "''")}'`).join(', ');
+          sql += `INSERT INTO sample_table (${colNames.join(', ')}) VALUES (${vals});\n`;
+        });
+        outPre.textContent = sql;
+      } else if (outputFormat === 'markdown') {
+        let md = `| ${colNames.join(' | ')} |\n`;
+        md += `| ${colNames.map(() => '---').join(' | ')} |\n`;
+        records.forEach(row => {
+          md += `| ${colNames.map(col => row[col]).join(' | ')} |\n`;
+        });
+        outPre.textContent = md;
+      }
+    }
+
+    function copyGeneratedData() {
+      const data = document.getElementById('dataOutput').textContent;
+      try {
+        navigator.clipboard.writeText(data);
+        triggerSuccessButton('copyBtn', 'copyIcon', 'copyText', 'Copied Data!');
+      } catch (e) {
+        const range = document.createRange();
+        range.selectNode(document.getElementById('dataOutput'));
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+        document.execCommand('copy');
+        triggerSuccessButton('copyBtn', 'copyIcon', 'copyText', 'Copied Data!');
+      }
+    }
+
+    function downloadDataFile() {
+      const data = document.getElementById('dataOutput').textContent;
+      const blob = new Blob([data], { type: 'text/plain;charset=utf-8' });
+      const ext = outputFormat === 'markdown' ? 'md' : outputFormat;
+
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `sample_data.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+  </script>
+</body>
+
+</html>

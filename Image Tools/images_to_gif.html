@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Images to Animated GIF Studio Pro</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Kalam:wght@700&family=Roboto:wght@400;500&family=Roboto+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+  <!-- Gifshot CDN for Client-Side GIF Encoding -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gifshot/0.3.2/gifshot.min.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    h3,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Drag and Drop Zone */
+    .drop-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      background-color: var(--bg-color);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    /* Per-Frame Grid Cards List */
+    .frames-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+      max-height: 520px;
+      overflow-y: auto;
+      padding: 4px;
+    }
+
+    .frame-card {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      position: relative;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+
+    .frame-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: grab;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--bg-color);
+    }
+
+    .frame-header:active {
+      cursor: grabbing;
+    }
+
+    .drag-handle-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary-blue);
+    }
+
+    .frame-card.dragging {
+      opacity: 0.4;
+      border: 2px dashed var(--primary-blue);
+    }
+
+    .frame-card.drop-target {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 2px var(--primary-blue);
+    }
+
+    .frame-preview-box {
+      height: 130px;
+      background-color: #e2e8f0;
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+      background-size: 12px 12px;
+    }
+
+    .frame-preview-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    .frame-controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+    }
+
+    .control-btn-icon {
+      background: none;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      transition: all 0.15s ease;
+    }
+
+    .control-btn-icon:hover {
+      background-color: var(--bg-color);
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+    }
+
+    /* Modal Crop Overlay */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-card {
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      width: 90%;
+      max-width: 650px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .crop-canvas-box {
+      width: 100%;
+      height: 320px;
+      background-color: #0f172a;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Settings Panel */
+    .settings-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background-color: var(--bg-color);
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    select,
+    input[type="number"],
+    input[type="text"],
+    input[type="color"],
+    input[type="range"] {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      padding: 6px 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    /* Live Preview Stage */
+    .gif-player-stage {
+      height: 230px;
+      background-color: #e2e8f0;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .gif-player-stage img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 160px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="grid">
+      <!-- Left: Drag-and-Drop Frame Management & Per-Image Controls -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+          <span class="material-symbols-outlined" style="font-size: 36px; color: var(--primary-blue);">gif_box</span>
+          <div>
+            <strong>Click to upload images</strong> or drag & drop multiple files
+          </div>
+          <span style="font-size: 12px; color: var(--text-secondary);">Drag top handles of cards to reorder frames</span>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" multiple style="display: none;" onchange="handleFileSelect(event)">
+
+        <!-- Frame Quick Action Buttons -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <label style="font-weight: 500;">Frame Timeline (<span id="frameCount">0</span> Frames)</label>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="reverseFrames()">
+              <span class="material-symbols-outlined" style="font-size: 14px;">swap_horiz</span> Reverse Order
+            </button>
+            <button class="btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="addTitleSlidePrompt()">
+              <span class="material-symbols-outlined" style="font-size: 14px;">title</span> + Title Slide
+            </button>
+            <button class="btn-secondary" style="padding: 4px 8px; font-size: 11px; color: var(--danger-text);" onclick="clearAllFrames()">Clear</button>
+          </div>
+        </div>
+
+        <!-- Frame Cards Grid -->
+        <div class="frames-grid" id="framesGrid">
+          <div style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 40px; font-size: 13px;">
+            No images uploaded yet. Drag & drop images above to start building your animated GIF!
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Global GIF Settings, Text Overlays & Live Animation Stage -->
+      <div class="settings-panel">
+        <label style="font-weight: 700; font-size: 13px; color: var(--primary-blue);">Live GIF Preview & Output Settings</label>
+
+        <div class="gif-player-stage" id="gifPlayerStage">
+          <span style="font-size: 12px; color: var(--text-secondary);">Click "Generate GIF Studio" below to preview</span>
+        </div>
+
+        <div class="input-group">
+          <label for="gifPresetDim">Output Canvas Dimensions</label>
+          <select id="gifPresetDim">
+            <option value="first" selected>Auto-Match First Image Size</option>
+            <option value="500x500">Square (500 x 500 px)</option>
+            <option value="800x600">Standard (800 x 600 px)</option>
+            <option value="1280x720">HD 720p (1280 x 720 px)</option>
+          </select>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+          <div class="input-group" style="flex: 1;">
+            <label for="globalFrameDelay">Frame Delay (s)</label>
+            <input type="number" id="globalFrameDelay" step="0.1" min="0.05" max="5.0" value="0.5" onchange="applyGlobalDelay(this.value)">
+          </div>
+
+          <div class="input-group" style="flex: 1;">
+            <label for="globalFitMode">Image Fit Mode</label>
+            <select id="globalFitMode" onchange="applyGlobalFit(this.value)">
+              <option value="contain" selected>Contain (Fit with padding)</option>
+              <option value="cover">Cover (Crop & fill canvas)</option>
+              <option value="stretch">Stretch (Exact scale)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Global Text Caption Overlay -->
+        <div style="border-top: 1px solid var(--border-color); padding-top: 8px;" class="input-group">
+          <label for="globalCaptionText">Global Text Caption / Watermark</label>
+          <input type="text" id="globalCaptionText" placeholder="Add text e.g. @mybrand..." oninput="updatePreviewWatermark()">
+          <div style="display: flex; gap: 6px; margin-top: 4px;">
+            <select id="captionPos" style="flex: 1;">
+              <option value="bottom" selected>Bottom Caption</option>
+              <option value="top">Top Header Text</option>
+              <option value="center">Centered Text</option>
+            </select>
+            <input type="color" id="captionColor" value="#ffffff" style="width: 40px; height: 30px; padding: 2px;">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="bgColorPicker">Canvas Padding Background Color</label>
+          <input type="color" id="bgColorPicker" value="#ffffff" style="width: 100%; height: 32px; padding: 2px;">
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Crop Overlay -->
+    <div class="modal-overlay" id="cropModal">
+      <div class="modal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="margin: 0; font-size: 16px;">Interactive Image Cropper</h3>
+          <span class="material-symbols-outlined" style="cursor: pointer;" onclick="closeCropModal()">close</span>
+        </div>
+
+        <div class="crop-canvas-box">
+          <canvas id="cropCanvas"></canvas>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 11px; color: var(--text-secondary);">Click & drag to select crop area</span>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-secondary" onclick="closeCropModal()">Cancel</button>
+            <button class="btn-primary" onclick="saveCroppedFrame()">Apply Crop</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="generateBtn" class="btn-primary" onclick="createAnimatedGif()" disabled>
+        <span class="material-symbols-outlined" id="genIcon">movie</span>
+        <span id="genText">Generate GIF Studio</span>
+      </button>
+
+      <button id="downloadBtn" class="btn-secondary" onclick="downloadGifFile()" disabled>
+        <span class="material-symbols-outlined">download</span>
+        Download GIF
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let framesList = [];
+    let generatedGifUrl = null;
+    let dragSrcIndex = null;
+    let editingFrameIndex = null;
+
+    // Crop Modal Variables
+    let cropCanvas, cropCtx;
+    let cropStartX = 0, cropStartY = 0, cropEndX = 0, cropEndY = 0;
+    let isCropping = false;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setupDragAndDrop();
+
+      cropCanvas = document.getElementById('cropCanvas');
+      cropCtx = cropCanvas.getContext('2d');
+
+      cropCanvas.addEventListener('mousedown', (e) => {
+        const rect = cropCanvas.getBoundingClientRect();
+        cropStartX = e.clientX - rect.left;
+        cropStartY = e.clientY - rect.top;
+        cropEndX = cropStartX;
+        cropEndY = cropStartY;
+        isCropping = true;
+      });
+
+      cropCanvas.addEventListener('mousemove', (e) => {
+        if (!isCropping) return;
+        const rect = cropCanvas.getBoundingClientRect();
+        cropEndX = e.clientX - rect.left;
+        cropEndY = e.clientY - rect.top;
+        drawCropPreview();
+      });
+
+      cropCanvas.addEventListener('mouseup', () => { isCropping = false; });
+    });
+
+    function setupDragAndDrop() {
+      const zone = document.getElementById('dropZone');
+      ['dragenter', 'dragover'].forEach(name => {
+        zone.addEventListener(name, (e) => { e.preventDefault(); zone.classList.add('dragover'); });
+      });
+      ['dragleave', 'drop'].forEach(name => {
+        zone.addEventListener(name, (e) => { e.preventDefault(); zone.classList.remove('dragover'); });
+      });
+      zone.addEventListener('drop', (e) => {
+        if (e.dataTransfer.files.length > 0) {
+          addImages(Array.from(e.dataTransfer.files));
+        }
+      });
+    }
+
+    function handleFileSelect(e) {
+      if (e.target.files.length > 0) {
+        addImages(Array.from(e.target.files));
+      }
+    }
+
+    function addImages(files) {
+      files.forEach(file => {
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            const img = new Image();
+            img.onload = () => {
+              framesList.push({
+                file,
+                src: evt.target.result,
+                imgObj: img,
+                width: img.width,
+                height: img.height,
+                duration: parseFloat(document.getElementById('globalFrameDelay').value) || 0.5,
+                fitMode: document.getElementById('globalFitMode').value || 'contain',
+                rotation: 0,
+                brightness: 100,
+                contrast: 100,
+                crop: null,
+                caption: ''
+              });
+              renderFramesGrid();
+            };
+            img.src = evt.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+
+    function renderFramesGrid() {
+      const grid = document.getElementById('framesGrid');
+      document.getElementById('frameCount').textContent = framesList.length;
+      document.getElementById('generateBtn').disabled = framesList.length === 0;
+
+      if (framesList.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 40px; font-size: 13px;">
+            No images uploaded yet. Drag & drop images above to start building your animated GIF!
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = framesList.map((f, idx) => `
+        <div class="frame-card" id="frame_card_${idx}" ondragover="onDragOver(event, ${idx})" ondragleave="onDragLeave(event, ${idx})" ondrop="onDrop(event, ${idx})">
+          <div class="frame-header" draggable="true" ondragstart="onDragStart(event, ${idx})" ondragend="onDragEnd(event, ${idx})">
+            <span class="drag-handle-badge">
+              <span class="material-symbols-outlined" style="font-size: 16px; cursor: grab;">drag_indicator</span> Frame #${idx + 1}
+            </span>
+            <span style="font-size: 10px; color: var(--text-secondary); font-family: monospace;">${f.width}x${f.height}px</span>
+          </div>
+
+          <div class="frame-preview-box">
+            <img src="${f.src}" style="transform: rotate(${f.rotation}deg); filter: brightness(${f.brightness}%) contrast(${f.contrast}%);">
+          </div>
+
+          <div class="frame-controls-row">
+            <div style="display: flex; gap: 4px;">
+              <button class="control-btn-icon" onclick="openCropModal(${idx})" title="Crop Image">
+                <span class="material-symbols-outlined" style="font-size: 16px;">crop</span>
+              </button>
+              <button class="control-btn-icon" onclick="rotateFrame(${idx})" title="Rotate 90°">
+                <span class="material-symbols-outlined" style="font-size: 16px;">rotate_right</span>
+              </button>
+              <button class="control-btn-icon" onclick="duplicateFrame(${idx})" title="Duplicate Frame">
+                <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span>
+              </button>
+            </div>
+
+            <button class="control-btn-icon" style="color: var(--danger-text);" onclick="removeFrame(${idx})" title="Delete Frame">
+              <span class="material-symbols-outlined" style="font-size: 16px;">delete</span>
+            </button>
+          </div>
+
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <label style="font-size: 11px;">Delay:</label>
+            <input type="number" step="0.1" min="0.05" max="5.0" value="${f.duration}" style="width: 55px;" onchange="framesList[${idx}].duration=parseFloat(this.value)">
+            <span style="font-size: 10px; color: var(--text-secondary);">s</span>
+          </div>
+
+          <div class="input-group">
+            <input type="text" placeholder="Frame caption text..." value="${escapeHtml(f.caption || '')}" oninput="framesList[${idx}].caption=this.value">
+          </div>
+        </div>
+      `).join('');
+    }
+
+    /* Robust HTML5 Drag & Drop Reordering via Top Handle */
+    function onDragStart(e, idx) {
+      dragSrcIndex = idx;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', idx);
+      const card = document.getElementById(`frame_card_${idx}`);
+      if (card) card.classList.add('dragging');
+    }
+
+    function onDragEnd(e, idx) {
+      const card = document.getElementById(`frame_card_${idx}`);
+      if (card) card.classList.remove('dragging');
+      document.querySelectorAll('.frame-card').forEach(c => c.classList.remove('drop-target'));
+    }
+
+    function onDragOver(e, idx) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const card = document.getElementById(`frame_card_${idx}`);
+      if (card && dragSrcIndex !== idx) card.classList.add('drop-target');
+    }
+
+    function onDragLeave(e, idx) {
+      const card = document.getElementById(`frame_card_${idx}`);
+      if (card) card.classList.remove('drop-target');
+    }
+
+    function onDrop(e, targetIdx) {
+      e.preventDefault();
+      document.querySelectorAll('.frame-card').forEach(c => c.classList.remove('drop-target'));
+      if (dragSrcIndex !== null && dragSrcIndex !== targetIdx) {
+        const item = framesList.splice(dragSrcIndex, 1)[0];
+        framesList.splice(targetIdx, 0, item);
+        renderFramesGrid();
+      }
+    }
+
+    function duplicateFrame(idx) {
+      const orig = framesList[idx];
+      const clone = { ...orig };
+      framesList.splice(idx + 1, 0, clone);
+      renderFramesGrid();
+    }
+
+    function reverseFrames() {
+      framesList.reverse();
+      renderFramesGrid();
+    }
+
+    function addTitleSlidePrompt() {
+      const text = prompt('Enter Title Slide Text:');
+      if (!text) return;
+
+      const c = document.createElement('canvas');
+      c.width = 600;
+      c.height = 400;
+      const ctx = c.getContext('2d');
+
+      ctx.fillStyle = '#1a73e8';
+      ctx.fillRect(0, 0, 600, 400);
+
+      ctx.font = 'bold 36px "Google Sans", sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, 300, 200);
+
+      const src = c.toDataURL('image/png');
+      const img = new Image();
+      img.onload = () => {
+        framesList.unshift({
+          file: null,
+          src,
+          imgObj: img,
+          width: 600,
+          height: 400,
+          duration: 1.0,
+          fitMode: 'contain',
+          rotation: 0,
+          brightness: 100,
+          contrast: 100,
+          crop: null,
+          caption: ''
+        });
+        renderFramesGrid();
+      };
+      img.src = src;
+    }
+
+    function rotateFrame(idx) {
+      framesList[idx].rotation = (framesList[idx].rotation + 90) % 360;
+      renderFramesGrid();
+    }
+
+    function removeFrame(idx) {
+      framesList.splice(idx, 1);
+      renderFramesGrid();
+    }
+
+    function clearAllFrames() {
+      framesList = [];
+      renderFramesGrid();
+      document.getElementById('gifPlayerStage').innerHTML = '<span style="font-size: 12px; color: var(--text-secondary);">Click "Generate GIF Studio" below to preview</span>';
+      document.getElementById('downloadBtn').disabled = true;
+    }
+
+    function applyGlobalDelay(val) {
+      const d = parseFloat(val) || 0.5;
+      framesList.forEach(f => f.duration = d);
+      renderFramesGrid();
+    }
+
+    function applyGlobalFit(val) {
+      framesList.forEach(f => f.fitMode = val);
+    }
+
+    /* Modal Cropper */
+    function openCropModal(idx) {
+      editingFrameIndex = idx;
+      const frame = framesList[idx];
+      const modal = document.getElementById('cropModal');
+      modal.style.display = 'flex';
+
+      cropCanvas.width = frame.width;
+      cropCanvas.height = frame.height;
+      cropCtx.drawImage(frame.imgObj, 0, 0);
+
+      cropStartX = 0; cropStartY = 0;
+      cropEndX = frame.width; cropEndY = frame.height;
+    }
+
+    function closeCropModal() {
+      document.getElementById('cropModal').style.display = 'none';
+      editingFrameIndex = null;
+    }
+
+    function drawCropPreview() {
+      if (editingFrameIndex === null) return;
+      const frame = framesList[editingFrameIndex];
+
+      cropCtx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
+      cropCtx.drawImage(frame.imgObj, 0, 0);
+
+      cropCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      cropCtx.fillRect(0, 0, cropCanvas.width, cropCanvas.height);
+
+      const x = Math.min(cropStartX, cropEndX);
+      const y = Math.min(cropStartY, cropEndY);
+      const w = Math.abs(cropEndX - cropStartX);
+      const h = Math.abs(cropEndY - cropStartY);
+
+      cropCtx.drawImage(frame.imgObj, x, y, w, h, x, y, w, h);
+      cropCtx.strokeStyle = '#1a73e8';
+      cropCtx.lineWidth = 2;
+      cropCtx.strokeRect(x, y, w, h);
+    }
+
+    function saveCroppedFrame() {
+      if (editingFrameIndex === null) return;
+      const frame = framesList[editingFrameIndex];
+
+      const x = Math.min(cropStartX, cropEndX);
+      const y = Math.min(cropStartY, cropEndY);
+      const w = Math.abs(cropEndX - cropStartX);
+      const h = Math.abs(cropEndY - cropStartY);
+
+      if (w > 10 && h > 10) {
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        const cCtx = c.getContext('2d');
+        cCtx.drawImage(frame.imgObj, x, y, w, h, 0, 0, w, h);
+
+        const newSrc = c.toDataURL('image/png');
+        const newImg = new Image();
+        newImg.onload = () => {
+          frame.src = newSrc;
+          frame.imgObj = newImg;
+          frame.width = w;
+          frame.height = h;
+          renderFramesGrid();
+          closeCropModal();
+        };
+        newImg.src = newSrc;
+      } else {
+        closeCropModal();
+      }
+    }
+
+    async function createAnimatedGif() {
+      if (framesList.length === 0) return;
+      triggerGeneratingButton(true);
+
+      const preset = document.getElementById('gifPresetDim').value;
+      let targetW = 500, targetH = 500;
+
+      if (preset === 'first') {
+        targetW = framesList[0].width;
+        targetH = framesList[0].height;
+      } else if (preset === '500x500') {
+        targetW = 500; targetH = 500;
+      } else if (preset === '800x600') {
+        targetW = 800; targetH = 600;
+      } else if (preset === '1280x720') {
+        targetW = 1280; targetH = 720;
+      }
+
+      const bgColor = document.getElementById('bgColorPicker').value;
+      const globalText = document.getElementById('globalCaptionText').value.trim();
+      const captionPos = document.getElementById('captionPos').value;
+      const captionColor = document.getElementById('captionColor').value;
+
+      const frameCanvasList = [];
+
+      for (let f of framesList) {
+        const c = document.createElement('canvas');
+        c.width = targetW;
+        c.height = targetH;
+        const ctx = c.getContext('2d');
+
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(0, 0, targetW, targetH);
+
+        ctx.save();
+        ctx.translate(targetW / 2, targetH / 2);
+        ctx.rotate((f.rotation * Math.PI) / 180);
+
+        let drawW = f.width;
+        let drawH = f.height;
+
+        if (f.fitMode === 'contain') {
+          const ratio = Math.min(targetW / f.width, targetH / f.height);
+          drawW = f.width * ratio;
+          drawH = f.height * ratio;
+        } else if (f.fitMode === 'cover') {
+          const ratio = Math.max(targetW / f.width, targetH / f.height);
+          drawW = f.width * ratio;
+          drawH = f.height * ratio;
+        } else {
+          drawW = targetW;
+          drawH = targetH;
+        }
+
+        ctx.drawImage(f.imgObj, -drawW / 2, -drawH / 2, drawW, drawH);
+        ctx.restore();
+
+        const textToRender = f.caption || globalText;
+        if (textToRender) {
+          ctx.font = 'bold 22px "Google Sans", sans-serif';
+          ctx.fillStyle = captionColor;
+          ctx.textAlign = 'center';
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = '#000000';
+
+          let textY = targetH - 24;
+          if (captionPos === 'top') textY = 36;
+          else if (captionPos === 'center') textY = targetH / 2;
+
+          ctx.strokeText(textToRender, targetW / 2, textY);
+          ctx.fillText(textToRender, targetW / 2, textY);
+        }
+
+        frameCanvasList.push({
+          src: c.toDataURL('image/png'),
+          duration: f.duration
+        });
+      }
+
+      const imagesPayload = frameCanvasList.map(item => item.src);
+      const avgInterval = frameCanvasList[0].duration;
+
+      gifshot.createGIF({
+        images: imagesPayload,
+        gifWidth: targetW,
+        gifHeight: targetH,
+        interval: avgInterval,
+        sampleInterval: 10,
+        numWorkers: 2
+      }, function (obj) {
+        triggerGeneratingButton(false);
+        if (!obj.error) {
+          generatedGifUrl = obj.image;
+          const stage = document.getElementById('gifPlayerStage');
+          stage.innerHTML = `<img src="${generatedGifUrl}">`;
+          document.getElementById('downloadBtn').disabled = false;
+          showStatus('Animated GIF Studio generated successfully!', 'success');
+        } else {
+          showStatus('Error encoding GIF animation.', 'error');
+        }
+      });
+    }
+
+    function downloadGifFile() {
+      if (!generatedGifUrl) return;
+      const a = document.createElement('a');
+      a.href = generatedGifUrl;
+      a.download = `animated_studio_${Date.now()}.gif`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function triggerGeneratingButton(active) {
+      const btn = document.getElementById('generateBtn');
+      const icon = document.getElementById('genIcon');
+      const text = document.getElementById('genText');
+
+      btn.disabled = active;
+      if (active) {
+        icon.innerText = 'sync';
+        text.innerText = 'Encoding GIF...';
+      } else {
+        icon.innerText = 'movie';
+        text.innerText = 'Generate GIF Studio';
+      }
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+  </script>
+</body>
+
+</html>

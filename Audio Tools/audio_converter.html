@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Universal Audio Format Converter</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Roboto:wght@400;500&family=Roboto+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+  <!-- LameJS CDN for Client-Side MP3 Encoding -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Drag and Drop Zone */
+    .drop-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 28px;
+      text-align: center;
+      background-color: var(--bg-color);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    .drop-icon {
+      font-size: 40px;
+      color: var(--primary-blue);
+    }
+
+    /* Controls Panel */
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background-color: var(--bg-color);
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    select {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 13px;
+      padding: 8px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    /* Audio Queue Card List */
+    .file-queue {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 13px;
+      gap: 12px;
+    }
+
+    .file-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .file-name {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-meta {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    /* Progress Bar */
+    .progress-bar-bg {
+      width: 100px;
+      height: 6px;
+      background-color: var(--border-color);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background-color: var(--primary-blue);
+      transition: width 0.1s linear;
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 150px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="grid">
+      <!-- Left: File Upload & Format Selection -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+          <span class="material-symbols-outlined drop-icon">graphic_eq</span>
+          <div>
+            <strong>Click to upload audio files</strong> or drag & drop here
+          </div>
+          <span style="font-size: 12px; color: var(--text-secondary);">Supports MP3, WAV, OGG, AAC, M4A, FLAC, WEBM audio</span>
+        </div>
+        <input type="file" id="fileInput" accept="audio/*" multiple style="display: none;" onchange="handleFileSelect(event)">
+
+        <!-- Target Output Settings Card -->
+        <div class="controls-panel">
+          <div class="control-row">
+            <div class="input-group">
+              <label for="targetFormat">Target Format</label>
+              <select id="targetFormat" onchange="updateBitrateVisibility()">
+                <option value="wav" selected>WAV (Uncompressed PCM)</option>
+                <option value="mp3">MP3 (MPEG Layer III)</option>
+                <option value="ogg">OGG (Ogg Vorbis)</option>
+                <option value="aac">AAC / M4A (Compressed Audio)</option>
+              </select>
+            </div>
+
+            <div class="input-group" id="bitrateGroup" style="display: none;">
+              <label for="bitrateSelect">MP3 Bitrate</label>
+              <select id="bitrateSelect">
+                <option value="128">128 kbps (Standard)</option>
+                <option value="192" selected>192 kbps (High Quality)</option>
+                <option value="256">256 kbps (Very High)</option>
+                <option value="320">320 kbps (Maximum Quality)</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label for="channelsSelect">Channels</label>
+              <select id="channelsSelect">
+                <option value="preserve" selected>Keep Original</option>
+                <option value="mono">Mono (1 Channel)</option>
+                <option value="stereo">Stereo (2 Channels)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Conversion Queue & Player -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <label style="font-weight: 500;">Conversion Queue (<span id="fileCount">0</span> Files)</label>
+        <div class="file-queue" id="fileQueue">
+          <div style="text-align: center; color: var(--text-secondary); padding: 32px; font-size: 13px;">
+            No audio files loaded yet. Upload audio files on the left to convert!
+          </div>
+        </div>
+
+        <!-- Audio Audition Player -->
+        <div id="playerBox" style="display: none; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; flex-direction: column; gap: 6px;">
+          <label style="font-weight: 500; font-size: 12px;">Converted Audio Audition Player</label>
+          <audio id="auditionPlayer" controls style="width: 100%; height: 36px;"></audio>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="convertBtn" class="btn-primary" onclick="convertAllFiles()" disabled>
+        <span class="material-symbols-outlined" id="convertIcon">sync</span>
+        <span id="convertText">Convert Audio</span>
+      </button>
+
+      <button class="btn-secondary" onclick="clearAllFiles()">
+        <span class="material-symbols-outlined">delete</span>
+        Clear Queue
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let fileList = [];
+    let audioCtx = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setupDragAndDrop();
+    });
+
+    function setupDragAndDrop() {
+      const zone = document.getElementById('dropZone');
+      ['dragenter', 'dragover'].forEach(name => {
+        zone.addEventListener(name, (e) => { e.preventDefault(); zone.classList.add('dragover'); });
+      });
+      ['dragleave', 'drop'].forEach(name => {
+        zone.addEventListener(name, (e) => { e.preventDefault(); zone.classList.remove('dragover'); });
+      });
+      zone.addEventListener('drop', (e) => {
+        if (e.dataTransfer.files.length > 0) {
+          addFiles(Array.from(e.dataTransfer.files));
+        }
+      });
+    }
+
+    function handleFileSelect(e) {
+      if (e.target.files.length > 0) {
+        addFiles(Array.from(e.target.files));
+      }
+    }
+
+    function addFiles(files) {
+      files.forEach(file => {
+        if (file.type.startsWith('audio/') || /\.(mp3|wav|ogg|m4a|aac|flac|webm)$/i.test(file.name)) {
+          fileList.push({
+            file,
+            status: 'pending', // 'pending', 'converting', 'done', 'error'
+            convertedBlob: null,
+            convertedUrl: null,
+            outputName: ''
+          });
+        }
+      });
+
+      renderQueue();
+    }
+
+    function renderQueue() {
+      const queue = document.getElementById('fileQueue');
+      document.getElementById('fileCount').textContent = fileList.length;
+      document.getElementById('convertBtn').disabled = fileList.length === 0;
+
+      if (fileList.length === 0) {
+        queue.innerHTML = `
+          <div style="text-align: center; color: var(--text-secondary); padding: 32px; font-size: 13px;">
+            No audio files loaded yet. Upload audio files on the left to convert!
+          </div>
+        `;
+        return;
+      }
+
+      queue.innerHTML = fileList.map((item, idx) => `
+        <div class="file-item">
+          <div class="file-info">
+            <span class="file-name">${escapeHtml(item.file.name)}</span>
+            <span class="file-meta">${formatFileSize(item.file.size)}</span>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px;">
+            ${item.status === 'converting' ? `
+              <div class="progress-bar-bg"><div class="progress-bar-fill" id="pbar_${idx}" style="width: 50%;"></div></div>
+            ` : item.status === 'done' ? `
+              <span class="material-symbols-outlined" style="color: var(--success-text);">check_circle</span>
+              <button class="btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="downloadSingleFile(${idx})">Download</button>
+            ` : `
+              <span class="material-symbols-outlined" style="font-size: 16px; cursor: pointer; color: var(--text-secondary);" onclick="removeFile(${idx})">close</span>
+            `}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function removeFile(idx) {
+      fileList.splice(idx, 1);
+      renderQueue();
+    }
+
+    function clearAllFiles() {
+      fileList = [];
+      renderQueue();
+      document.getElementById('playerBox').style.display = 'none';
+      hideStatus();
+    }
+
+    function updateBitrateVisibility() {
+      const fmt = document.getElementById('targetFormat').value;
+      document.getElementById('bitrateGroup').style.display = fmt === 'mp3' ? 'flex' : 'none';
+    }
+
+    async function convertAllFiles() {
+      if (fileList.length === 0) return;
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+      const fmt = document.getElementById('targetFormat').value;
+      const bitrate = parseInt(document.getElementById('bitrateSelect').value, 10);
+      const chMode = document.getElementById('channelsSelect').value;
+
+      triggerConvertingButton(true);
+
+      for (let i = 0; i < fileList.length; i++) {
+        const item = fileList[i];
+        item.status = 'converting';
+        renderQueue();
+
+        try {
+          const arrayBuffer = await item.file.arrayBuffer();
+          const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+          let convertedBlob = null;
+          const baseName = item.file.name.substring(0, item.file.name.lastIndexOf('.')) || item.file.name;
+
+          if (fmt === 'wav') {
+            convertedBlob = bufferToWavBlob(audioBuffer, chMode);
+            item.outputName = `${baseName}_converted.wav`;
+          } else if (fmt === 'mp3') {
+            convertedBlob = await bufferToMp3Blob(audioBuffer, bitrate, chMode);
+            item.outputName = `${baseName}_converted.mp3`;
+          } else {
+            // OGG / AAC using WebAudio MediaRecorder
+            convertedBlob = await bufferToMediaRecorderBlob(audioBuffer, fmt, chMode);
+            item.outputName = `${baseName}_converted.${fmt === 'aac' ? 'm4a' : 'ogg'}`;
+          }
+
+          item.convertedBlob = convertedBlob;
+          item.convertedUrl = URL.createObjectURL(convertedBlob);
+          item.status = 'done';
+
+          // Set Audition Player to latest converted file
+          const auditionPlayer = document.getElementById('auditionPlayer');
+          auditionPlayer.src = item.convertedUrl;
+          document.getElementById('playerBox').style.display = 'flex';
+        } catch (e) {
+          console.error(e);
+          item.status = 'error';
+        }
+
+        renderQueue();
+      }
+
+      triggerConvertingButton(false);
+      showStatus('All audio conversions completed successfully!', 'success');
+    }
+
+    function bufferToWavBlob(audioBuffer, chMode) {
+      let numChannels = audioBuffer.numberOfChannels;
+      if (chMode === 'mono') numChannels = 1;
+      else if (chMode === 'stereo') numChannels = 2;
+
+      const sampleRate = audioBuffer.sampleRate;
+      const format = 1; // PCM 16-bit
+      const bitDepth = 16;
+
+      let samples;
+      if (numChannels === 1) {
+        samples = audioBuffer.getChannelData(0);
+      } else {
+        const L = audioBuffer.getChannelData(0);
+        const R = audioBuffer.numberOfChannels > 1 ? audioBuffer.getChannelData(1) : L;
+        samples = new Float32Array(L.length * 2);
+        for (let i = 0; i < L.length; i++) {
+          samples[i * 2] = L[i];
+          samples[i * 2 + 1] = R[i];
+        }
+      }
+
+      const buffer = new ArrayBuffer(44 + samples.length * 2);
+      const view = new DataView(buffer);
+
+      /* WAV Header */
+      writeString(view, 0, 'RIFF');
+      view.setUint32(4, 36 + samples.length * 2, true);
+      writeString(view, 8, 'WAVE');
+      writeString(view, 12, 'fmt ');
+      view.setUint32(16, 16, true);
+      view.setUint16(20, format, true);
+      view.setUint16(22, numChannels, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * numChannels * 2, true);
+      view.setUint16(32, numChannels * 2, true);
+      view.setUint16(34, bitDepth, true);
+      writeString(view, 36, 'data');
+      view.setUint32(40, samples.length * 2, true);
+
+      /* Write PCM Samples */
+      let offset = 44;
+      for (let i = 0; i < samples.length; i++) {
+        const s = Math.max(-1, Math.min(1, samples[i]));
+        view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+        offset += 2;
+      }
+
+      return new Blob([buffer], { type: 'audio/wav' });
+    }
+
+    async function bufferToMp3Blob(audioBuffer, kbps, chMode) {
+      if (typeof lamejs === 'undefined') {
+        throw new Error('LameJS MP3 Encoder library not loaded');
+      }
+
+      let channels = audioBuffer.numberOfChannels;
+      if (chMode === 'mono') channels = 1;
+      else if (chMode === 'stereo') channels = 2;
+
+      const sampleRate = audioBuffer.sampleRate;
+      const mp3encoder = new lamejs.Mp3Encoder(channels, sampleRate, kbps);
+      const mp3Data = [];
+
+      const sampleLength = audioBuffer.length;
+      const left = audioBuffer.getChannelData(0);
+      const right = channels > 1 && audioBuffer.numberOfChannels > 1 ? audioBuffer.getChannelData(1) : left;
+
+      // Convert Float32Array to Int16Array
+      const leftInt = new Int16Array(sampleLength);
+      const rightInt = new Int16Array(sampleLength);
+      for (let i = 0; i < sampleLength; i++) {
+        leftInt[i] = left[i] < 0 ? left[i] * 0x8000 : left[i] * 0x7FFF;
+        rightInt[i] = right[i] < 0 ? right[i] * 0x8000 : right[i] * 0x7FFF;
+      }
+
+      const sampleBlockSize = 1152;
+      for (let i = 0; i < sampleLength; i += sampleBlockSize) {
+        const leftChunk = leftInt.subarray(i, i + sampleBlockSize);
+        let mp3buf;
+        if (channels === 1) {
+          mp3buf = mp3encoder.encodeBuffer(leftChunk);
+        } else {
+          const rightChunk = rightInt.subarray(i, i + sampleBlockSize);
+          mp3buf = mp3encoder.encodeBuffer(leftChunk, rightChunk);
+        }
+        if (mp3buf.length > 0) mp3Data.push(mp3buf);
+      }
+
+      const endBuf = mp3encoder.flush();
+      if (endBuf.length > 0) mp3Data.push(endBuf);
+
+      return new Blob(mp3Data, { type: 'audio/mp3' });
+    }
+
+    function bufferToMediaRecorderBlob(audioBuffer, fmt, chMode) {
+      return new Promise((resolve) => {
+        const dest = audioCtx.createMediaStreamDestination();
+        const src = audioCtx.createBufferSource();
+        src.buffer = audioBuffer;
+        src.connect(dest);
+
+        const mimeType = fmt === 'ogg' ? 'audio/webm;codecs=opus' : 'audio/webm';
+        const mediaRecorder = new MediaRecorder(dest.stream, { mimeType });
+        const chunks = [];
+
+        mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+        mediaRecorder.onstop = () => {
+          resolve(new Blob(chunks, { type: fmt === 'ogg' ? 'audio/ogg' : 'audio/aac' }));
+        };
+
+        mediaRecorder.start();
+        src.start(0);
+
+        src.onended = () => {
+          mediaRecorder.stop();
+        };
+      });
+    }
+
+    function downloadSingleFile(idx) {
+      const item = fileList[idx];
+      if (!item || !item.convertedUrl) return;
+
+      const a = document.createElement('a');
+      a.href = item.convertedUrl;
+      a.download = item.outputName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function triggerConvertingButton(active) {
+      const btn = document.getElementById('convertBtn');
+      const icon = document.getElementById('convertIcon');
+      const text = document.getElementById('convertText');
+
+      btn.disabled = active;
+      if (active) {
+        icon.innerText = 'sync';
+        text.innerText = 'Converting...';
+      } else {
+        icon.innerText = 'sync';
+        text.innerText = 'Convert Audio';
+      }
+    }
+
+    function writeString(view, offset, string) {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    }
+
+    function formatFileSize(bytes) {
+      if (!bytes) return '0 B';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+    }
+
+    function hideStatus() {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = 'status-box';
+      statusBox.textContent = '';
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+  </script>
+</body>
+
+</html>
