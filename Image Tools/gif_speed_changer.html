@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GIF Speed Changer & Frame Rate Controller</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Roboto:wght@400;500&family=Roboto+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+  <!-- Omggif & Gifshot CDNs for Client-Side GIF Decoding and Encoding -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/omggif/1.0.10/omggif.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gifshot/0.3.2/gifshot.min.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 16px;
+    }
+
+    @media (max-width: 860px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Drag and Drop Zone */
+    .drop-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      background-color: var(--bg-color);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    /* Speed Presets Grid */
+    .speed-presets {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .speed-btn {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+
+    .speed-btn:hover,
+    .speed-btn.active {
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    /* Settings Panel */
+    .settings-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background-color: var(--bg-color);
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    select,
+    input[type="number"] {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      padding: 6px 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    /* Stage Player */
+    .gif-player-stage {
+      height: 240px;
+      background-color: #e2e8f0;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .gif-player-stage img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 160px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="grid">
+      <!-- Left: File Upload & Speed Settings -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+          <span class="material-symbols-outlined" style="font-size: 36px; color: var(--primary-blue);">speed</span>
+          <div>
+            <strong>Click to upload an animated GIF</strong> or drag & drop file here
+          </div>
+          <span style="font-size: 12px; color: var(--text-secondary);">Speeds up or slows down GIF frame playback instantly</span>
+        </div>
+        <input type="file" id="fileInput" accept="image/gif" style="display: none;" onchange="handleFileSelect(event)">
+
+        <!-- Speed Selector Grid -->
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-weight: 500;">Select Playback Speed Multiplier:</label>
+          <div class="speed-presets">
+            <button class="speed-btn" onclick="setSpeedMultiplier(0.25, this)">0.25x (Slow)</button>
+            <button class="speed-btn" onclick="setSpeedMultiplier(0.5, this)">0.5x (Half)</button>
+            <button class="speed-btn active" onclick="setSpeedMultiplier(1.0, this)">1.0x (Normal)</button>
+            <button class="speed-btn" onclick="setSpeedMultiplier(1.5, this)">1.5x (Faster)</button>
+            <button class="speed-btn" onclick="setSpeedMultiplier(2.0, this)">2.0x (Double)</button>
+            <button class="speed-btn" onclick="setSpeedMultiplier(3.0, this)">3.0x (3x Fast)</button>
+            <button class="speed-btn" onclick="setSpeedMultiplier(4.0, this)">4.0x (4x Fast)</button>
+            <button class="speed-btn" onclick="setSpeedMultiplier(0.1, this)">0.1x (Step)</button>
+          </div>
+        </div>
+
+        <!-- Custom Delay Input -->
+        <div class="input-group">
+          <label for="customDelayInput">Custom Frame Delay (seconds per frame)</label>
+          <input type="number" id="customDelayInput" step="0.01" min="0.02" max="5.0" value="0.1" onchange="onCustomDelayChange(this.value)">
+        </div>
+      </div>
+
+      <!-- Right: GIF Info & Preview Player -->
+      <div class="settings-panel">
+        <label style="font-weight: 700; font-size: 13px; color: var(--primary-blue);">Live GIF Preview & Stats</label>
+
+        <div class="gif-player-stage" id="gifPlayerStage">
+          <span style="font-size: 12px; color: var(--text-secondary);">Upload an animated GIF on the left to start</span>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; font-size: 12px; border-top: 1px solid var(--border-color); padding-top: 8px;">
+          <span>Frames Extracted: <strong id="statFrames">0</strong></span>
+          <span>Original Size: <strong id="statDim">0x0 px</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="applyBtn" class="btn-primary" onclick="processGifSpeed()" disabled>
+        <span class="material-symbols-outlined" id="applyIcon">bolt</span>
+        <span id="applyText">Apply Speed Change</span>
+      </button>
+
+      <button id="downloadBtn" class="btn-secondary" onclick="downloadSpeedGif()" disabled>
+        <span class="material-symbols-outlined">download</span>
+        Download Speed GIF
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let extractedFrames = [];
+    let originalGifWidth = 0;
+    let originalGifHeight = 0;
+    let speedMultiplier = 1.0;
+    let newGifUrl = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setupDragAndDrop();
+    });
+
+    function setupDragAndDrop() {
+      const zone = document.getElementById('dropZone');
+      ['dragenter', 'dragover'].forEach(name => {
+        zone.addEventListener(name, (e) => { e.preventDefault(); zone.classList.add('dragover'); });
+      });
+      ['dragleave', 'drop'].forEach(name => {
+        zone.addEventListener(name, (e) => { e.preventDefault(); zone.classList.remove('dragover'); });
+      });
+      zone.addEventListener('drop', (e) => {
+        if (e.dataTransfer.files.length > 0) {
+          loadGifFile(e.dataTransfer.files[0]);
+        }
+      });
+    }
+
+    function handleFileSelect(e) {
+      if (e.target.files.length > 0) {
+        loadGifFile(e.target.files[0]);
+      }
+    }
+
+    async function loadGifFile(file) {
+      if (!file || !file.type.includes('gif')) return;
+
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const byteArray = new Uint8Array(arrayBuffer);
+        const gr = new omggif.GifReader(byteArray);
+
+        originalGifWidth = gr.width;
+        originalGifHeight = gr.height;
+        extractedFrames = [];
+
+        for (let i = 0; i < gr.numFrames(); i++) {
+          const frameInfo = gr.frameInfo(i);
+          const pixels = new Uint8ClampedArray(gr.width * gr.height * 4);
+          gr.decodeAndBlitFrameRGBA(i, pixels);
+
+          const c = document.createElement('canvas');
+          c.width = gr.width;
+          c.height = gr.height;
+          const ctx = c.getContext('2d');
+          const imgData = ctx.createImageData(gr.width, gr.height);
+          imgData.data.set(pixels);
+          ctx.putImageData(imgData, 0, 0);
+
+          extractedFrames.push({
+            src: c.toDataURL('image/png'),
+            delay: (frameInfo.delay || 10) / 100 // convert 100ths of sec to sec
+          });
+        }
+
+        document.getElementById('statFrames').textContent = extractedFrames.length;
+        document.getElementById('statDim').textContent = `${originalGifWidth}x${originalGifHeight}px`;
+
+        const stage = document.getElementById('gifPlayerStage');
+        stage.innerHTML = `<img src="${URL.createObjectURL(file)}">`;
+
+        document.getElementById('applyBtn').disabled = false;
+        showStatus(`Extracted ${extractedFrames.length} frames successfully! Select speed multiplier above.`, 'success');
+      } catch (e) {
+        console.error(e);
+        showStatus('Error parsing GIF frames. Ensure file is a valid animated GIF.', 'error');
+      }
+    }
+
+    function setSpeedMultiplier(mult, btnEl) {
+      speedMultiplier = mult;
+      document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+
+      if (extractedFrames.length > 0) {
+        const avgDelay = extractedFrames[0].delay || 0.1;
+        document.getElementById('customDelayInput').value = (avgDelay / speedMultiplier).toFixed(2);
+      }
+    }
+
+    function onCustomDelayChange(val) {
+      const delaySec = parseFloat(val) || 0.1;
+      if (extractedFrames.length > 0) {
+        const origDelay = extractedFrames[0].delay || 0.1;
+        speedMultiplier = origDelay / delaySec;
+      }
+    }
+
+    function processGifSpeed() {
+      if (extractedFrames.length === 0) return;
+      triggerApplyingButton(true);
+
+      const targetDelay = (extractedFrames[0].delay || 0.1) / speedMultiplier;
+      const imagesPayload = extractedFrames.map(f => f.src);
+
+      gifshot.createGIF({
+        images: imagesPayload,
+        gifWidth: originalGifWidth,
+        gifHeight: originalGifHeight,
+        interval: targetDelay,
+        sampleInterval: 10,
+        numWorkers: 2
+      }, function (obj) {
+        triggerApplyingButton(false);
+        if (!obj.error) {
+          newGifUrl = obj.image;
+          const stage = document.getElementById('gifPlayerStage');
+          stage.innerHTML = `<img src="${newGifUrl}">`;
+          document.getElementById('downloadBtn').disabled = false;
+          showStatus('GIF speed adjusted successfully!', 'success');
+        } else {
+          showStatus('Error re-encoding GIF speed.', 'error');
+        }
+      });
+    }
+
+    function downloadSpeedGif() {
+      if (!newGifUrl) return;
+      const a = document.createElement('a');
+      a.href = newGifUrl;
+      a.download = `gif_speed_${speedMultiplier}x_${Date.now()}.gif`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function triggerApplyingButton(active) {
+      const btn = document.getElementById('applyBtn');
+      const icon = document.getElementById('applyIcon');
+      const text = document.getElementById('applyText');
+
+      btn.disabled = active;
+      if (active) {
+        icon.innerText = 'sync';
+        text.innerText = 'Re-encoding Speed...';
+      } else {
+        icon.innerText = 'bolt';
+        text.innerText = 'Apply Speed Change';
+      }
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+    }
+  </script>
+</body>
+
+</html>
