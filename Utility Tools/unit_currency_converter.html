@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Universal Multi-Unit & Currency Converter</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Roboto:wght@400;500&family=Roboto+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 860px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Category Tabs Bar */
+    .category-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .tab-chip {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tab-chip:hover {
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    .tab-chip.active {
+      background-color: var(--primary-blue);
+      color: white;
+      border-color: var(--primary-blue);
+    }
+
+    /* Converter Main Card */
+    .converter-card {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background-color: var(--bg-color);
+      padding: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .conversion-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .conversion-row {
+        flex-direction: column;
+      }
+    }
+
+    .input-box-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    select,
+    input[type="number"] {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 15px;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    select:focus,
+    input[type="number"]:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+    }
+
+    .swap-btn {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--primary-blue);
+      transition: all 0.2s ease;
+      align-self: center;
+    }
+
+    .swap-btn:hover {
+      background-color: #e8f0fe;
+      border-color: var(--primary-blue);
+    }
+
+    /* Comparison Matrix Table */
+    .matrix-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .matrix-table-box {
+      max-height: 280px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    th {
+      background-color: var(--bg-color);
+      text-align: left;
+      padding: 8px 12px;
+      font-weight: 500;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+    }
+
+    td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-color);
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 150px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Category Tabs Bar -->
+    <div class="category-tabs">
+      <button class="tab-chip active" id="tab_currency" onclick="setCategory('currency')">💵 Currency (Forex FX)</button>
+      <button class="tab-chip" id="tab_length" onclick="setCategory('length')">📏 Length & Distance</button>
+      <button class="tab-chip" id="tab_weight" onclick="setCategory('weight')">⚖️ Weight & Mass</button>
+      <button class="tab-chip" id="tab_temp" onclick="setCategory('temp')">🌡️ Temperature</button>
+      <button class="tab-chip" id="tab_volume" onclick="setCategory('volume')">🧪 Volume</button>
+      <button class="tab-chip" id="tab_data" onclick="setCategory('data')">⚡ Data Storage</button>
+    </div>
+
+    <div class="grid">
+      <!-- Left: Conversion Inputs -->
+      <div class="converter-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label style="font-weight: 700; font-size: 13px; color: var(--primary-blue);" id="catTitle">Currency Converter</label>
+          <span style="font-size: 11px; color: var(--text-secondary);" id="fxStatus">Live Rates Active</span>
+        </div>
+
+        <div class="conversion-row">
+          <div class="input-box-group">
+            <label for="fromUnitSelect">From Unit</label>
+            <select id="fromUnitSelect" onchange="convertValues('from')"></select>
+            <input type="number" id="fromValueInput" value="100" step="any" oninput="convertValues('from')">
+          </div>
+
+          <button class="swap-btn" onclick="swapUnits()" title="Swap Units">
+            <span class="material-symbols-outlined">swap_horiz</span>
+          </button>
+
+          <div class="input-box-group">
+            <label for="toUnitSelect">To Unit</label>
+            <select id="toUnitSelect" onchange="convertValues('from')"></select>
+            <input type="number" id="toValueInput" value="0" step="any" oninput="convertValues('to')">
+          </div>
+        </div>
+
+        <!-- Result Formula Display -->
+        <div style="font-family: 'Roboto Mono', monospace; font-size: 13px; font-weight: 500; color: var(--primary-blue); background: #ffffff; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border-color);" id="formulaDisplay">
+          100 USD = 8320.00 INR
+        </div>
+      </div>
+
+      <!-- Right: All Units Comparison Matrix -->
+      <div class="matrix-card">
+        <label style="font-weight: 500;">All Units Comparison Matrix</label>
+        <div class="matrix-table-box">
+          <table>
+            <thead>
+              <tr>
+                <th>Unit / Currency</th>
+                <th>Converted Value</th>
+              </tr>
+            </thead>
+            <tbody id="matrixTableBody">
+              <!-- Matrix rows inserted dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="copyBtn" class="btn-primary" onclick="copyResult()">
+        <span class="material-symbols-outlined" id="copyIcon">content_copy</span>
+        <span id="copyText">Copy Result</span>
+      </button>
+
+      <button class="btn-secondary" id="refreshFxBtn" onclick="fetchLiveFxRates()">
+        <span class="material-symbols-outlined">refresh</span>
+        Refresh Exchange Rates
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let activeCategory = 'currency';
+    let fxRates = { USD: 1, EUR: 0.91, GBP: 0.78, INR: 83.2, JPY: 155.5, CAD: 1.36, AUD: 1.51, CHF: 0.89, CNY: 7.23, SGD: 1.35, AED: 3.67 };
+
+    // Standard Math Unit Definitions (Base Units)
+    const unitDefinitions = {
+      currency: {
+        units: {
+          USD: { name: '🇺🇸 US Dollar (USD)', rate: 1 },
+          EUR: { name: '🇪🇺 Euro (EUR)', rate: 0.91 },
+          GBP: { name: '🇬🇧 British Pound (GBP)', rate: 0.78 },
+          INR: { name: '🇮🇳 Indian Rupee (INR)', rate: 83.2 },
+          JPY: { name: '🇯🇵 Japanese Yen (JPY)', rate: 155.5 },
+          CAD: { name: '🇨🇦 Canadian Dollar (CAD)', rate: 1.36 },
+          AUD: { name: '🇦🇺 Australian Dollar (AUD)', rate: 1.51 },
+          CHF: { name: '🇨🇭 Swiss Franc (CHF)', rate: 0.89 },
+          CNY: { name: '🇨🇳 Chinese Yuan (CNY)', rate: 7.23 },
+          SGD: { name: '🇸🇬 Singapore Dollar (SGD)', rate: 1.35 },
+          AED: { name: '🇦🇪 UAE Dirham (AED)', rate: 3.67 }
+        }
+      },
+      length: {
+        units: {
+          m: { name: 'Meters (m)', toBase: x => x, fromBase: x => x },
+          km: { name: 'Kilometers (km)', toBase: x => x * 1000, fromBase: x => x / 1000 },
+          cm: { name: 'Centimeters (cm)', toBase: x => x / 100, fromBase: x => x * 100 },
+          mm: { name: 'Millimeters (mm)', toBase: x => x / 1000, fromBase: x => x * 1000 },
+          mi: { name: 'Miles (mi)', toBase: x => x * 1609.344, fromBase: x => x / 1609.344 },
+          ft: { name: 'Feet (ft)', toBase: x => x * 0.3048, fromBase: x => x / 0.3048 },
+          in: { name: 'Inches (in)', toBase: x => x * 0.0254, fromBase: x => x / 0.0254 }
+        }
+      },
+      weight: {
+        units: {
+          kg: { name: 'Kilograms (kg)', toBase: x => x, fromBase: x => x },
+          g: { name: 'Grams (g)', toBase: x => x / 1000, fromBase: x => x * 1000 },
+          mg: { name: 'Milligrams (mg)', toBase: x => x / 1e6, fromBase: x => x * 1e6 },
+          lb: { name: 'Pounds (lbs)', toBase: x => x * 0.45359237, fromBase: x => x / 0.45359237 },
+          oz: { name: 'Ounces (oz)', toBase: x => x * 0.028349523, fromBase: x => x / 0.028349523 }
+        }
+      },
+      temp: {
+        units: {
+          C: { name: 'Celsius (°C)', toBase: x => x, fromBase: x => x },
+          F: { name: 'Fahrenheit (°F)', toBase: x => (x - 32) * 5 / 9, fromBase: x => (x * 9 / 5) + 32 },
+          K: { name: 'Kelvin (K)', toBase: x => x - 273.15, fromBase: x => x + 273.15 }
+        }
+      },
+      volume: {
+        units: {
+          L: { name: 'Liters (L)', toBase: x => x, fromBase: x => x },
+          mL: { name: 'Milliliters (mL)', toBase: x => x / 1000, fromBase: x => x * 1000 },
+          gal: { name: 'Gallons (US gal)', toBase: x => x * 3.78541, fromBase: x => x / 3.78541 },
+          cup: { name: 'Cups (US)', toBase: x => x * 0.236588, fromBase: x => x / 0.236588 }
+        }
+      },
+      data: {
+        units: {
+          B: { name: 'Bytes (B)', toBase: x => x, fromBase: x => x },
+          KB: { name: 'Kilobytes (KB)', toBase: x => x * 1024, fromBase: x => x / 1024 },
+          MB: { name: 'Megabytes (MB)', toBase: x => x * Math.pow(1024, 2), fromBase: x => x / Math.pow(1024, 2) },
+          GB: { name: 'Gigabytes (GB)', toBase: x => x * Math.pow(1024, 3), fromBase: x => x / Math.pow(1024, 3) },
+          TB: { name: 'Terabytes (TB)', toBase: x => x * Math.pow(1024, 4), fromBase: x => x / Math.pow(1024, 4) }
+        }
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchLiveFxRates();
+      setCategory('currency');
+    });
+
+    async function fetchLiveFxRates() {
+      try {
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.rates) {
+            fxRates = data.rates;
+            Object.keys(unitDefinitions.currency.units).forEach(code => {
+              if (fxRates[code]) unitDefinitions.currency.units[code].rate = fxRates[code];
+            });
+            document.getElementById('fxStatus').textContent = `Live FX Updated (${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`;
+          }
+        }
+      } catch (e) {
+        console.warn('Using cached offline exchange rates.');
+      }
+    }
+
+    function setCategory(catKey) {
+      activeCategory = catKey;
+      document.querySelectorAll('.tab-chip').forEach(b => b.classList.remove('active'));
+      document.getElementById(`tab_${catKey}`).classList.add('active');
+
+      document.getElementById('refreshFxBtn').style.display = catKey === 'currency' ? 'flex' : 'none';
+
+      const catData = unitDefinitions[catKey];
+      const fromSel = document.getElementById('fromUnitSelect');
+      const toSel = document.getElementById('toUnitSelect');
+
+      fromSel.innerHTML = '';
+      toSel.innerHTML = '';
+
+      const keys = Object.keys(catData.units);
+      keys.forEach(k => {
+        const name = catData.units[k].name;
+        fromSel.appendChild(new Option(name, k));
+        toSel.appendChild(new Option(name, k));
+      });
+
+      if (keys.length > 1) toSel.selectedIndex = 1;
+      convertValues('from');
+    }
+
+    function convertValues(source) {
+      const catData = unitDefinitions[activeCategory];
+      const fromKey = document.getElementById('fromUnitSelect').value;
+      const toKey = document.getElementById('toUnitSelect').value;
+
+      const fromInput = document.getElementById('fromValueInput');
+      const toInput = document.getElementById('toValueInput');
+
+      let val = parseFloat(source === 'from' ? fromInput.value : toInput.value) || 0;
+      let convertedVal = 0;
+
+      if (activeCategory === 'currency') {
+        const rateFrom = catData.units[fromKey].rate;
+        const rateTo = catData.units[toKey].rate;
+        if (source === 'from') {
+          convertedVal = (val / rateFrom) * rateTo;
+          toInput.value = formatNum(convertedVal);
+        } else {
+          convertedVal = (val / rateTo) * rateFrom;
+          fromInput.value = formatNum(convertedVal);
+        }
+      } else {
+        const uFrom = catData.units[fromKey];
+        const uTo = catData.units[toKey];
+        if (source === 'from') {
+          const base = uFrom.toBase(val);
+          convertedVal = uTo.fromBase(base);
+          toInput.value = formatNum(convertedVal);
+        } else {
+          const base = uTo.toBase(val);
+          convertedVal = uFrom.fromBase(base);
+          fromInput.value = formatNum(convertedVal);
+        }
+      }
+
+      // Update Formula Display
+      const fromV = parseFloat(fromInput.value) || 0;
+      const toV = parseFloat(toInput.value) || 0;
+      document.getElementById('formulaDisplay').textContent = `${formatNum(fromV)} ${fromKey} = ${formatNum(toV)} ${toKey}`;
+
+      // Update Matrix
+      renderMatrix(fromKey, fromV);
+    }
+
+    function renderMatrix(baseKey, baseVal) {
+      const tbody = document.getElementById('matrixTableBody');
+      const catData = unitDefinitions[activeCategory];
+      tbody.innerHTML = '';
+
+      Object.keys(catData.units).forEach(k => {
+        let val = 0;
+        if (activeCategory === 'currency') {
+          const rateFrom = catData.units[baseKey].rate;
+          const rateTarget = catData.units[k].rate;
+          val = (baseVal / rateFrom) * rateTarget;
+        } else {
+          const uFrom = catData.units[baseKey];
+          const uTarget = catData.units[k];
+          const base = uFrom.toBase(baseVal);
+          val = uTarget.fromBase(base);
+        }
+
+        const tr = document.createElement('tr');
+        if (k === baseKey) tr.style.fontWeight = '700';
+
+        tr.innerHTML = `
+          <td>${catData.units[k].name}</td>
+          <td>${formatNum(val)} ${k}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function swapUnits() {
+      const fromSel = document.getElementById('fromUnitSelect');
+      const toSel = document.getElementById('toUnitSelect');
+
+      const temp = fromSel.value;
+      fromSel.value = toSel.value;
+      toSel.value = temp;
+
+      convertValues('from');
+    }
+
+    function copyResult() {
+      const formula = document.getElementById('formulaDisplay').textContent;
+      try {
+        navigator.clipboard.writeText(formula);
+        triggerSuccessButton('copyBtn', 'copyIcon', 'copyText', 'Copied Result!');
+      } catch (e) {
+        const temp = document.createElement('input');
+        temp.value = formula;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        triggerSuccessButton('copyBtn', 'copyIcon', 'copyText', 'Copied Result!');
+      }
+    }
+
+    function formatNum(n) {
+      if (Math.abs(n) < 0.0001 && n !== 0) return n.toExponential(4);
+      return Number(n.toFixed(4)).toLocaleString(undefined, { maximumFractionDigits: 4 });
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+  </script>
+</body>
+
+</html>
