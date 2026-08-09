@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XML Validator & Pretty Formatter Studio</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Roboto:wght@400;500&family=Roboto+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 860px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Preset Quick Starter Chips */
+    .preset-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .preset-chip {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .preset-chip:hover {
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    /* Text Area Editor Cards */
+    .editor-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    textarea {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: #1e1e1e;
+      color: #d4d4d4;
+      resize: vertical;
+      height: 380px;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    textarea:focus {
+      border-color: var(--primary-blue);
+    }
+
+    /* Controls Row */
+    .controls-panel {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      background-color: var(--bg-color);
+      padding: 12px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    select {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      padding: 6px 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 150px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Preset Quick Starters -->
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <label style="font-weight: 500;">Quick XML Samples:</label>
+      <div class="preset-bar">
+        <button class="preset-chip" onclick="loadPreset('rss')">📡 RSS Feed XML</button>
+        <button class="preset-chip" onclick="loadPreset('soap')">📑 SOAP API Request</button>
+        <button class="preset-chip" onclick="loadPreset('catalog')">🛒 Product Catalog</button>
+        <button class="preset-chip" onclick="loadPreset('invalid')">⚠️ Mismatched Error XML</button>
+      </div>
+    </div>
+
+    <!-- Options Toolbar -->
+    <div class="controls-panel">
+      <div class="input-group">
+        <label for="indentSelect">Indentation:</label>
+        <select id="indentSelect">
+          <option value="2" selected>2 Spaces</option>
+          <option value="4">4 Spaces</option>
+          <option value="tab">Tab</option>
+          <option value="minified">Minified (Single Line)</option>
+        </select>
+      </div>
+
+      <div class="input-group" style="margin-left: auto; gap: 12px;">
+        <span style="font-size: 12px; color: var(--text-secondary);" id="xmlStats">Nodes: 0</span>
+      </div>
+    </div>
+
+    <!-- Editors Grid -->
+    <div class="grid">
+      <!-- Input XML -->
+      <div class="editor-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label style="font-weight: 500;">Input XML Code</label>
+          <button class="btn-secondary" style="padding: 2px 6px; font-size: 11px;" onclick="document.getElementById('fileInput').click()">Load File</button>
+          <input type="file" id="fileInput" accept=".xml,.svg,.rss" style="display: none;" onchange="handleFileSelect(event)">
+        </div>
+        <textarea id="xmlInput" placeholder="Paste or type raw XML code here..." oninput="validateXmlLive()"></textarea>
+      </div>
+
+      <!-- Formatted Output XML -->
+      <div class="editor-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label style="font-weight: 500;">Validated / Pretty Formatted Output</label>
+          <span style="font-size: 11px; color: var(--text-secondary);" id="validIndicator">Syntax Check</span>
+        </div>
+        <textarea id="xmlOutput" placeholder="Formatted XML will appear here..." readonly></textarea>
+      </div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button class="btn-primary" onclick="validateAndFormatXml()">
+        <span class="material-symbols-outlined">check_circle</span>
+        Validate & Format XML
+      </button>
+
+      <button id="copyBtn" class="btn-secondary" onclick="copyFormattedXml()">
+        <span class="material-symbols-outlined" id="copyIcon">content_copy</span>
+        <span id="copyText">Copy Output</span>
+      </button>
+
+      <button class="btn-secondary" onclick="downloadXmlFile()">
+        <span class="material-symbols-outlined">download</span>
+        Download XML
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const sampleXmls = {
+      rss: `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0">\n  <channel>\n    <title>Useful Tools News</title>\n    <link>https://go/usefultools</link>\n    <description>Web developer productivity utilities</description>\n    <item>\n      <title>XML Validator Released</title>\n      <pubDate>Sun, 09 Aug 2026 12:00:00 GMT</pubDate>\n    </item>\n  </channel>\n</rss>`,
+      soap: `<?xml version="1.0"?>\n<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope/">\n  <soap:Header/>\n  <soap:Body>\n    <m:GetStockPrice xmlns:m="https://www.example.org/stock">\n      <m:StockName>GOOG</m:StockName>\n    </m:GetStockPrice>\n  </soap:Body>\n</soap:Envelope>`,
+      catalog: `<?xml version="1.0"?>\n<catalog>\n  <book id="bk101">\n    <author>Gambardella, Matthew</author>\n    <title>XML Developer's Guide</title>\n    <genre>Computer</genre>\n    <price>44.95</price>\n  </book>\n</catalog>`,
+      invalid: `<?xml version="1.0"?>\n<root>\n  <title>Mismatched Tag Demo</name>\n</root>`
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadPreset('rss');
+    });
+
+    function loadPreset(key) {
+      document.getElementById('xmlInput').value = sampleXmls[key] || '';
+      validateAndFormatXml();
+    }
+
+    function handleFileSelect(e) {
+      if (e.target.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          document.getElementById('xmlInput').value = evt.target.result;
+          validateAndFormatXml();
+        };
+        reader.readAsText(e.target.files[0]);
+      }
+    }
+
+    function validateXmlLive() {
+      const xmlStr = document.getElementById('xmlInput').value.trim();
+      if (!xmlStr) {
+        hideStatus();
+        return;
+      }
+      validateAndFormatXml();
+    }
+
+    function validateAndFormatXml() {
+      const xmlStr = document.getElementById('xmlInput').value.trim();
+      const statusBox = document.getElementById('statusBox');
+      const outArea = document.getElementById('xmlOutput');
+
+      if (!xmlStr) {
+        showStatus('Please enter or paste XML code to validate.', 'error');
+        outArea.value = '';
+        return;
+      }
+
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlStr, "application/xml");
+      const parseError = xmlDoc.querySelector("parsererror");
+
+      if (parseError) {
+        const errorText = parseError.textContent || "XML Syntax Error";
+        showStatus(`❌ XML Validation Failed: ${errorText}`, 'error');
+        document.getElementById('validIndicator').textContent = '❌ Invalid XML';
+        document.getElementById('validIndicator').style.color = 'var(--danger-text)';
+        outArea.value = `/* XML Syntax Error Details */\n${errorText}`;
+        return;
+      }
+
+      // Counts
+      const allElements = xmlDoc.getElementsByTagName("*");
+      document.getElementById('xmlStats').textContent = `Nodes: ${allElements.length}`;
+      document.getElementById('validIndicator').textContent = '✅ Valid XML';
+      document.getElementById('validIndicator').style.color = 'var(--success-text)';
+
+      // Pretty Format
+      const indentType = document.getElementById('indentSelect').value;
+      const formatted = formatXmlTree(xmlDoc, indentType);
+      outArea.value = formatted;
+
+      showStatus('✅ XML is 100% valid & correctly formatted!', 'success');
+    }
+
+    function formatXmlTree(xmlDoc, indentType) {
+      if (indentType === 'minified') {
+        const serializer = new XMLSerializer();
+        return serializer.serializeToString(xmlDoc).replace(/>\s+</g, '><');
+      }
+
+      let indentStr = '  ';
+      if (indentType === '4') indentStr = '    ';
+      else if (indentType === 'tab') indentStr = '\t';
+
+      const serializer = new XMLSerializer();
+      const rawXml = serializer.serializeToString(xmlDoc);
+
+      let formatted = '';
+      let pad = 0;
+
+      // Clean extra spacing
+      const reg = /(>)(<)(\/*)/g;
+      const xml = rawXml.replace(reg, '$1\r\n$2$3');
+      const lines = xml.split('\r\n');
+
+      lines.forEach(line => {
+        let indent = 0;
+        if (line.match(/.+<\/\w[^>]*>$/)) {
+          indent = 0;
+        } else if (line.match(/^<\/\w/)) {
+          if (pad !== 0) pad -= 1;
+        } else if (line.match(/^<\w[^>]*[^\/]>.*$/)) {
+          indent = 1;
+        }
+
+        let padding = '';
+        for (let i = 0; i < pad; i++) padding += indentStr;
+
+        formatted += padding + line + '\n';
+        pad += indent;
+      });
+
+      return formatted.trim();
+    }
+
+    function copyFormattedXml() {
+      const formatted = document.getElementById('xmlOutput').value;
+      if (!formatted) return;
+
+      try {
+        navigator.clipboard.writeText(formatted);
+        triggerSuccessButton('copyBtn', 'copyIcon', 'copyText', 'Copied XML!');
+      } catch (e) {
+        const temp = document.createElement('textarea');
+        temp.value = formatted;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        triggerSuccessButton('copyBtn', 'copyIcon', 'copyText', 'Copied XML!');
+      }
+    }
+
+    function downloadXmlFile() {
+      const xml = document.getElementById('xmlOutput').value;
+      if (!xml) return;
+
+      const blob = new Blob([xml], { type: 'application/xml;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `formatted_${Date.now()}.xml`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+    }
+
+    function hideStatus() {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = 'status-box';
+      statusBox.textContent = '';
+    }
+  </script>
+</body>
+
+</html>
