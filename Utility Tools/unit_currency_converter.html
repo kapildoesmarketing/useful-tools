@@ -301,7 +301,7 @@
   <div class="container">
     <!-- Category Tabs Bar -->
     <div class="category-tabs">
-      <button class="tab-chip active" id="tab_currency" onclick="setCategory('currency')">💵 Currency (Forex FX)</button>
+      <button class="tab-chip active" id="tab_currency" onclick="setCategory('currency')">💵 Currency (Frankfurter FX)</button>
       <button class="tab-chip" id="tab_length" onclick="setCategory('length')">📏 Length & Distance</button>
       <button class="tab-chip" id="tab_weight" onclick="setCategory('weight')">⚖️ Weight & Mass</button>
       <button class="tab-chip" id="tab_temp" onclick="setCategory('temp')">🌡️ Temperature</button>
@@ -314,7 +314,7 @@
       <div class="converter-card">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <label style="font-weight: 700; font-size: 13px; color: var(--primary-blue);" id="catTitle">Currency Converter</label>
-          <span style="font-size: 11px; color: var(--text-secondary);" id="fxStatus">Live Rates Active</span>
+          <span style="font-size: 11px; color: var(--text-secondary);" id="fxStatus">Frankfurter Rates Active</span>
         </div>
 
         <div class="conversion-row">
@@ -372,7 +372,7 @@
 
       <button class="btn-secondary" id="refreshFxBtn" onclick="fetchLiveFxRates()">
         <span class="material-symbols-outlined">refresh</span>
-        Refresh Exchange Rates
+        Refresh Frankfurter Rates
       </button>
     </div>
   </div>
@@ -451,18 +451,39 @@
 
     async function fetchLiveFxRates() {
       try {
-        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        // Primary: Frankfurter API (Backed by European Central Bank)
+        const res = await fetch('https://api.frankfurter.app/latest?from=USD');
         if (res.ok) {
           const data = await res.json();
           if (data && data.rates) {
-            fxRates = data.rates;
+            fxRates = { USD: 1, ...data.rates };
+            Object.keys(unitDefinitions.currency.units).forEach(code => {
+              if (fxRates[code]) unitDefinitions.currency.units[code].rate = fxRates[code];
+            });
+            document.getElementById('fxStatus').textContent = `Frankfurter ECB Rates Updated (${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`;
+            if (activeCategory === 'currency') convertValues('from');
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('Frankfurter API fetch error, falling back to ER-API...');
+      }
+
+      // Secondary Fallback API
+      try {
+        const res2 = await fetch('https://open.er-api.com/v6/latest/USD');
+        if (res2.ok) {
+          const data2 = await res2.json();
+          if (data2 && data2.rates) {
+            fxRates = data2.rates;
             Object.keys(unitDefinitions.currency.units).forEach(code => {
               if (fxRates[code]) unitDefinitions.currency.units[code].rate = fxRates[code];
             });
             document.getElementById('fxStatus').textContent = `Live FX Updated (${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`;
+            if (activeCategory === 'currency') convertValues('from');
           }
         }
-      } catch (e) {
+      } catch (err) {
         console.warn('Using cached offline exchange rates.');
       }
     }
@@ -527,12 +548,10 @@
         }
       }
 
-      // Update Formula Display
       const fromV = parseFloat(fromInput.value) || 0;
       const toV = parseFloat(toInput.value) || 0;
       document.getElementById('formulaDisplay').textContent = `${formatNum(fromV)} ${fromKey} = ${formatNum(toV)} ${toKey}`;
 
-      // Update Matrix
       renderMatrix(fromKey, fromV);
     }
 
