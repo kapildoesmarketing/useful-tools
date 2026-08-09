@@ -12,7 +12,7 @@
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
   <!-- Omggif & Gifshot CDNs for Client-Side GIF Decoding and Encoding -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/omggif/1.0.10/omggif.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/omggif@1.0.10/omggif.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gifshot/0.3.2/gifshot.min.js"></script>
 
   <style>
@@ -178,6 +178,13 @@
       background-color: var(--success-bg);
       color: var(--success-text);
       border: 1px solid #c3e6cb;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
     }
 
     /* Toolbar */
@@ -353,32 +360,64 @@
     async function loadGifFile(file) {
       if (!file || !file.type.includes('gif')) return;
 
+      extractedFrames = [];
+
       try {
-        const arrayBuffer = await file.arrayBuffer();
-        const byteArray = new Uint8Array(arrayBuffer);
-        const gr = new omggif.GifReader(byteArray);
+        // Strategy 1: Browser Native ImageDecoder API (Supported in Chrome/Chromium/Edge)
+        if ('ImageDecoder' in window) {
+          const stream = file.stream();
+          const imageDecoder = new ImageDecoder({ data: stream, type: 'image/gif' });
+          await imageDecoder.tracks.ready;
+          const track = imageDecoder.tracks.selectedTrack;
 
-        originalGifWidth = gr.width;
-        originalGifHeight = gr.height;
-        extractedFrames = [];
+          for (let i = 0; i < track.frameCount; i++) {
+            const frameResult = await imageDecoder.decode({ frameIndex: i });
+            const c = document.createElement('canvas');
+            c.width = frameResult.image.displayWidth;
+            c.height = frameResult.image.displayHeight;
+            const ctx = c.getContext('2d');
+            ctx.drawImage(frameResult.image, 0, 0);
 
-        for (let i = 0; i < gr.numFrames(); i++) {
-          const frameInfo = gr.frameInfo(i);
-          const pixels = new Uint8ClampedArray(gr.width * gr.height * 4);
-          gr.decodeAndBlitFrameRGBA(i, pixels);
+            originalGifWidth = c.width;
+            originalGifHeight = c.height;
 
-          const c = document.createElement('canvas');
-          c.width = gr.width;
-          c.height = gr.height;
-          const ctx = c.getContext('2d');
-          const imgData = ctx.createImageData(gr.width, gr.height);
-          imgData.data.set(pixels);
-          ctx.putImageData(imgData, 0, 0);
+            const durationSec = (frameResult.image.duration || 100000) / 1000000; // microseconds to sec
 
-          extractedFrames.push({
-            src: c.toDataURL('image/png'),
-            delay: (frameInfo.delay || 10) / 100 // convert 100ths of sec to sec
-          });
+            extractedFrames.push({
+              src: c.toDataURL('image/png'),
+              delay: durationSec || 0.1
+            });
+          }
+        } else {
+          // Strategy 2: Fallback to Omggif Library
+          const GifReader = (window.omggif && window.omggif.GifReader) || window.GifReader;
+          if (!GifReader) throw new Error('GifReader library not loaded');
+
+          const arrayBuffer = await file.arrayBuffer();
+          const byteArray = new Uint8Array(arrayBuffer);
+          const gr = new GifReader(byteArray);
+
+          originalGifWidth = gr.width;
+          originalGifHeight = gr.height;
+
+          for (let i = 0; i < gr.numFrames(); i++) {
+            const frameInfo = gr.frameInfo(i);
+            const pixels = new Uint8ClampedArray(gr.width * gr.height * 4);
+            gr.decodeAndBlitFrameRGBA(i, pixels);
+
+            const c = document.createElement('canvas');
+            c.width = gr.width;
+            c.height = gr.height;
+            const ctx = c.getContext('2d');
+            const imgData = ctx.createImageData(gr.width, gr.height);
+            imgData.data.set(pixels);
+            ctx.putImageData(imgData, 0, 0);
+
+            extractedFrames.push({
+              src: c.toDataURL('image/png'),
+              delay: (frameInfo.delay || 10) / 100
+            });
+          }
         }
 
         document.getElementById('statFrames').textContent = extractedFrames.length;
