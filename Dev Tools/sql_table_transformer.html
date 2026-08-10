@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SQL Output to Markdown & HTML Table Transformer</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Roboto:wght@400;500&family=Roboto+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 860px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Preset Quick Starter Chips */
+    .preset-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .preset-chip {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .preset-chip:hover {
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    /* Editor Cards */
+    .editor-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    textarea {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: #1e1e1e;
+      color: #d4d4d4;
+      resize: vertical;
+      height: 380px;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    textarea:focus {
+      border-color: var(--primary-blue);
+    }
+
+    /* Format Tabs */
+    .format-tabs {
+      display: flex;
+      gap: 6px;
+      background-color: var(--bg-color);
+      padding: 4px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    .format-btn {
+      background: none;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .format-btn.active {
+      background-color: #ffffff;
+      color: var(--primary-blue);
+      font-weight: 700;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    /* HTML Live Render Preview Box */
+    .render-preview-box {
+      height: 380px;
+      overflow: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      background-color: #ffffff;
+      box-sizing: border-box;
+    }
+
+    .styled-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    .styled-table th {
+      background-color: var(--primary-blue);
+      color: #ffffff;
+      text-align: left;
+      padding: 8px 12px;
+      font-weight: 500;
+    }
+
+    .styled-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .styled-table tr:nth-child(even) {
+      background-color: var(--bg-color);
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 150px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Preset Quick Starters -->
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <label style="font-weight: 500;">Quick Sample SQL Dumps:</label>
+      <div class="preset-bar">
+        <button class="preset-chip" onclick="loadPreset('mysql')">🐬 MySQL CLI Table</button>
+        <button class="preset-chip" onclick="loadPreset('psql')">🐘 PostgreSQL psql Table</button>
+        <button class="preset-chip" onclick="loadPreset('sqlite')">🗃️ SQLite Pipe Table</button>
+      </div>
+    </div>
+
+    <!-- Editors Grid -->
+    <div class="grid">
+      <!-- Raw SQL Output Input -->
+      <div class="editor-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label style="font-weight: 500;">Raw SQL CLI Output Dump</label>
+          <button class="btn-secondary" style="padding: 2px 6px; font-size: 11px;" onclick="document.getElementById('fileInput').click()">Load File</button>
+          <input type="file" id="fileInput" accept=".txt,.sql,.csv,.log" style="display: none;" onchange="handleFileSelect(event)">
+        </div>
+        <textarea id="sqlInput" placeholder="Paste MySQL, PostgreSQL, or SQLite CLI table output..." oninput="transformSqlOutput()"></textarea>
+      </div>
+
+      <!-- Formatted Output & Framework Selector -->
+      <div class="editor-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="format-tabs">
+            <button class="format-btn active" id="tabMarkdown" onclick="setFormat('markdown')">Markdown</button>
+            <button class="format-btn" id="tabHtml" onclick="setFormat('html')">Styled HTML</button>
+            <button class="format-btn" id="tabPreview" onclick="setFormat('preview')">Live Render</button>
+            <button class="format-btn" id="tabJson" onclick="setFormat('json')">JSON</button>
+          </div>
+
+          <span style="font-size: 11px; color: var(--text-secondary);" id="tableStats">0 Rows Parsed</span>
+        </div>
+
+        <textarea id="codeOutput" placeholder="Transformed table output will appear here..."></textarea>
+        <div class="render-preview-box" id="renderPreview" style="display: none;"></div>
+      </div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="copyBtn" class="btn-primary" onclick="copyOutput()">
+        <span class="material-symbols-outlined" id="copyIcon">content_copy</span>
+        <span id="copyText">Copy Table Code</span>
+      </button>
+
+      <button class="btn-secondary" onclick="downloadFile()">
+        <span class="material-symbols-outlined">download</span>
+        Download File
+      </button>
+
+      <button class="btn-secondary" onclick="transformSqlOutput()">
+        <span class="material-symbols-outlined">refresh</span>
+        Re-Transform
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let outputFormat = 'markdown'; // 'markdown', 'html', 'preview', 'json'
+    let parsedHeaders = [];
+    let parsedRows = [];
+
+    const sampleDumps = {
+      mysql: `+----+-----------------+--------------------+---------+\n| id | name            | email              | role    |\n+----+-----------------+--------------------+---------+\n|  1 | Kapil Pidhwani  | hikapil@google.com | Admin   |\n|  2 | Sarah Jenkins   | sarah@corp.io      | Lead    |\n|  3 | Alex Rivera     | alex@tech.org      | Dev     |\n+----+-----------------+--------------------+---------+`,
+      psql: ` id |      name       |      email       | role  \n----+-----------------+------------------+-------\n  1 | Kapil Pidhwani  | hikapil@google   | Admin\n  2 | Sarah Jenkins   | sarah@corp.io    | Lead\n  3 | Alex Rivera     | alex@tech.org    | Dev`,
+      sqlite: `id|name|email|role\n1|Kapil Pidhwani|hikapil@google|Admin\n2|Sarah Jenkins|sarah@corp.io|Lead\n3|Alex Rivera|alex@tech.org|Dev`
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadPreset('mysql');
+    });
+
+    function loadPreset(key) {
+      document.getElementById('sqlInput').value = sampleDumps[key] || '';
+      transformSqlOutput();
+    }
+
+    function handleFileSelect(e) {
+      if (e.target.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          document.getElementById('sqlInput').value = evt.target.result;
+          transformSqlOutput();
+        };
+        reader.readAsText(e.target.files[0]);
+      }
+    }
+
+    function setFormat(fmt) {
+      outputFormat = fmt;
+      document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`tab${fmt.charAt(0).toUpperCase() + fmt.slice(1)}`).classList.add('active');
+
+      const codeArea = document.getElementById('codeOutput');
+      const renderBox = document.getElementById('renderPreview');
+
+      if (fmt === 'preview') {
+        codeArea.style.display = 'none';
+        renderBox.style.display = 'block';
+      } else {
+        codeArea.style.display = 'block';
+        renderBox.style.display = 'none';
+      }
+
+      renderOutput();
+    }
+
+    function transformSqlOutput() {
+      const raw = document.getElementById('sqlInput').value;
+      parsedHeaders = [];
+      parsedRows = [];
+
+      if (!raw.trim()) {
+        document.getElementById('tableStats').textContent = '0 Rows Parsed';
+        renderOutput();
+        return;
+      }
+
+      const lines = raw.split('\n').filter(l => l.trim() && !l.startsWith('+--') && !l.startsWith('---'));
+
+      if (lines.length > 0) {
+        // Parse Header Row
+        parsedHeaders = parseSqlLine(lines[0]);
+
+        // Parse Data Rows
+        for (let i = 1; i < lines.length; i++) {
+          const cells = parseSqlLine(lines[i]);
+          if (cells.length === parsedHeaders.length || cells.length > 0) {
+            parsedRows.push(cells);
+          }
+        }
+      }
+
+      document.getElementById('tableStats').textContent = `${parsedRows.length} Rows Parsed`;
+      renderOutput();
+    }
+
+    function parseSqlLine(line) {
+      let delimiter = '|';
+      if (!line.includes('|') && line.includes('\t')) delimiter = '\t';
+      else if (!line.includes('|') && line.includes(',')) delimiter = ',';
+
+      return line.split(delimiter)
+        .map(s => s.trim())
+        .filter((s, idx, arr) => !(idx === 0 && s === '') && !(idx === arr.length - 1 && s === ''));
+    }
+
+    function renderOutput() {
+      const codeArea = document.getElementById('codeOutput');
+      const renderBox = document.getElementById('renderPreview');
+
+      if (parsedHeaders.length === 0) {
+        codeArea.value = '/* Paste raw SQL output on the left to transform */';
+        renderBox.innerHTML = '<span style="color: var(--text-secondary);">No table data parsed.</span>';
+        return;
+      }
+
+      if (outputFormat === 'markdown') {
+        let md = `| ${parsedHeaders.join(' | ')} |\n`;
+        md += `| ${parsedHeaders.map(() => '---').join(' | ')} |\n`;
+        parsedRows.forEach(r => {
+          md += `| ${r.join(' | ')} |\n`;
+        });
+        codeArea.value = md;
+      } else if (outputFormat === 'html' || outputFormat === 'preview') {
+        let html = `<table class="styled-table">\n  <thead>\n    <tr>\n`;
+        parsedHeaders.forEach(h => { html += `      <th>${escapeHtml(h)}</th>\n`; });
+        html += `    </tr>\n  </thead>\n  <tbody>\n`;
+
+        parsedRows.forEach(r => {
+          html += `    <tr>\n`;
+          r.forEach(c => { html += `      <td>${escapeHtml(c)}</td>\n`; });
+          html += `    </tr>\n`;
+        });
+        html += `  </tbody>\n</table>`;
+
+        codeArea.value = html;
+        renderBox.innerHTML = html;
+      } else if (outputFormat === 'json') {
+        const jsonList = parsedRows.map(row => {
+          const obj = {};
+          parsedHeaders.forEach((h, idx) => {
+            obj[h || `col_${idx + 1}`] = row[idx] || '';
+          });
+          return obj;
+        });
+        codeArea.value = JSON.stringify(jsonList, null, 2);
+      }
+    }
+
+    function copyOutput() {
+      const code = document.getElementById('codeOutput').value;
+      try {
+        navigator.clipboard.writeText(code);
+        triggerSuccessButton('copyBtn', 'copyIcon', 'copyText', 'Copied Table!');
+      } catch (e) {
+        const temp = document.createElement('textarea');
+        temp.value = code;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        triggerSuccessButton('copyBtn', 'copyIcon', 'copyText', 'Copied Table!');
+      }
+    }
+
+    function downloadFile() {
+      const code = document.getElementById('codeOutput').value;
+      const ext = outputFormat === 'markdown' ? 'md' : outputFormat === 'html' ? 'html' : 'json';
+      const mime = outputFormat === 'json' ? 'application/json' : 'text/plain';
+
+      const blob = new Blob([code], { type: `${mime};charset=utf-8` });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `transformed_sql_table.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+  </script>
+</body>
+
+</html>
