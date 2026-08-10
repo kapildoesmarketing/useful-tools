@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DNS Record Parsing Table Visualizer & Dashboard</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Roboto:wght@400;500&family=Roboto+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 860px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Preset Quick Starter Chips */
+    .preset-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .preset-chip {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .preset-chip:hover {
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    /* Input Raw Dump Card */
+    .input-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background-color: var(--bg-color);
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    textarea {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #1e1e1e;
+      color: #d4d4d4;
+      resize: vertical;
+      height: 380px;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    textarea:focus {
+      border-color: var(--primary-blue);
+    }
+
+    /* Record Type Filter Pills */
+    .type-filters {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .type-pill {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .type-pill:hover,
+    .type-pill.active {
+      background-color: var(--primary-blue);
+      color: #ffffff;
+      border-color: var(--primary-blue);
+    }
+
+    /* Dashboard Table Box */
+    .table-container {
+      max-height: 420px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    th {
+      background-color: var(--bg-color);
+      text-align: left;
+      padding: 10px 12px;
+      font-weight: 500;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+    }
+
+    td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-color);
+      font-family: 'Roboto Mono', monospace;
+      word-break: break-all;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Badges */
+    .badge-type {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .badge-A { background-color: #dbeafe; color: #1e40af; }
+    .badge-AAAA { background-color: #e0e7ff; color: #3730a3; }
+    .badge-CNAME { background-color: #fef3c7; color: #92400e; }
+    .badge-MX { background-color: #fce7f3; color: #9d174d; }
+    .badge-TXT { background-color: #dcfce7; color: #166534; }
+    .badge-NS { background-color: #ffedd5; color: #9a3412; }
+    .badge-SOA { background-color: #f3e8ff; color: #6b21a8; }
+
+    /* Search Box */
+    .search-input {
+      font-family: 'Roboto', sans-serif;
+      font-size: 13px;
+      padding: 6px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      outline: none;
+      width: 220px;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary-blue);
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 150px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Preset Quick Starters -->
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <label style="font-weight: 500;">Quick DNS Dumps:</label>
+      <div class="preset-bar">
+        <button class="preset-chip" onclick="loadPreset('bind')">📜 BIND Zone File</button>
+        <button class="preset-chip" onclick="loadPreset('dig')">🔍 Raw `dig ANY` Output</button>
+        <button class="preset-chip" onclick="loadPreset('cloudflare')">☁️ Cloudflare / Route53 Export</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Left: Raw DNS Dump Input -->
+      <div class="input-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label style="font-weight: 700; font-size: 13px; color: var(--primary-blue);">Raw DNS Record Dump</label>
+          <button class="btn-secondary" style="padding: 2px 6px; font-size: 11px;" onclick="document.getElementById('fileInput').click()">Load File</button>
+          <input type="file" id="fileInput" accept=".txt,.zone,.txt,.csv" style="display: none;" onchange="handleFileSelect(event)">
+        </div>
+
+        <textarea id="dnsRawInput" placeholder="Paste raw dig output, nslookup, or BIND zone file..." oninput="parseDnsDump()"></textarea>
+      </div>
+
+      <!-- Right: Searchable Parsed Dashboard Table -->
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div class="type-filters" id="typeFilters">
+            <button class="type-pill active" onclick="setFilter('ALL', this)">ALL (<span id="cntAll">0</span>)</button>
+            <button class="type-pill" onclick="setFilter('A', this)">A</button>
+            <button class="type-pill" onclick="setFilter('AAAA', this)">AAAA</button>
+            <button class="type-pill" onclick="setFilter('CNAME', this)">CNAME</button>
+            <button class="type-pill" onclick="setFilter('MX', this)">MX</button>
+            <button class="type-pill" onclick="setFilter('TXT', this)">TXT</button>
+            <button class="type-pill" onclick="setFilter('NS', this)">NS</button>
+            <button class="type-pill" onclick="setFilter('SOA', this)">SOA</button>
+          </div>
+
+          <input type="text" class="search-input" id="searchInput" placeholder="Search domain, IP, TTL..." oninput="renderTable()">
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 70px;">Type</th>
+                <th>Name / Host</th>
+                <th style="width: 80px;">TTL</th>
+                <th>Target / Value</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr>
+                <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                  No DNS records parsed yet. Paste raw DNS output on the left!
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="copyJsonBtn" class="btn-primary" onclick="copyJson()">
+        <span class="material-symbols-outlined" id="copyIcon">data_object</span>
+        <span id="copyText">Copy Records (JSON)</span>
+      </button>
+
+      <button class="btn-secondary" onclick="downloadCsv()">
+        <span class="material-symbols-outlined">download</span>
+        Download CSV
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let parsedRecords = [];
+    let activeFilter = 'ALL';
+
+    const sampleDnsDumps = {
+      bind: `$ORIGIN example.com.\n$TTL 3600\n@       IN  SOA   ns1.example.com. admin.example.com. (\n                2026081001 ; serial\n                7200       ; refresh\n                3600       ; retry\n                1209600    ; expire\n                3600 )     ; minimum\n@       IN  NS    ns1.example.com.\n@       IN  NS    ns2.example.com.\n@       IN  A     192.0.2.1\n@       IN  AAAA  2001:db8::1\nwww     IN  CNAME example.com.\nmail    IN  A     192.0.2.5\n@       IN  MX 10 mail.example.com.\n@       IN  TXT   "v=spf1 mx ip4:192.0.2.0/24 -all"`,
+      dig: `; <<>> DiG 9.18.1 <<>> google.com ANY\n;; ANSWER SECTION:\ngoogle.com.     300  IN  A     142.250.190.46\ngoogle.com.     300  IN  AAAA  2607:f8b0:4004:837::200e\ngoogle.com.     86400 IN NS    ns1.google.com.\ngoogle.com.     86400 IN NS    ns2.google.com.\ngoogle.com.     600  IN  MX 10 smtp.google.com.\ngoogle.com.     3600 IN  TXT   "v=spf1 include:_spf.google.com ~all"`,
+      cloudflare: `example.com,A,192.0.2.1,300,Proxied\nexample.com,AAAA,2001:db8::1,300,Proxied\napi.example.com,CNAME,backend.aws.com,120,DNS Only\nmail.example.com,MX,10 mail.example.com,3600,DNS Only\nexample.com,TXT,"v=DMARC1; p=reject; rua=mailto:dmarc@example.com",3600,DNS Only`
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadPreset('bind');
+    });
+
+    function loadPreset(key) {
+      document.getElementById('dnsRawInput').value = sampleDnsDumps[key] || '';
+      parseDnsDump();
+    }
+
+    function handleFileSelect(e) {
+      if (e.target.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          document.getElementById('dnsRawInput').value = evt.target.result;
+          parseDnsDump();
+        };
+        reader.readAsText(e.target.files[0]);
+      }
+    }
+
+    function parseDnsDump() {
+      const raw = document.getElementById('dnsRawInput').value;
+      parsedRecords = [];
+
+      if (!raw.trim()) {
+        renderTable();
+        return;
+      }
+
+      const lines = raw.split('\n');
+
+      lines.forEach(line => {
+        const clean = line.trim();
+        if (!clean || clean.startsWith(';') || clean.startsWith('#') || clean.startsWith('//')) return;
+
+        // Pattern 1: Standard BIND / Dig output: name [ttl] [IN] TYPE value
+        // e.g. "google.com. 300 IN A 142.250.190.46"
+        const digMatch = clean.match(/^([^\s]+)\s+(\d+)?\s*(?:IN)?\s+(A|AAAA|CNAME|MX|TXT|NS|SOA|CAA)\s+(.+)$/i);
+        if (digMatch) {
+          parsedRecords.push({
+            name: digMatch[1],
+            ttl: digMatch[2] ? parseInt(digMatch[2], 10) : 3600,
+            type: digMatch[3].toUpperCase(),
+            value: digMatch[4].trim()
+          });
+          return;
+        }
+
+        // Pattern 2: BIND Short: "www IN CNAME example.com."
+        const shortMatch = clean.match(/^([^\s]+)\s+(?:IN)\s+(A|AAAA|CNAME|MX|TXT|NS|SOA)\s+(.+)$/i);
+        if (shortMatch) {
+          parsedRecords.push({
+            name: shortMatch[1],
+            ttl: 3600,
+            type: shortMatch[2].toUpperCase(),
+            value: shortMatch[3].trim()
+          });
+          return;
+        }
+
+        // Pattern 3: CSV Format (Cloudflare / Route53 Export): name,type,value,ttl
+        if (clean.includes(',')) {
+          const parts = clean.split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+          if (parts.length >= 3 && ['A','AAAA','CNAME','MX','TXT','NS','SOA'].includes(parts[1].toUpperCase())) {
+            parsedRecords.push({
+              name: parts[0],
+              type: parts[1].toUpperCase(),
+              value: parts[2],
+              ttl: parseInt(parts[3], 10) || 3600
+            });
+          }
+        }
+      });
+
+      document.getElementById('cntAll').textContent = parsedRecords.length;
+      renderTable();
+    }
+
+    function setFilter(type, btnEl) {
+      activeFilter = type;
+      document.querySelectorAll('.type-pill').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('tableBody');
+      const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+
+      const filtered = parsedRecords.filter(r => {
+        const matchesType = activeFilter === 'ALL' || r.type === activeFilter;
+        const matchesSearch = !searchQuery || 
+          r.name.toLowerCase().includes(searchQuery) || 
+          r.value.toLowerCase().includes(searchQuery) ||
+          r.type.toLowerCase().includes(searchQuery) ||
+          String(r.ttl).includes(searchQuery);
+        return matchesType && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 32px;">No DNS records match the current filter or search query.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(r => `
+        <tr>
+          <td><span class="badge-type badge-${r.type}">${r.type}</span></td>
+          <td style="color: var(--primary-blue); font-weight: 500;">${escapeHtml(r.name)}</td>
+          <td style="color: var(--text-secondary); font-size: 11px;">${humanizeTtl(r.ttl)}</td>
+          <td>${escapeHtml(r.value)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function humanizeTtl(ttlSec) {
+      if (!ttlSec) return '3600s';
+      if (ttlSec < 60) return `${ttlSec}s`;
+      if (ttlSec < 3600) return `${Math.floor(ttlSec / 60)}m`;
+      if (ttlSec < 86400) return `${Math.floor(ttlSec / 3600)}h`;
+      return `${Math.floor(ttlSec / 86400)}d`;
+    }
+
+    function copyJson() {
+      if (parsedRecords.length === 0) return;
+      const jsonStr = JSON.stringify(parsedRecords, null, 2);
+      try {
+        navigator.clipboard.writeText(jsonStr);
+        triggerSuccessButton('copyJsonBtn', 'copyIcon', 'copyText', 'Copied JSON!');
+      } catch (e) {
+        const temp = document.createElement('textarea');
+        temp.value = jsonStr;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        triggerSuccessButton('copyJsonBtn', 'copyIcon', 'copyText', 'Copied JSON!');
+      }
+    }
+
+    function downloadCsv() {
+      if (parsedRecords.length === 0) return;
+      let csv = 'Name,Type,TTL,Target/Value\n';
+      parsedRecords.forEach(r => {
+        csv += `"${r.name}","${r.type}",${r.ttl},"${r.value.replace(/"/g, '""')}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `dns_records_${Date.now()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+  </script>
+</body>
+
+</html>
