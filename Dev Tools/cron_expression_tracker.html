@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cron Expression Matrix & Multi-Schedule Projection Tracker</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Roboto:wght@400;500&family=Roboto+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 860px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Preset Quick Starter Chips */
+    .preset-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .preset-chip {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .preset-chip:hover {
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    /* Cron Expression Input Panel */
+    .cron-card {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      background-color: var(--bg-color);
+      padding: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .cron-input-box {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 20px;
+      font-weight: 700;
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: var(--primary-blue);
+      outline: none;
+      width: 100%;
+      box-sizing: border-box;
+      letter-spacing: 2px;
+    }
+
+    .cron-input-box:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 1px var(--primary-blue);
+    }
+
+    .human-translation {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-main);
+      background: #ffffff;
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    /* 5-Field Explainer Breakdown */
+    .field-explainer-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      text-align: center;
+      font-size: 11px;
+    }
+
+    .field-box {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 6px 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .field-val {
+      font-family: 'Roboto Mono', monospace;
+      font-weight: 700;
+      color: var(--primary-blue);
+      font-size: 13px;
+    }
+
+    /* Projection List Box */
+    .projection-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .projection-table-container {
+      height: 380px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    th {
+      background-color: var(--bg-color);
+      text-align: left;
+      padding: 10px 12px;
+      font-weight: 500;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+    }
+
+    td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-color);
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 170px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Preset Quick Starters -->
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <label style="font-weight: 500;">Quick Automation Schedules:</label>
+      <div class="preset-bar">
+        <button class="preset-chip" onclick="applyPreset('*/15 * * * *')">⚡ Every 15 Minutes</button>
+        <button class="preset-chip" onclick="applyPreset('0 0 * * *')">⏰ Daily at Midnight</button>
+        <button class="preset-chip" onclick="applyPreset('0 9 * * 1-5')">💼 Weekdays at 9:00 AM</button>
+        <button class="preset-chip" onclick="applyPreset('0 6 1 * *')">📅 1st of Month at 6 AM</button>
+        <button class="preset-chip" onclick="applyPreset('0 * * * *')">🔄 Every Hour</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Left: Cron Input & 5-Field Breakdown -->
+      <div class="cron-card">
+        <label style="font-weight: 700; font-size: 13px; color: var(--primary-blue);">Standard 5-Field Cron Expression</label>
+        
+        <input type="text" class="cron-input-box" id="cronInput" value="*/15 * * * *" placeholder="* * * * *" oninput="evaluateCronSchedule()">
+
+        <!-- Human Readable Description -->
+        <div class="human-translation" id="humanText">
+          Every 15 minutes
+        </div>
+
+        <!-- 5-Field Breakdown Matrix -->
+        <label style="font-weight: 500; font-size: 12px; margin-top: 4px;">Field Token Breakdown:</label>
+        <div class="field-explainer-grid">
+          <div class="field-box">
+            <span class="field-val" id="fMin">*/15</span>
+            <span style="color: var(--text-secondary);">MINUTE</span>
+          </div>
+          <div class="field-box">
+            <span class="field-val" id="fHour">*</span>
+            <span style="color: var(--text-secondary);">HOUR</span>
+          </div>
+          <div class="field-box">
+            <span class="field-val" id="fDom">*</span>
+            <span style="color: var(--text-secondary);">DAY (MONTH)</span>
+          </div>
+          <div class="field-box">
+            <span class="field-val" id="fMonth">*</span>
+            <span style="color: var(--text-secondary);">MONTH</span>
+          </div>
+          <div class="field-box">
+            <span class="field-val" id="fDow">*</span>
+            <span style="color: var(--text-secondary);">DAY (WEEK)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Next 50 Occurrences Table -->
+      <div class="projection-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label style="font-weight: 500;">Next 50 Execution Projection Matrix</label>
+          <span style="font-size: 11px; color: var(--text-secondary);" id="projTz">Local Timezone</span>
+        </div>
+
+        <div class="projection-table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 40px;">#</th>
+                <th>Execution Date & Time</th>
+                <th>Relative Countdown</th>
+              </tr>
+            </thead>
+            <tbody id="projectionTableBody">
+              <!-- Occurrences inserted dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="copyBtn" class="btn-primary" onclick="copyNextOccurrences()">
+        <span class="material-symbols-outlined" id="copyIcon">content_copy</span>
+        <span id="copyText">Copy Next 50 Dates</span>
+      </button>
+
+      <button class="btn-secondary" onclick="downloadCsv()">
+        <span class="material-symbols-outlined">download</span>
+        Download Schedule CSV
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let projectedDates = [];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      evaluateCronSchedule();
+    });
+
+    function applyPreset(cronStr) {
+      document.getElementById('cronInput').value = cronStr;
+      evaluateCronSchedule();
+    }
+
+    function parseCronPart(part, minVal, maxVal) {
+      const result = new Set();
+
+      part.split(',').forEach(sub => {
+        if (sub === '*') {
+          for (let i = minVal; i <= maxVal; i++) result.add(i);
+        } else if (sub.startsWith('*/')) {
+          const step = parseInt(sub.slice(2), 10);
+          if (step > 0) {
+            for (let i = minVal; i <= maxVal; i += step) result.add(i);
+          }
+        } else if (sub.includes('-')) {
+          const [start, end] = sub.split('-').map(n => parseInt(n, 10));
+          if (!isNaN(start) && !isNaN(end)) {
+            for (let i = start; i <= end; i++) result.add(i);
+          }
+        } else {
+          const num = parseInt(sub, 10);
+          if (!isNaN(num)) result.add(num);
+        }
+      });
+
+      return Array.from(result).sort((a, b) => a - b);
+    }
+
+    function evaluateCronSchedule() {
+      const cronStr = document.getElementById('cronInput').value.trim();
+      const parts = cronStr.split(/\s+/);
+      const statusBox = document.getElementById('statusBox');
+
+      if (parts.length !== 5) {
+        showStatus('Invalid Cron Expression: Must contain exactly 5 space-separated fields (minute, hour, day-of-month, month, day-of-week).', 'error');
+        renderFields('-', '-', '-', '-', '-');
+        document.getElementById('humanText').textContent = 'Invalid Cron Format';
+        document.getElementById('projectionTableBody').innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--danger-text); padding: 32px;">Invalid Cron Expression</td></tr>';
+        return;
+      }
+
+      hideStatus();
+      renderFields(parts[0], parts[1], parts[2], parts[3], parts[4]);
+      document.getElementById('humanText').textContent = translateCronToHuman(parts);
+
+      // Evaluate Next 50 Dates
+      try {
+        const validMinutes = parseCronPart(parts[0], 0, 59);
+        const validHours = parseCronPart(parts[1], 0, 23);
+        const validDom = parseCronPart(parts[2], 1, 31);
+        const validMonths = parseCronPart(parts[3], 1, 12);
+        const validDow = parseCronPart(parts[4], 0, 6);
+
+        projectedDates = [];
+        let curr = new Date();
+        curr.setSeconds(0, 0);
+        curr.setMinutes(curr.getMinutes() + 1); // Start next minute
+
+        let safetyLoop = 0;
+        while (projectedDates.length < 50 && safetyLoop < 100000) {
+          safetyLoop++;
+          const m = curr.getMonth() + 1;
+          const dom = curr.getDate();
+          const dow = curr.getDay();
+          const h = curr.getHours();
+          const min = curr.getMinutes();
+
+          if (validMonths.includes(m) && validDom.includes(dom) && validDow.includes(dow) && validHours.includes(h) && validMinutes.includes(min)) {
+            projectedDates.push(new Date(curr));
+          }
+
+          curr.setMinutes(curr.getMinutes() + 1);
+        }
+
+        renderProjectionTable();
+      } catch (e) {
+        showStatus('Error computing cron schedule occurrences.', 'error');
+      }
+    }
+
+    function renderFields(m, h, dom, mon, dow) {
+      document.getElementById('fMin').textContent = m;
+      document.getElementById('fHour').textContent = h;
+      document.getElementById('fDom').textContent = dom;
+      document.getElementById('fMonth').textContent = mon;
+      document.getElementById('fDow').textContent = dow;
+    }
+
+    function renderProjectionTable() {
+      const tbody = document.getElementById('projectionTableBody');
+      const now = new Date();
+
+      if (projectedDates.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-secondary); padding: 32px;">No future occurrences found for schedule.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = projectedDates.map((d, idx) => `
+        <tr>
+          <td>#${idx + 1}</td>
+          <td style="color: var(--primary-blue); font-weight: 500;">${formatDateStr(d)}</td>
+          <td style="color: var(--text-secondary); font-size: 11px;">${getRelativeTime(now, d)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function translateCronToHuman(parts) {
+      const [min, hour, dom, mon, dow] = parts;
+      if (min === '*/15' && hour === '*' && dom === '*' && mon === '*' && dow === '*') return 'At every 15th minute';
+      if (min === '0' && hour === '0' && dom === '*' && mon === '*' && dow === '*') return 'At 00:00 AM (Midnight) every day';
+      if (min === '0' && hour === '9' && dow === '1-5') return 'At 09:00 AM, Monday through Friday';
+      if (min === '0' && hour === '6' && dom === '1') return 'At 06:00 AM on the 1st of every month';
+      if (min === '0' && hour === '*') return 'At minute 0 of every hour';
+      return `At minute ${min}, hour ${hour}, day ${dom} of month ${mon}, weekday ${dow}`;
+    }
+
+    function formatDateStr(d) {
+      return d.toLocaleString([], { weekday: 'short', year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+
+    function getRelativeTime(now, target) {
+      const diffMs = target - now;
+      const diffMin = Math.floor(diffMs / 60000);
+      const diffHrs = Math.floor(diffMin / 60);
+      const diffDays = Math.floor(diffHrs / 24);
+
+      if (diffMin < 60) return `in ${diffMin} min${diffMin !== 1 ? 's' : ''}`;
+      if (diffHrs < 24) return `in ${diffHrs} hr${diffHrs !== 1 ? 's' : ''} ${diffMin % 60}m`;
+      return `in ${diffDays} day${diffDays !== 1 ? 's' : ''} ${diffHrs % 24}h`;
+    }
+
+    function copyNextOccurrences() {
+      if (projectedDates.length === 0) return;
+      const text = projectedDates.map((d, i) => `${i + 1}. ${formatDateStr(d)}`).join('\n');
+
+      try {
+        navigator.clipboard.writeText(text);
+        triggerSuccessButton('copyBtn', 'copyIcon', 'copyText', 'Copied 50 Dates!');
+      } catch (e) {
+        const temp = document.createElement('textarea');
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        triggerSuccessButton('copyBtn', 'copyIcon', 'copyText', 'Copied 50 Dates!');
+      }
+    }
+
+    function downloadCsv() {
+      if (projectedDates.length === 0) return;
+      let csv = 'Occurrence,Execution Timestamp,Relative Countdown\n';
+      const now = new Date();
+      projectedDates.forEach((d, i) => {
+        csv += `${i + 1},"${formatDateStr(d)}","${getRelativeTime(now, d)}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `cron_schedule_50_dates_${Date.now()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+    }
+
+    function hideStatus() {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = 'status-box';
+      statusBox.textContent = '';
+    }
+  </script>
+</body>
+
+</html>
