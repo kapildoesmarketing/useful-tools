@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log File Error Pattern Aggregator & SysAdmin Dashboard</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Roboto:wght@400;500&family=Roboto+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      box-sizing: border-box;
+    }
+
+    h2,
+    .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 860px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Preset Quick Starter Chips */
+    .preset-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .preset-chip {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .preset-chip:hover {
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    /* Input Raw Dump Card */
+    .input-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background-color: var(--bg-color);
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    textarea {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #1e1e1e;
+      color: #d4d4d4;
+      resize: vertical;
+      height: 380px;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    textarea:focus {
+      border-color: var(--primary-blue);
+    }
+
+    /* Stat Cards Row */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .stat-card {
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stat-val {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary-blue);
+    }
+
+    .stat-lbl {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    /* Aggregation Table Box */
+    .table-container {
+      max-height: 330px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    th {
+      background-color: var(--bg-color);
+      text-align: left;
+      padding: 10px 12px;
+      font-weight: 500;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+    }
+
+    td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-color);
+      font-family: 'Roboto Mono', monospace;
+      word-break: break-all;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .count-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      font-weight: 700;
+      font-size: 11px;
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 170px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Preset Quick Starters -->
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <label style="font-weight: 500;">Quick Sample Server Logs:</label>
+      <div class="preset-bar">
+        <button class="preset-chip" onclick="loadPreset('java')">☕ Java Spring Boot StackTrace</button>
+        <button class="preset-chip" onclick="loadPreset('nginx')">🌐 Nginx HTTP 50x Error Log</button>
+        <button class="preset-chip" onclick="loadPreset('python')">🐍 Python Django Traceback</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Left: Raw Log Dump Input -->
+      <div class="input-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label style="font-weight: 700; font-size: 13px; color: var(--primary-blue);">Raw Server Log File Dump</label>
+          <button class="btn-secondary" style="padding: 2px 6px; font-size: 11px;" onclick="document.getElementById('fileInput').click()">Load Log File</button>
+          <input type="file" id="fileInput" accept=".log,.txt,.out" style="display: none;" onchange="handleFileSelect(event)">
+        </div>
+
+        <textarea id="logRawInput" placeholder="Paste server log file dump here..." oninput="aggregateErrorLogs()"></textarea>
+      </div>
+
+      <!-- Right: Stats & Error Frequency Ranking Table -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="stats-bar">
+          <div class="stat-card">
+            <span class="stat-val" id="statTotal">0</span>
+            <span class="stat-lbl">Total Lines</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-val" id="statErrors">0</span>
+            <span class="stat-lbl">Total Errors</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-val" id="statPatterns">0</span>
+            <span class="stat-lbl">Unique Patterns</span>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label style="font-weight: 500;">Aggregated Error Frequency Ranking</label>
+          <input type="text" id="searchInput" placeholder="Search patterns..." style="font-size: 12px; padding: 4px 8px; border: 1px solid var(--border-color); border-radius: 4px;" oninput="renderTable()">
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 75px;">Count</th>
+                <th>Normalized Error Signature</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr>
+                <td colspan="2" style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                  No log errors aggregated yet. Paste a log dump on the left!
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button id="copyJsonBtn" class="btn-primary" onclick="copySummaryJson()">
+        <span class="material-symbols-outlined" id="copyIcon">content_copy</span>
+        <span id="copyText">Copy Aggregated JSON</span>
+      </button>
+
+      <button class="btn-secondary" onclick="downloadCsv()">
+        <span class="material-symbols-outlined">download</span>
+        Download CSV Report
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let aggregatedList = [];
+    let totalLinesCount = 0;
+    let totalErrorsCount = 0;
+
+    const sampleLogs = {
+      java: `2026-08-10 05:10:01.123 ERROR [main] c.e.Service: NullPointerException: Connection failed at 0x7fff5fbff840\n2026-08-10 05:10:02.145 ERROR [main] c.e.Service: NullPointerException: Connection failed at 0x7fff5fbff880\n2026-08-10 05:10:03.189 WARN  [worker-1] c.e.Pool: Timeout waiting for db connection from 192.168.1.5:5432\n2026-08-10 05:10:04.220 ERROR [main] c.e.Service: NullPointerException: Connection failed at 0x7fff5fbff910\n2026-08-10 05:10:05.301 FATAL [worker-2] c.e.Database: OutOfMemoryError: Java heap space\n2026-08-10 05:10:06.412 ERROR [worker-1] c.e.Pool: Timeout waiting for db connection from 192.168.1.10:5432`,
+      nginx: `2026/08/10 05:12:00 [error] 1234#0: *123 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.1.100, server: example.com\n2026/08/10 05:12:01 [error] 1235#0: *124 connect() failed (111: Connection refused) while connecting to upstream, client: 192.168.1.101, server: example.com\n2026/08/10 05:12:05 [error] 1236#0: *125 open() "/var/www/html/favicon.ico" failed (2: No such file or directory), client: 10.0.0.5`,
+      python: `[10/Aug/2026 05:14:00] ERROR [django.request] Internal Server Error: /api/v1/users (KeyError: 'user_id')\n[10/Aug/2026 05:14:02] ERROR [django.request] Internal Server Error: /api/v1/orders (KeyError: 'user_id')\n[10/Aug/2026 05:14:05] CRITICAL [db.connector] OperationalError: OperationalError(2003, "Can't connect to MySQL server on '10.0.0.1'")`
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadPreset('java');
+    });
+
+    function loadPreset(key) {
+      document.getElementById('logRawInput').value = sampleLogs[key] || '';
+      aggregateErrorLogs();
+    }
+
+    function handleFileSelect(e) {
+      if (e.target.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          document.getElementById('logRawInput').value = evt.target.result;
+          aggregateErrorLogs();
+        };
+        reader.readAsText(e.target.files[0]);
+      }
+    }
+
+    function aggregateErrorLogs() {
+      const raw = document.getElementById('logRawInput').value;
+      const freqMap = new Map();
+      totalLinesCount = 0;
+      totalErrorsCount = 0;
+
+      if (!raw.trim()) {
+        aggregatedList = [];
+        renderStats();
+        renderTable();
+        return;
+      }
+
+      const lines = raw.split('\n');
+      totalLinesCount = lines.length;
+
+      lines.forEach(line => {
+        const clean = line.trim();
+        if (!clean) return;
+
+        // Check if line contains error keywords
+        if (/ERROR|FATAL|CRITICAL|EXCEPTION|WARN|FAILED|REFUSED/i.test(clean)) {
+          totalErrorsCount++;
+
+          // Normalize line: strip timestamps, IPs, PIDs, Hex addresses
+          const normalized = clean
+            .replace(/\d{4}[-/.]\d{2}[-/.]\d{2}[T\s]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?/gi, '<TIMESTAMP>')
+            .replace(/\[\d{2}\/\w{3}\/\d{4}:?\d{2}:\d{2}:\d{2}[^\]]*\]/gi, '<TIMESTAMP>')
+            .replace(/\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}(?::\d+)?\b/gi, '<IP>')
+            .replace(/\b0x[a-fA-F0-9]+\b/gi, '<HEX>')
+            .replace(/\[pid \d+\]|#\d+:\s*\*\d+/gi, '<PID>');
+
+          freqMap.set(normalized, (freqMap.get(normalized) || 0) + 1);
+        }
+      });
+
+      // Convert map to sorted array by count descending
+      aggregatedList = Array.from(freqMap.entries()).map(([signature, count]) => ({
+        signature,
+        count
+      })).sort((a, b) => b.count - a.count);
+
+      renderStats();
+      renderTable();
+    }
+
+    function renderStats() {
+      document.getElementById('statTotal').textContent = totalLinesCount.toLocaleString();
+      document.getElementById('statErrors').textContent = totalErrorsCount.toLocaleString();
+      document.getElementById('statPatterns').textContent = aggregatedList.length.toLocaleString();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('tableBody');
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+
+      const filtered = aggregatedList.filter(item => !query || item.signature.toLowerCase().includes(query));
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: var(--text-secondary); padding: 32px;">No error patterns match current search query.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(item => `
+        <tr>
+          <td><span class="count-badge">${item.count}x</span></td>
+          <td style="color: var(--text-main);">${escapeHtml(item.signature)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function copySummaryJson() {
+      if (aggregatedList.length === 0) return;
+      const jsonStr = JSON.stringify(aggregatedList, null, 2);
+
+      try {
+        navigator.clipboard.writeText(jsonStr);
+        triggerSuccessButton('copyJsonBtn', 'copyIcon', 'copyText', 'Copied JSON!');
+      } catch (e) {
+        const temp = document.createElement('textarea');
+        temp.value = jsonStr;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        triggerSuccessButton('copyJsonBtn', 'copyIcon', 'copyText', 'Copied JSON!');
+      }
+    }
+
+    function downloadCsv() {
+      if (aggregatedList.length === 0) return;
+      let csv = 'Frequency_Count,Normalized_Error_Signature\n';
+      aggregatedList.forEach(item => {
+        csv += `${item.count},"${item.signature.replace(/"/g, '""')}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `error_patterns_summary_${Date.now()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function triggerSuccessButton(btnId, iconId, textId, successText) {
+      const btn = document.getElementById(btnId);
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      btn.classList.add('btn-success');
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        btn.classList.remove('btn-success');
+        icon.innerText = originalIcon;
+        text.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+  </script>
+</body>
+
+</html>
