@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Dice Roller & Polyhedral Probability Studio</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+    }
+
+    h1, h2, h3, h4, .btn, .stat-val {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Standard Header Bar with Action Chips */
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .header-title-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-title-box h2 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .action-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-family: 'Roboto', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid var(--border-color);
+      background-color: #ffffff;
+      color: var(--text-main);
+    }
+
+    .action-chip .material-symbols-outlined {
+      font-size: 16px;
+    }
+
+    .action-chip:hover {
+      background-color: var(--bg-color);
+      border-color: #c6c9ce;
+      transform: translateY(-1px);
+    }
+
+    .chip-bug:hover {
+      color: var(--danger-text);
+      border-color: #fad2cf;
+      background-color: var(--danger-bg);
+    }
+
+    .chip-feature:hover {
+      color: #b06000;
+      border-color: #feefc3;
+      background-color: #fef7e0;
+    }
+
+    .chip-creator:hover {
+      color: var(--primary-blue);
+      border-color: #d2e3fc;
+      background-color: #e8f0fe;
+    }
+
+    /* Configuration & Mode Bar */
+    .controls-panel {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 14px;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .ctrl-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .chip-btn {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .chip-btn:hover {
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    .chip-btn.active {
+      background-color: var(--primary-blue);
+      color: #ffffff;
+      border-color: var(--primary-blue);
+      font-weight: 700;
+    }
+
+    /* 3D Dice Rolling Arena */
+    .dice-arena {
+      background: radial-gradient(circle at 50% 30%, #1e293b, #0f172a 85%);
+      border: 1px solid #334155;
+      border-radius: 12px;
+      min-height: 320px;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.5), 0 4px 14px rgba(0,0,0,0.08);
+      perspective: 1000px;
+      cursor: pointer;
+    }
+
+    .dice-stage-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      align-items: center;
+      justify-content: center;
+      max-width: 800px;
+      z-index: 2;
+    }
+
+    /* 3D Cube Die */
+    .die-wrapper {
+      width: 76px;
+      height: 76px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 1.2s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    }
+
+    .die-cube {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+    }
+
+    .die-face {
+      position: absolute;
+      width: 76px;
+      height: 76px;
+      background: #ffffff;
+      border: 2px solid #cbd5e1;
+      border-radius: 14px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      padding: 8px;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0,0,0,0.3);
+      backface-visibility: hidden;
+      box-sizing: border-box;
+    }
+
+    /* Pip Dot Styling */
+    .pip {
+      width: 12px;
+      height: 12px;
+      background-color: #1e293b;
+      border-radius: 50%;
+      align-self: center;
+      justify-self: center;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.4);
+    }
+
+    .die-face-1 .pip { grid-area: 2 / 2; }
+    .die-face-2 .pip:nth-child(1) { grid-area: 1 / 1; }
+    .die-face-2 .pip:nth-child(2) { grid-area: 3 / 3; }
+    .die-face-3 .pip:nth-child(1) { grid-area: 1 / 1; }
+    .die-face-3 .pip:nth-child(2) { grid-area: 2 / 2; }
+    .die-face-3 .pip:nth-child(3) { grid-area: 3 / 3; }
+    .die-face-4 .pip:nth-child(1) { grid-area: 1 / 1; }
+    .die-face-4 .pip:nth-child(2) { grid-area: 1 / 3; }
+    .die-face-4 .pip:nth-child(3) { grid-area: 3 / 1; }
+    .die-face-4 .pip:nth-child(4) { grid-area: 3 / 3; }
+    .die-face-5 .pip:nth-child(1) { grid-area: 1 / 1; }
+    .die-face-5 .pip:nth-child(2) { grid-area: 1 / 3; }
+    .die-face-5 .pip:nth-child(3) { grid-area: 2 / 2; }
+    .die-face-5 .pip:nth-child(4) { grid-area: 3 / 1; }
+    .die-face-5 .pip:nth-child(5) { grid-area: 3 / 3; }
+    .die-face-6 .pip:nth-child(1) { grid-area: 1 / 1; }
+    .die-face-6 .pip:nth-child(2) { grid-area: 2 / 1; }
+    .die-face-6 .pip:nth-child(3) { grid-area: 3 / 1; }
+    .die-face-6 .pip:nth-child(4) { grid-area: 1 / 3; }
+    .die-face-6 .pip:nth-child(5) { grid-area: 2 / 3; }
+    .die-face-6 .pip:nth-child(6) { grid-area: 3 / 3; }
+
+    /* 3D Cube Face Positions (radius = 38px) */
+    .die-face-1 { transform: translateZ(38px); }
+    .die-face-2 { transform: rotateY(180deg) translateZ(38px); }
+    .die-face-3 { transform: rotateY(-90deg) translateZ(38px); }
+    .die-face-4 { transform: rotateY(90deg) translateZ(38px); }
+    .die-face-5 { transform: rotateX(-90deg) translateZ(38px); }
+    .die-face-6 { transform: rotateX(90deg) translateZ(38px); }
+
+    /* Themes */
+    .theme-vegas .die-face { background: #dc2626; border-color: #ef4444; }
+    .theme-vegas .pip { background: #ffffff; }
+
+    .theme-cyber .die-face { background: #0f172a; border-color: #06b6d4; }
+    .theme-cyber .pip { background: #38bdf8; box-shadow: 0 0 8px #38bdf8; }
+
+    .theme-gold .die-face { background: #fef08a; border-color: #eab308; }
+    .theme-gold .pip { background: #713f12; }
+
+    .theme-obsidian .die-face { background: #1e1e1e; border-color: #404040; }
+    .theme-obsidian .pip { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+
+    /* Polyhedral & Number Die Mode */
+    .poly-die-box {
+      width: 76px;
+      height: 76px;
+      border-radius: 16px;
+      background: linear-gradient(145deg, #1e293b, #0f172a);
+      border: 3px solid #60a5fa;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5), inset 0 0 12px rgba(96, 165, 250, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .poly-die-val {
+      font-size: 30px;
+      font-weight: 700;
+      color: #60a5fa;
+      text-shadow: 0 0 12px rgba(96, 165, 250, 0.8);
+    }
+
+    .poly-die-type {
+      font-size: 9px;
+      font-family: 'Roboto Mono', monospace;
+      color: #94a3b8;
+      text-transform: uppercase;
+    }
+
+    /* Roll Outcome Summary Banner */
+    .outcome-banner {
+      margin-top: 14px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 2;
+      color: #ffffff;
+    }
+
+    .outcome-total {
+      font-size: 24px;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+
+    .outcome-meta {
+      display: flex;
+      gap: 12px;
+      font-size: 11px;
+      color: #cbd5e1;
+    }
+
+    .combo-badge {
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 700;
+      background-color: #f59e0b;
+      color: #000000;
+    }
+
+    /* Stats & History Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card-box {
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* History Table */
+    .history-list {
+      max-height: 140px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 11px;
+    }
+
+    /* Probability Distribution Bars */
+    .dist-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 90px;
+      padding-top: 10px;
+    }
+
+    .dist-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      height: 100%;
+      justify-content: flex-end;
+    }
+
+    .dist-bar-fill {
+      width: 100%;
+      background: var(--primary-blue);
+      border-radius: 3px 3px 0 0;
+      min-height: 2px;
+      transition: height 0.3s ease;
+    }
+
+    .dist-lbl {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Bottom Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 7px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.96);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 17px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 130px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Header Bar with Action Chips -->
+    <div class="header-bar">
+      <div class="header-title-box">
+        <span class="material-symbols-outlined" style="font-size: 24px; color: var(--primary-blue);">casino</span>
+        <h2>3D Dice Roller & Polyhedral Physics Studio</h2>
+      </div>
+
+      <div class="header-actions">
+        <a href="mailto:hikapil@google.com?cc=useful-tools@google.com&amp;subject=%5BUser%20Feedback%5D%20%7C%20Bug%20Found%20on%20go%2Fusefultools&amp;body=Hi%20Kapil%2C%0A%0AI%E2%80%99m%20reaching%20out%20to%20report%20a%20bug.%20Here%20are%20the%20relevant%20details%3A%0A%0ABug%20Description%3A%20%5BPlease%20provide%20a%20description%20of%20the%20issue%20here%5D"
+          target="_blank" rel="noopener noreferrer" class="action-chip chip-bug" title="Report a Bug">
+          <span class="material-symbols-outlined">bug_report</span>
+          <span>Report Bug</span>
+        </a>
+
+        <a href="mailto:hikapil@google.com?cc=useful-tools@google.com&amp;subject=%5BUser%20Feedback%5D%20%7C%20New%20Tool%2FFeature%20Request%20for%20go%2Fusefultools&amp;body=Hi%20Kapil%2C%0A%0AI%E2%80%99m%20reaching%20out%20to%20request%20a%20new%20feature.%20Here%20are%20the%20relevant%20details%3A%0A%0AFeature%20Request%3A%20%5BPlease%20provide%20a%20description%20of%20the%20feature%20you&#39;d%20like%20to%20see%5D"
+          target="_blank" rel="noopener noreferrer" class="action-chip chip-feature" title="Request a New Feature">
+          <span class="material-symbols-outlined">lightbulb</span>
+          <span>Request Feature</span>
+        </a>
+
+        <a href="https://moma.corp.google.com/person/hikapil"
+          target="_blank" rel="noopener noreferrer" class="action-chip chip-creator" title="Meet the Creator on Moma">
+          <span class="material-symbols-outlined">person</span>
+          <span>Meet the Creator</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Controls Panel -->
+    <div class="controls-panel">
+      <!-- Dice Quantity Selector -->
+      <div class="control-group">
+        <span class="ctrl-label">
+          <span class="material-symbols-outlined" style="font-size: 15px;">filter_6</span>
+          Dice Count:
+        </span>
+        <button class="chip-btn" onclick="setDiceCount(1, this)">1 Die</button>
+        <button class="chip-btn active" onclick="setDiceCount(2, this)">2 Dice</button>
+        <button class="chip-btn" onclick="setDiceCount(3, this)">3 Dice</button>
+        <button class="chip-btn" onclick="setDiceCount(4, this)">4 Dice</button>
+        <button class="chip-btn" onclick="setDiceCount(6, this)">6 Dice</button>
+      </div>
+
+      <!-- Die Type (D6, D20, etc.) -->
+      <div class="control-group">
+        <span class="ctrl-label">
+          <span class="material-symbols-outlined" style="font-size: 15px;">category</span>
+          Die Type:
+        </span>
+        <button class="chip-btn active" id="typeD6" onclick="setDieType('d6', this)">D6 (Cube)</button>
+        <button class="chip-btn" id="typeD20" onclick="setDieType('d20', this)">D20 (RPG)</button>
+        <button class="chip-btn" id="typeD12" onclick="setDieType('d12', this)">D12</button>
+        <button class="chip-btn" id="typeD10" onclick="setDieType('d10', this)">D10</button>
+        <button class="chip-btn" id="typeD4" onclick="setDieType('d4', this)">D4</button>
+        <button class="chip-btn" id="typeCoin" onclick="setDieType('coin', this)">Coin (2)</button>
+      </div>
+
+      <!-- Theme Selector -->
+      <div class="control-group">
+        <span class="ctrl-label">Theme:</span>
+        <button class="chip-btn active" onclick="setTheme('classic', this)">Classic</button>
+        <button class="chip-btn" onclick="setTheme('vegas', this)">Vegas Red</button>
+        <button class="chip-btn" onclick="setTheme('cyber', this)">Cyber</button>
+        <button class="chip-btn" onclick="setTheme('gold', this)">Gold</button>
+        <button class="chip-btn" onclick="setTheme('obsidian', this)">Obsidian</button>
+      </div>
+    </div>
+
+    <!-- 3D Dice Arena -->
+    <div class="dice-arena" id="diceArena" onclick="rollAllDice()">
+      <!-- Dice Grid Stage -->
+      <div class="dice-stage-grid" id="diceContainer">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Live Result Banner -->
+      <div class="outcome-banner" id="outcomeBanner">
+        <div>
+          <span style="font-size: 10px; color: #94a3b8; text-transform: uppercase;">Total Score</span>
+          <div class="outcome-total" id="outcomeTotal">7</div>
+        </div>
+        <div class="outcome-meta">
+          <span id="outcomeBreakdown">Dice: [3, 4]</span>
+          <span id="outcomeStats">Avg: 3.5</span>
+          <span class="combo-badge" id="outcomeCombo" style="display: none;">Lucky 7!</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Roll Analytics & History -->
+    <div class="stats-grid">
+      <!-- Roll History Log -->
+      <div class="card-box">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3 class="card-title">
+            <span class="material-symbols-outlined" style="font-size: 16px; color: var(--primary-blue);">history</span>
+            Roll History
+          </h3>
+          <span style="font-size: 11px; color: var(--text-secondary);" id="totalRollsCount">0 Rolls</span>
+        </div>
+        <div class="history-list" id="historyList">
+          <div style="text-align: center; color: var(--text-secondary); padding: 24px; font-size: 11px;">
+            Click "Roll Dice" or click the arena to roll!
+          </div>
+        </div>
+      </div>
+
+      <!-- Frequency Distribution Graph -->
+      <div class="card-box">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3 class="card-title">
+            <span class="material-symbols-outlined" style="font-size: 16px; color: var(--primary-blue);">bar_chart</span>
+            Outcome Distribution
+          </h3>
+          <span style="font-size: 11px; color: var(--text-secondary);">Fair Probability Matrix</span>
+        </div>
+        <div class="dist-bars" id="distBars">
+          <!-- Rendered in JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Bottom Toolbar -->
+    <div class="toolbar">
+      <button class="btn-primary" id="rollBtn" onclick="rollAllDice()">
+        <span class="material-symbols-outlined">casino</span>
+        Roll Dice (Space)
+      </button>
+
+      <button class="btn-secondary" onclick="toggleSound()">
+        <span class="material-symbols-outlined" id="soundIcon">volume_up</span>
+        <span id="soundText">Sound ON</span>
+      </button>
+
+      <button class="btn-secondary" onclick="copyHistory()">
+        <span class="material-symbols-outlined" id="copyIcon">content_copy</span>
+        <span id="copyText">Copy History</span>
+      </button>
+
+      <button class="btn-secondary" onclick="clearHistory()">
+        <span class="material-symbols-outlined">delete</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // State Configuration
+    let diceCount = 2;
+    let dieType = 'd6'; // 'd6', 'd20', 'd12', 'd10', 'd4', 'coin'
+    let currentTheme = 'classic';
+    let isRolling = false;
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    // History and Statistics
+    const rollHistory = [];
+    const frequencyMap = {};
+
+    // 3D Rotations for 6 Faces
+    const faceRotations = {
+      1: { x: 0, y: 0 },
+      2: { x: 0, y: 180 },
+      3: { x: 0, y: 90 },
+      4: { x: 0, y: -90 },
+      5: { x: 90, y: 0 },
+      6: { x: -90, y: 0 }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      buildDice();
+      setupKeyboard();
+      renderDistributionBars();
+    });
+
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContextClass();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function setupKeyboard() {
+      window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
+          e.preventDefault();
+          rollAllDice();
+        }
+      });
+    }
+
+    function setDiceCount(num, btn) {
+      diceCount = num;
+      document.querySelectorAll('.controls-panel .control-group:nth-child(1) .chip-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      buildDice();
+    }
+
+    function setDieType(type, btn) {
+      dieType = type;
+      document.querySelectorAll('.controls-panel .control-group:nth-child(2) .chip-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      buildDice();
+      renderDistributionBars();
+    }
+
+    function setTheme(theme, btn) {
+      currentTheme = theme;
+      document.querySelectorAll('.controls-panel .control-group:nth-child(3) .chip-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      buildDice();
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundIcon').textContent = soundEnabled ? 'volume_up' : 'volume_off';
+      document.getElementById('soundText').textContent = soundEnabled ? 'Sound ON' : 'Sound OFF';
+    }
+
+    function buildDice() {
+      const container = document.getElementById('diceContainer');
+      container.innerHTML = '';
+
+      for (let i = 0; i < diceCount; i++) {
+        if (dieType === 'd6') {
+          const wrapper = document.createElement('div');
+          wrapper.className = `die-wrapper theme-${currentTheme}`;
+          wrapper.id = `die_${i}`;
+
+          const cube = document.createElement('div');
+          cube.className = 'die-cube';
+
+          // 6 Faces
+          for (let f = 1; f <= 6; f++) {
+            const face = document.createElement('div');
+            face.className = `die-face die-face-${f}`;
+            for (let p = 0; p < f; p++) {
+              const pip = document.createElement('div');
+              pip.className = 'pip';
+              face.appendChild(pip);
+            }
+            cube.appendChild(face);
+          }
+
+          wrapper.appendChild(cube);
+          container.appendChild(wrapper);
+        } else {
+          // Polyhedral / Number Die
+          const polyBox = document.createElement('div');
+          polyBox.className = 'poly-die-box';
+          polyBox.id = `poly_die_${i}`;
+          polyBox.innerHTML = `
+            <span class="poly-die-val" id="poly_val_${i}">1</span>
+            <span class="poly-die-type">${dieType.toUpperCase()}</span>
+          `;
+          container.appendChild(polyBox);
+        }
+      }
+    }
+
+    function getMaxSides() {
+      if (dieType === 'd4') return 4;
+      if (dieType === 'd6') return 6;
+      if (dieType === 'd10') return 10;
+      if (dieType === 'd12') return 12;
+      if (dieType === 'd20') return 20;
+      if (dieType === 'coin') return 2;
+      return 6;
+    }
+
+    function rollAllDice() {
+      if (isRolling) return;
+      isRolling = true;
+      initAudio();
+
+      if (soundEnabled) playDiceSound();
+
+      const maxSides = getMaxSides();
+      const results = [];
+
+      for (let i = 0; i < diceCount; i++) {
+        const val = Math.floor(Math.random() * maxSides) + 1;
+        results.push(val);
+
+        if (dieType === 'd6') {
+          const die = document.getElementById(`die_${i}`);
+          if (die) {
+            // Add extra spins (3 to 5 full rotations)
+            const extraRotX = (Math.floor(Math.random() * 4) + 3) * 360;
+            const extraRotY = (Math.floor(Math.random() * 4) + 3) * 360;
+            const faceRot = faceRotations[val];
+
+            die.style.transform = `rotateX(${faceRot.x + extraRotX}deg) rotateY(${faceRot.y + extraRotY}deg)`;
+          }
+        } else {
+          const polyBox = document.getElementById(`poly_die_${i}`);
+          const polyVal = document.getElementById(`poly_val_${i}`);
+          if (polyBox && polyVal) {
+            polyBox.style.transform = 'scale(1.2) rotate(360deg)';
+            let counter = 0;
+            const shuffleInterval = setInterval(() => {
+              polyVal.textContent = Math.floor(Math.random() * maxSides) + 1;
+              if (++counter > 10) {
+                clearInterval(shuffleInterval);
+                polyVal.textContent = dieType === 'coin' ? (val === 1 ? 'HEADS' : 'TAILS') : val;
+                polyBox.style.transform = 'scale(1) rotate(0deg)';
+              }
+            }, 60);
+          }
+        }
+      }
+
+      setTimeout(() => {
+        finalizeRoll(results);
+        isRolling = false;
+      }, 1000);
+    }
+
+    function finalizeRoll(results) {
+      const sum = results.reduce((a, b) => a + b, 0);
+      const avg = (sum / results.length).toFixed(1);
+
+      document.getElementById('outcomeTotal').textContent = dieType === 'coin' ? (results[0] === 1 ? 'HEADS' : 'TAILS') : sum;
+      document.getElementById('outcomeBreakdown').textContent = `Dice: [${results.join(', ')}]`;
+      document.getElementById('outcomeStats').textContent = `Avg: ${avg}`;
+
+      // Detect Combos (Doubles, Triples, Yahtzee, Lucky 7, Nat 20)
+      const comboBadge = document.getElementById('outcomeCombo');
+      let comboName = '';
+
+      if (dieType === 'd20' && results.includes(20)) comboName = '✨ Critical Hit (20)!';
+      else if (dieType === 'd20' && results.includes(1)) comboName = '💀 Critical Fail (1)!';
+      else if (results.length > 1 && results.every(v => v === results[0])) {
+        comboName = results.length === 2 ? `🎉 Double ${results[0]}s!` : `🔥 Yahtzee (${results[0]}s)!`;
+      } else if (sum === 7 && results.length === 2) {
+        comboName = '🍀 Lucky 7!';
+      }
+
+      if (comboName) {
+        comboBadge.textContent = comboName;
+        comboBadge.style.display = 'inline-block';
+      } else {
+        comboBadge.style.display = 'none';
+      }
+
+      // Record History
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      rollHistory.unshift({
+        time: timeStr,
+        results: [...results],
+        total: sum,
+        combo: comboName
+      });
+
+      // Update Distribution
+      results.forEach(v => {
+        frequencyMap[v] = (frequencyMap[v] || 0) + 1;
+      });
+
+      renderHistory();
+      renderDistributionBars();
+    }
+
+    function renderHistory() {
+      const list = document.getElementById('historyList');
+      document.getElementById('totalRollsCount').textContent = `${rollHistory.length} Rolls`;
+
+      if (rollHistory.length === 0) {
+        list.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 24px; font-size: 11px;">No rolls recorded yet.</div>';
+        return;
+      }
+
+      list.innerHTML = rollHistory.slice(0, 30).map((r, idx) => `
+        <div class="history-item">
+          <div>
+            <strong>#${rollHistory.length - idx}</strong>: Total <strong>${r.total}</strong> (${r.results.join(', ')})
+            ${r.combo ? `<span style="color: #f59e0b; font-weight: 700; margin-left: 4px;">${r.combo}</span>` : ''}
+          </div>
+          <span style="color: var(--text-secondary); font-family: 'Roboto Mono', monospace; font-size: 10px;">${r.time}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderDistributionBars() {
+      const distContainer = document.getElementById('distBars');
+      const maxSides = getMaxSides();
+      distContainer.innerHTML = '';
+
+      let maxCount = 1;
+      for (let s = 1; s <= maxSides; s++) {
+        if ((frequencyMap[s] || 0) > maxCount) maxCount = frequencyMap[s];
+      }
+
+      for (let s = 1; s <= maxSides; s++) {
+        const count = frequencyMap[s] || 0;
+        const heightPct = Math.max(5, (count / maxCount) * 100);
+
+        const col = document.createElement('div');
+        col.className = 'dist-col';
+        col.innerHTML = `
+          <span style="font-size: 9px; color: var(--text-secondary); font-family: 'Roboto Mono', monospace;">${count}</span>
+          <div class="dist-bar-fill" style="height: ${heightPct}%;"></div>
+          <span class="dist-lbl">${s}</span>
+        `;
+        distContainer.appendChild(col);
+      }
+    }
+
+    /* Web Audio API Sound Synthesizer (Realistic Clatter & Landing) */
+    function playDiceSound() {
+      if (!audioCtx) return;
+      const t = audioCtx.currentTime;
+
+      // 4 Rapid Clatter Bounces
+      for (let i = 0; i < 4; i++) {
+        const delay = i * 0.08 + Math.random() * 0.03;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.frequency.setValueAtTime(450 + Math.random() * 300, t + delay);
+        osc.frequency.exponentialRampToValueAtTime(100, t + delay + 0.05);
+
+        gain.gain.setValueAtTime(0.35 - i * 0.06, t + delay);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + delay + 0.05);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(t + delay);
+        osc.stop(t + delay + 0.06);
+      }
+    }
+
+    function copyHistory() {
+      if (rollHistory.length === 0) return;
+      const text = rollHistory.map((r, i) => `${i + 1}. [${r.time}] Total: ${r.total} (${r.results.join(', ')}) ${r.combo || ''}`).join('\n');
+
+      try {
+        navigator.clipboard.writeText(text);
+        triggerSuccessButton('copyIcon', 'copyText', 'Copied History!');
+      } catch (e) {
+        const temp = document.createElement('textarea');
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        triggerSuccessButton('copyIcon', 'copyText', 'Copied History!');
+      }
+    }
+
+    function clearHistory() {
+      rollHistory.length = 0;
+      for (let key in frequencyMap) delete frequencyMap[key];
+      renderHistory();
+      renderDistributionBars();
+      showStatus('Roll history and statistics cleared.', 'success');
+    }
+
+    function triggerSuccessButton(iconId, textId, successText) {
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+      setTimeout(() => {
+        statusBox.className = 'status-box';
+        statusBox.textContent = '';
+      }, 3000);
+    }
+  </script>
+</body>
+
+</html>
