@@ -19,6 +19,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/utif/3.1.0/UTIF.min.js"></script>
   <!-- heic2any for HEIC support -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/heic2any/0.0.4/heic2any.min.js"></script>
+  <!-- Tesseract.js library for Client-Side OCR -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
 
   <style>
     :root {
@@ -148,6 +150,35 @@
     input[type="range"] {
       flex: 1;
       accent-color: var(--primary-blue);
+    }
+
+    .panel-section-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border-color);
+      margin-top: 4px;
+    }
+
+    .checkbox-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      user-select: none;
+      color: var(--text-main);
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      accent-color: var(--primary-blue);
+      cursor: pointer;
+      width: 15px;
+      height: 15px;
     }
 
     /* Reorderable Image Cards Grid */
@@ -379,12 +410,101 @@
         transform: rotate(360deg);
       }
     }
+  
+    /* Header Bar: Feedback & Creator Chips */
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-left: auto;
+    }
+
+    .action-chip {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 16px;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      background-color: #ffffff;
+      color: var(--text-secondary);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-sizing: border-box;
+      line-height: 1;
+    }
+
+    .action-chip .material-symbols-outlined {
+      font-size: 15px;
+    }
+
+    .action-chip:hover {
+      box-shadow: 0 1px 2px rgba(60, 64, 67, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .action-chip:active {
+      transform: scale(0.95);
+    }
+
+    .chip-bug:hover {
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border-color: #f5c6cb;
+    }
+
+    .chip-feature:hover {
+      background-color: #fef7e0;
+      color: #b06000;
+      border-color: #f9ab00;
+    }
+
+    .chip-creator:hover {
+      background-color: #e8f0fe;
+      color: var(--primary-blue);
+      border-color: #aecbfa;
+    }
   </style>
 </head>
 
 <body>
 
   <div class="container">
+    <!-- Header Bar: Feedback & Creator Chips -->
+    <div class="header-bar">
+      <div class="header-actions">
+        <a href="mailto:hikapil@google.com?cc=useful-tools@google.com&amp;subject=%5BUser%20Feedback%5D%20%7C%20Bug%20Found%20on%20go%2Fusefultools&amp;body=Hi%20Kapil%2C%0A%0AI%E2%80%99m%20reaching%20out%20to%20report%20a%20bug.%20Here%20are%20the%20relevant%20details%3A%0A%0ABug%20Description%3A%20%5BPlease%20provide%20a%20description%20of%20the%20issue%20here%5D%0ABug%20Screenshot%20(optional)%3A%20%5BPlease%20include%20the%20screenshot%20with%20this%20email%5D"
+          target="_blank" rel="noopener noreferrer" class="action-chip chip-bug" title="Report a Bug">
+          <span class="material-symbols-outlined">bug_report</span>
+          <span>Report Bug</span>
+        </a>
+
+        <a href="mailto:hikapil@google.com?cc=useful-tools@google.com&amp;subject=%5BUser%20Feedback%5D%20%7C%20New%20Tool%2FFeature%20Request%20for%20go%2Fusefultools&amp;body=Hi%20Kapil%2C%0A%0AI%E2%80%99m%20reaching%20out%20to%20request%20a%20new%20feature.%20Here%20are%20the%20relevant%20details%3A%0A%0AFeature%20Request%3A%20%5BPlease%20provide%20a%20description%20of%20the%20feature%20you&#39;d%20like%20to%20see%5D%0AWhy%20this%20would%20be%20helpful%3A%20%5BPlease%20explain%20how%20this%20feature%20would%20improve%20your%20experience%5D"
+          target="_blank" rel="noopener noreferrer" class="action-chip chip-feature" title="Request a New Feature">
+          <span class="material-symbols-outlined">lightbulb</span>
+          <span>Request Feature</span>
+        </a>
+
+        <a href="https://moma.corp.google.com/person/hikapil"
+          target="_blank" rel="noopener noreferrer" class="action-chip chip-creator" title="Meet the Creator on Moma">
+          <span class="material-symbols-outlined">person</span>
+          <span>Meet the Creator</span>
+        </a>
+      </div>
+    </div>
     <!-- Drop Zone -->
     <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
       <span class="material-symbols-outlined" style="font-size: 36px; color: var(--primary-blue);">picture_as_pdf</span>
@@ -398,6 +518,12 @@
       <div class="controls-panel" id="controlsPanel">
         <div id="fileSummary" style="font-size: 13px; color: var(--text-secondary);">
           No images uploaded yet.
+        </div>
+
+        <!-- Section 1: Page Layout -->
+        <div class="panel-section-title">
+          <span class="material-symbols-outlined" style="font-size: 16px; color: var(--primary-blue);">description</span>
+          <span>PDF Page Setup</span>
         </div>
 
         <div class="control-row">
@@ -442,17 +568,72 @@
           </div>
         </div>
 
-        <div class="control-row">
-          <div class="input-group">
-            <label for="imgQuality">Image Compression (<span id="qualityVal">90</span>%)</label>
-            <input type="range" id="imgQuality" min="1" max="100" value="90" oninput="document.getElementById('qualityVal').textContent = this.value;">
-          </div>
+        <!-- Section 2: Image Upscaling & Quality -->
+        <div class="panel-section-title">
+          <span class="material-symbols-outlined" style="font-size: 16px; color: var(--primary-blue);">high_density</span>
+          <span>Image Upscaling & Clarity</span>
         </div>
 
         <div class="control-row">
           <div class="input-group">
+            <label for="upscaleFactor">Super-Resolution Upscale</label>
+            <select id="upscaleFactor">
+              <option value="auto" selected>⚡ Auto (Smart 300 DPI - Crisp)</option>
+              <option value="2">2× Enhanced (Crisp Detail)</option>
+              <option value="3">3× Ultra HD (High-Res)</option>
+              <option value="1">1× Original (No Upscale - Fast)</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label for="imgQuality">JPEG Quality (<span id="qualityVal">95</span>%)</label>
+            <input type="range" id="imgQuality" min="1" max="100" value="95" oninput="document.getElementById('qualityVal').textContent = this.value;">
+          </div>
+        </div>
+
+        <div class="control-row" style="gap: 16px;">
+          <label class="checkbox-label" title="Applies unsharp mask sharpening to make text edges and details razor sharp">
+            <input type="checkbox" id="sharpenFilter" checked>
+            <span>Smart Edge Sharpening</span>
+          </label>
+
+          <label class="checkbox-label" title="Cleans up background noise and boosts text contrast for scanned documents">
+            <input type="checkbox" id="contrastFilter" checked>
+            <span>Text Contrast Boost</span>
+          </label>
+        </div>
+
+        <!-- Section 3: OCR & Searchable Text -->
+        <div class="panel-section-title">
+          <span class="material-symbols-outlined" style="font-size: 16px; color: var(--primary-blue);">document_scanner</span>
+          <span>OCR & Searchable Text Layer</span>
+        </div>
+
+        <div class="control-row">
+          <label class="checkbox-label" style="font-weight: 500;" title="Creates an invisible text layer on top of the image so you can search and copy text directly from the PDF">
+            <input type="checkbox" id="enableOcr" checked onchange="toggleOcrSettings()">
+            <span>Enable OCR (Searchable & Copyable PDF)</span>
+          </label>
+        </div>
+
+        <div class="control-row" id="ocrSettingsRow">
+          <div class="input-group">
+            <label for="ocrLang">OCR Language</label>
+            <select id="ocrLang">
+              <option value="eng" selected>English (eng)</option>
+              <option value="spa">Spanish (spa)</option>
+              <option value="fra">French (fra)</option>
+              <option value="deu">German (deu)</option>
+              <option value="chi_sim">Chinese Simplified (chi_sim)</option>
+              <option value="jpn">Japanese (jpn)</option>
+              <option value="hin">Hindi (hin)</option>
+              <option value="eng+spa+fra+deu">Multi-Language (Eng/Spa/Fra/Deu)</option>
+            </select>
+          </div>
+
+          <div class="input-group">
             <label for="pdfTitle">PDF Document Title</label>
-            <input type="text" id="pdfTitle" placeholder="e.g. Combined_Images_Document">
+            <input type="text" id="pdfTitle" placeholder="e.g. Searchable_Document">
           </div>
         </div>
       </div>
@@ -487,12 +668,17 @@
     <div class="toolbar">
       <button id="convertBtn" class="btn-primary" onclick="generatePdf()">
         <span class="material-symbols-outlined" id="convertIcon">picture_as_pdf</span>
-        <span id="convertText">Convert to PDF</span>
+        <span id="convertText">Convert to Searchable PDF</span>
       </button>
 
       <button id="downloadBtn" class="btn-secondary" onclick="downloadResult()" disabled>
         <span class="material-symbols-outlined" id="downloadIcon">download</span>
         <span id="downloadText">Download PDF</span>
+      </button>
+
+      <button id="copyTextBtn" class="btn-secondary" onclick="copyExtractedOcrText()" disabled title="Copy all recognized OCR text to clipboard">
+        <span class="material-symbols-outlined" id="copyTextIcon">content_copy</span>
+        <span id="copyTextLabel">Copy Extracted Text</span>
       </button>
 
       <button class="btn-secondary" onclick="clearAll()" style="color: var(--text-secondary);">
@@ -505,8 +691,21 @@
   <script>
     let uploadedImages = []; // Array of { file, name, size, dataUrl, imgElement, width, height }
     let generatedPdfBlob = null;
+    let allExtractedText = '';
 
     const dropZone = document.getElementById('dropZone');
+
+    function toggleOcrSettings() {
+      const isOcr = document.getElementById('enableOcr').checked;
+      const langSelect = document.getElementById('ocrLang');
+      if (langSelect) {
+        langSelect.disabled = !isOcr;
+      }
+      const btnText = document.getElementById('convertText');
+      if (btnText) {
+        btnText.textContent = isOcr ? 'Convert to Searchable PDF' : 'Convert to PDF';
+      }
+    }
 
     ['dragenter', 'dragover'].forEach(eventName => {
       dropZone.addEventListener(eventName, (e) => {
@@ -644,6 +843,150 @@
       renderGrid();
     }
 
+    // High-Quality Multi-Step Image Upscaling & Enhancement
+    async function upscaleAndEnhanceImage(imgElement, scaleOption, applySharpen, applyContrastBoost) {
+      const origW = imgElement.naturalWidth || imgElement.width;
+      const origH = imgElement.naturalHeight || imgElement.height;
+
+      let targetScale = 1.0;
+      if (scaleOption === 'auto') {
+        const maxDim = Math.max(origW, origH);
+        if (maxDim < 1200) targetScale = 2.5;
+        else if (maxDim < 1800) targetScale = 2.0;
+        else if (maxDim < 2400) targetScale = 1.5;
+        else targetScale = 1.0;
+      } else {
+        targetScale = parseFloat(scaleOption) || 1.0;
+      }
+
+      const targetW = Math.round(origW * targetScale);
+      const targetH = Math.round(origH * targetScale);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = targetW;
+      canvas.height = targetH;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, targetW, targetH);
+
+      // Multi-step high quality resampling
+      if (targetScale > 2.0) {
+        const stepCanvas = document.createElement('canvas');
+        stepCanvas.width = Math.round(origW * 2.0);
+        stepCanvas.height = Math.round(origH * 2.0);
+        const stepCtx = stepCanvas.getContext('2d');
+        stepCtx.imageSmoothingEnabled = true;
+        stepCtx.imageSmoothingQuality = 'high';
+        stepCtx.drawImage(imgElement, 0, 0, stepCanvas.width, stepCanvas.height);
+        ctx.drawImage(stepCanvas, 0, 0, targetW, targetH);
+      } else {
+        ctx.drawImage(imgElement, 0, 0, targetW, targetH);
+      }
+
+      // Apply Enhancement Filters if selected
+      if (applySharpen || applyContrastBoost) {
+        const imgData = ctx.getImageData(0, 0, targetW, targetH);
+        const data = imgData.data;
+
+        // Text & Contrast Enhancement
+        if (applyContrastBoost) {
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i], g = data[i+1], b = data[i+2];
+            const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+            if (lum > 215) {
+              const boost = (lum - 215) / 40;
+              data[i] = Math.min(255, r + boost * 25);
+              data[i+1] = Math.min(255, g + boost * 25);
+              data[i+2] = Math.min(255, b + boost * 25);
+            } else if (lum < 95) {
+              data[i] = Math.max(0, r * 0.85);
+              data[i+1] = Math.max(0, g * 0.85);
+              data[i+2] = Math.max(0, b * 0.85);
+            }
+          }
+        }
+
+        // Unsharp Mask Sharpening
+        if (applySharpen && targetScale > 1.0) {
+          const copy = new Uint8ClampedArray(data);
+          const w = targetW, h = targetH;
+          const strength = 0.35;
+
+          for (let y = 1; y < h - 1; y++) {
+            for (let x = 1; x < w - 1; x++) {
+              const idx = (y * w + x) * 4;
+              for (let c = 0; c < 3; c++) {
+                const center = copy[idx + c];
+                const up = copy[((y - 1) * w + x) * 4 + c];
+                const down = copy[((y + 1) * w + x) * 4 + c];
+                const left = copy[(y * w + (x - 1)) * 4 + c];
+                const right = copy[(y * w + (x + 1)) * 4 + c];
+                const laplacian = 5 * center - up - down - left - right;
+                data[idx + c] = Math.min(255, Math.max(0, center + strength * (laplacian - center)));
+              }
+            }
+          }
+        }
+
+        ctx.putImageData(imgData, 0, 0);
+      }
+
+      return { canvas, width: targetW, height: targetH, scaleFactor: targetScale };
+    }
+
+    // Client-side OCR via Tesseract.js
+    async function performOcr(canvas, lang, onProgress) {
+      if (typeof Tesseract === 'undefined') {
+        throw new Error('Tesseract OCR library not available.');
+      }
+
+      const result = await Tesseract.recognize(canvas, lang, {
+        logger: m => {
+          if (m.status === 'recognizing text' && onProgress) {
+            onProgress(Math.round((m.progress || 0) * 100));
+          }
+        }
+      });
+
+      return result.data;
+    }
+
+    // Embed invisible selectable text layer on top of image in PDF
+    function overlayOcrTextLayer(pdfDoc, ocrData, canvasW, canvasH, imgX, imgY, imgW, imgH) {
+      if (!ocrData || !ocrData.words || ocrData.words.length === 0) return;
+
+      try {
+        pdfDoc.saveGraphicsState();
+        // PDF rendering mode 3: Neither fill nor stroke text (invisible text for OCR overlay)
+        pdfDoc.internal.write('3 Tr');
+        pdfDoc.setFont('helvetica', 'normal');
+
+        for (const word of ocrData.words) {
+          if (!word.text || !word.text.trim()) continue;
+          if (word.confidence < 15) continue;
+
+          const wordX = imgX + (word.bbox.x0 / canvasW) * imgW;
+          const wordY = imgY + (word.bbox.y0 / canvasH) * imgH;
+          const wordW = ((word.bbox.x1 - word.bbox.x0) / canvasW) * imgW;
+          const wordH = ((word.bbox.y1 - word.bbox.y0) / canvasH) * imgH;
+
+          if (wordW <= 0 || wordH <= 0) continue;
+
+          const fontSizePt = Math.max(3, wordH / 0.352778);
+          pdfDoc.setFontSize(fontSizePt);
+          pdfDoc.text(word.text, wordX, wordY, { baseline: 'top' });
+        }
+
+        pdfDoc.internal.write('0 Tr');
+        pdfDoc.restoreGraphicsState();
+      } catch (err) {
+        console.warn('Could not embed OCR text layer:', err);
+      }
+    }
+
     async function generatePdf() {
       hideStatus();
       if (uploadedImages.length === 0) {
@@ -659,7 +1002,6 @@
 
       btn.disabled = true;
       icon.style.display = 'none';
-      text.innerHTML = '<span class="spinner" style="margin-right: 6px;"></span>Assembling PDF...';
       progressContainer.style.display = 'block';
       progressFill.style.width = '0%';
 
@@ -668,40 +1010,71 @@
       const marginMm = parseInt(document.getElementById('pageMargin').value, 10);
       const fitOpt = document.getElementById('imageFit').value;
       const quality = parseInt(document.getElementById('imgQuality').value, 10) / 100;
+      const upscaleFactor = document.getElementById('upscaleFactor').value;
+      const applySharpen = document.getElementById('sharpenFilter').checked;
+      const applyContrastBoost = document.getElementById('contrastFilter').checked;
+      const enableOcr = document.getElementById('enableOcr').checked;
+      const ocrLang = document.getElementById('ocrLang').value;
 
       const { jsPDF } = window.jspdf;
       let pdfDoc = null;
+      const extractedFullText = [];
+      let totalWordsRecognized = 0;
+      let averageUpscale = 1.0;
 
-      requestAnimationFrame(async () => {
+      setTimeout(async () => {
         try {
-          for (let i = 0; i < uploadedImages.length; i++) {
+          const totalPages = uploadedImages.length;
+
+          for (let i = 0; i < totalPages; i++) {
             const item = uploadedImages[i];
+            const pageNum = i + 1;
 
-            // Re-compress canvas image if needed according to quality setting
-            const canvas = document.createElement('canvas');
-            canvas.width = item.width;
-            canvas.height = item.height;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, item.width, item.height);
-            ctx.drawImage(item.imgElement, 0, 0);
+            // Stage 1: Image Upscaling & Enhancement
+            text.innerHTML = `<span class="spinner" style="margin-right: 6px;"></span>Page ${pageNum}/${totalPages}: Upscaling & Enhancing...`;
+            const baseProgress = (i / totalPages) * 100;
+            progressFill.style.width = `${Math.round(baseProgress + (1 / totalPages) * 30)}%`;
 
-            const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+            const { canvas: upscaledCanvas, width: upscaledW, height: upscaledH, scaleFactor } =
+              await upscaleAndEnhanceImage(item.imgElement, upscaleFactor, applySharpen, applyContrastBoost);
+            
+            averageUpscale = scaleFactor;
+
+            // Stage 2: OCR Text Layer Recognition (if enabled)
+            let ocrData = null;
+            if (enableOcr) {
+              text.innerHTML = `<span class="spinner" style="margin-right: 6px;"></span>Page ${pageNum}/${totalPages}: OCR Text Layer (${ocrLang})...`;
+              try {
+                ocrData = await performOcr(upscaledCanvas, ocrLang, (ocrPct) => {
+                  const ocrProgress = baseProgress + (1 / totalPages) * (30 + ocrPct * 0.4);
+                  progressFill.style.width = `${Math.round(ocrProgress)}%`;
+                });
+
+                if (ocrData && ocrData.text && ocrData.text.trim()) {
+                  extractedFullText.push(`--- Page ${pageNum} (${item.name}) ---\n${ocrData.text.trim()}`);
+                  if (ocrData.words) totalWordsRecognized += ocrData.words.length;
+                }
+              } catch (ocrErr) {
+                console.warn(`OCR skipped on page ${pageNum}:`, ocrErr);
+              }
+            }
+
+            // Stage 3: PDF Assembly
+            text.innerHTML = `<span class="spinner" style="margin-right: 6px;"></span>Page ${pageNum}/${totalPages}: Assembling PDF...`;
+
+            const compressedDataUrl = upscaledCanvas.toDataURL('image/jpeg', quality);
 
             // Determine page size (mm)
             let pageW = 210;
             let pageH = 297;
 
             if (pageSizeOpt === 'auto') {
-              // Convert pixels to mm (approx 96 DPI: 1 px = 0.264583 mm)
               pageW = item.width * 0.264583;
               pageH = item.height * 0.264583;
             } else if (pageSizeOpt === 'letter') {
-              pageW = 215.9;
-              pageH = 279.4;
+              pageW = 215.9; pageH = 279.4;
             } else if (pageSizeOpt === 'legal') {
-              pageW = 215.9;
-              pageH = 355.6;
+              pageW = 215.9; pageH = 355.6;
             }
 
             let orientation = 'portrait';
@@ -727,7 +1100,7 @@
               pdfDoc.addPage(pageSizeOpt === 'auto' ? [pageW, pageH] : pageSizeOpt, orientation);
             }
 
-            // Calculate image draw position inside page margins
+            // Calculate image draw position inside margins
             const drawAreaW = Math.max(1, pageW - (marginMm * 2));
             const drawAreaH = Math.max(1, pageH - (marginMm * 2));
 
@@ -736,10 +1109,10 @@
             let imgX = marginMm;
             let imgY = marginMm;
 
-            if (fitOpt === 'contain') {
-              const imgRatio = item.width / item.height;
-              const areaRatio = drawAreaW / drawAreaH;
+            const imgRatio = item.width / item.height;
+            const areaRatio = drawAreaW / drawAreaH;
 
+            if (fitOpt === 'contain') {
               if (imgRatio > areaRatio) {
                 imgW = drawAreaW;
                 imgH = drawAreaW / imgRatio;
@@ -750,9 +1123,6 @@
               imgX = marginMm + (drawAreaW - imgW) / 2;
               imgY = marginMm + (drawAreaH - imgH) / 2;
             } else if (fitOpt === 'cover') {
-              const imgRatio = item.width / item.height;
-              const areaRatio = drawAreaW / drawAreaH;
-
               if (imgRatio > areaRatio) {
                 imgH = drawAreaH;
                 imgW = drawAreaH * imgRatio;
@@ -764,33 +1134,69 @@
               imgY = marginMm + (drawAreaH - imgH) / 2;
             }
 
+            // Add upscaled high-res image
             pdfDoc.addImage(compressedDataUrl, 'JPEG', imgX, imgY, imgW, imgH);
 
-            const pct = Math.round(((i + 1) / uploadedImages.length) * 100);
-            progressFill.style.width = `${pct}%`;
+            // Overlay invisible selectable/searchable OCR text layer
+            if (enableOcr && ocrData) {
+              overlayOcrTextLayer(pdfDoc, ocrData, upscaledW, upscaledH, imgX, imgY, imgW, imgH);
+            }
+
+            progressFill.style.width = `${Math.round(((i + 1) / totalPages) * 100)}%`;
           }
 
           const pdfArrayBuffer = pdfDoc.output('arraybuffer');
           generatedPdfBlob = new Blob([pdfArrayBuffer], { type: 'application/pdf' });
+          allExtractedText = extractedFullText.join('\n\n');
 
-          showStatus(`Successfully assembled ${uploadedImages.length} image(s) into a multi-page PDF document (${formatFileSize(generatedPdfBlob.size)}).`, 'success');
+          const upscaleSummary = averageUpscale > 1.0 ? ` (Upscaled ${averageUpscale}× HD)` : '';
+          const ocrSummary = enableOcr
+            ? ` with OCR Searchable Text Layer (${totalWordsRecognized} words recognized)`
+            : '';
+
+          showStatus(`Successfully assembled ${totalPages} page(s) into PDF${upscaleSummary}${ocrSummary} — Total Size: ${formatFileSize(generatedPdfBlob.size)}.`, 'success');
+
           document.getElementById('downloadBtn').disabled = false;
+          const copyBtn = document.getElementById('copyTextBtn');
+          if (copyBtn) {
+            copyBtn.disabled = !(allExtractedText && allExtractedText.trim().length > 0);
+          }
         } catch (err) {
           showStatus('Error generating PDF: ' + err.message, 'error');
         } finally {
           btn.disabled = false;
           icon.style.display = 'block';
-          text.innerHTML = 'Convert to PDF';
-          setTimeout(() => { progressContainer.style.display = 'none'; }, 500);
+          text.innerHTML = enableOcr ? 'Convert to Searchable PDF' : 'Convert to PDF';
+          setTimeout(() => { progressContainer.style.display = 'none'; }, 600);
         }
-      });
+      }, 50);
+    }
+
+    async function copyExtractedOcrText() {
+      if (!allExtractedText || !allExtractedText.trim()) return;
+
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(allExtractedText);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = allExtractedText;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        triggerSuccessButton('copyTextBtn', 'copyTextIcon', 'copyTextLabel', 'Copied Text!');
+      } catch (err) {
+        showStatus('Failed to copy text: ' + err.message, 'error');
+      }
     }
 
     function downloadResult() {
       if (!generatedPdfBlob) return;
 
       const titleInput = document.getElementById('pdfTitle').value.trim();
-      const filename = (titleInput.replace(/[^a-z0-9]/gi, '_') || 'combined_images') + '.pdf';
+      const filename = (titleInput.replace(/[^a-z0-9]/gi, '_') || 'searchable_images_document') + '.pdf';
 
       const url = URL.createObjectURL(generatedPdfBlob);
       const a = document.createElement('a');
@@ -826,12 +1232,15 @@
     function clearAll() {
       uploadedImages = [];
       generatedPdfBlob = null;
+      allExtractedText = '';
 
       document.getElementById('fileInput').value = '';
       document.getElementById('pdfTitle').value = '';
       document.getElementById('fileSummary').innerHTML = 'No images uploaded yet.';
       document.getElementById('dropZoneText').textContent = 'Click or drag & drop images here (PNG, JPG, WebP, GIF, SVG, BMP, AVIF, TIFF, HEIC)';
       document.getElementById('downloadBtn').disabled = true;
+      const copyBtn = document.getElementById('copyTextBtn');
+      if (copyBtn) copyBtn.disabled = true;
 
       hideStatus();
       renderGrid();

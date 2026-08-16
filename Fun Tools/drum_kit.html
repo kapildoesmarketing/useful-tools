@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Virtual Drum Kit & Beat Studio</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Roboto:wght@400;500&family=Roboto+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+    }
+
+    h1, h2, h3, .btn, .drum-key {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Top Header Bar */
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .header-title-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-title-box h2 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--text-main);
+    }
+
+    .action-chips {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .action-chip {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 4px 10px;
+      transition: all 0.2s ease;
+    }
+
+    .action-chip:hover {
+      color: var(--primary-blue);
+      border-color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    /* Control Panel Card */
+    .control-panel {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .control-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .slider-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    input[type="range"] {
+      accent-color: var(--primary-blue);
+      cursor: pointer;
+      height: 6px;
+    }
+
+    .badge-val {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary-blue);
+      min-width: 42px;
+    }
+
+    /* Visualizer Canvas */
+    .visualizer-card {
+      background: #111827;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .canvas-container {
+      height: 60px;
+      width: 100%;
+      position: relative;
+    }
+
+    #visualizerCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .visualizer-overlay {
+      position: absolute;
+      top: 6px;
+      left: 12px;
+      font-size: 11px;
+      font-weight: 500;
+      color: #9ca3af;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      pointer-events: none;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #10b981;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 6px #10b981;
+    }
+
+    /* Drum Pad Layout */
+    .drum-kit-stage {
+      background: linear-gradient(145deg, #1e293b, #0f172a);
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 24px 16px;
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.08);
+      position: relative;
+    }
+
+    .drum-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 16px;
+      justify-items: center;
+      align-items: center;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 600px) {
+      .drum-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* Drum Instrument Buttons */
+    .drum-pad {
+      width: 100%;
+      max-width: 140px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 4px solid #475569;
+      background: radial-gradient(circle at 35% 35%, #334155, #1e293b);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      position: relative;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+      transition: transform 0.08s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.08s ease, border-color 0.08s ease;
+      touch-action: manipulation;
+    }
+
+    .drum-pad::after {
+      content: '';
+      position: absolute;
+      width: 70%;
+      height: 70%;
+      border-radius: 50%;
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      pointer-events: none;
+    }
+
+    .drum-pad:hover {
+      border-color: #64748b;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .drum-pad:active,
+    .drum-pad.hit {
+      transform: scale(0.92) translateY(2px);
+      border-color: #60a5fa !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 0 24px rgba(96, 165, 250, 0.8) !important;
+      background: radial-gradient(circle at 50% 50%, #2563eb, #1e3a8a) !important;
+    }
+
+    /* Instrument Type Variations */
+    .drum-pad.type-crash {
+      border-color: #d97706;
+      background: radial-gradient(circle at 35% 35%, #b45309, #78350f);
+    }
+    .drum-pad.type-crash:active,
+    .drum-pad.type-crash.hit {
+      border-color: #fde047 !important;
+      background: radial-gradient(circle at 50% 50%, #eab308, #ca8a04) !important;
+      box-shadow: 0 0 25px #facc15 !important;
+    }
+
+    .drum-pad.type-kick {
+      border-color: #dc2626;
+      background: radial-gradient(circle at 35% 35%, #991b1b, #450a0a);
+    }
+    .drum-pad.type-kick:active,
+    .drum-pad.type-kick.hit {
+      border-color: #f87171 !important;
+      background: radial-gradient(circle at 50% 50%, #ef4444, #b91c1c) !important;
+      box-shadow: 0 0 25px #f87171 !important;
+    }
+
+    .drum-pad.type-snare {
+      border-color: #0284c7;
+      background: radial-gradient(circle at 35% 35%, #0369a1, #082f49);
+    }
+    .drum-pad.type-snare:active,
+    .drum-pad.type-snare.hit {
+      border-color: #38bdf8 !important;
+      background: radial-gradient(circle at 50% 50%, #0ea5e9, #0369a1) !important;
+      box-shadow: 0 0 25px #38bdf8 !important;
+    }
+
+    .drum-pad.type-tom {
+      border-color: #7c3aed;
+      background: radial-gradient(circle at 35% 35%, #5b21b6, #2e1065);
+    }
+    .drum-pad.type-tom:active,
+    .drum-pad.type-tom.hit {
+      border-color: #c084fc !important;
+      background: radial-gradient(circle at 50% 50%, #9333ea, #6b21a8) !important;
+      box-shadow: 0 0 25px #c084fc !important;
+    }
+
+    .drum-key {
+      font-size: 26px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    .drum-name {
+      font-size: 11px;
+      font-weight: 500;
+      color: #cbd5e1;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .drum-sound-file {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 9px;
+      color: #94a3b8;
+    }
+
+    /* Practice Beats & Loop Station Bar */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .feature-card {
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .feature-card h3 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .preset-chips-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .preset-btn {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .preset-btn:hover {
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    .preset-btn.active {
+      background-color: var(--primary-blue);
+      color: #ffffff;
+      border-color: var(--primary-blue);
+    }
+
+    /* Recording Timeline Status */
+    .recording-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+
+    .rec-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .rec-indicator.recording {
+      color: var(--danger-text);
+    }
+
+    .rec-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #9ca3af;
+    }
+
+    .rec-indicator.recording .rec-dot {
+      background-color: var(--danger-text);
+      animation: blink 0.8s infinite alternate;
+    }
+
+    @keyframes blink {
+      0% { opacity: 0.2; }
+      100% { opacity: 1; }
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 18px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 140px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-danger {
+      background-color: #ffffff;
+      color: var(--danger-text);
+      border-color: #f5c6cb;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background-color: var(--danger-bg);
+      border-color: var(--danger-text);
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Header Bar with Quick Action Chips -->
+    <div class="header-bar">
+      <div class="header-title-box">
+        <span class="material-symbols-outlined" style="font-size: 24px; color: var(--primary-blue);">music_note</span>
+        <h2>Virtual Drum Kit & Beat Studio</h2>
+      </div>
+
+      <div class="action-chips">
+        <a href="mailto:hikapil@google.com?subject=[Bug]%20Drum%20Kit%20Tool&body=Description%20of%20issue:" class="action-chip" title="Report Bug">
+          <span class="material-symbols-outlined" style="font-size: 14px;">bug_report</span>
+          Report Bug
+        </a>
+        <a href="mailto:hikapil@google.com?subject=[Feature%20Request]%20Drum%20Kit%20Tool&body=Feature%20idea:" class="action-chip" title="Request Feature">
+          <span class="material-symbols-outlined" style="font-size: 14px;">lightbulb</span>
+          Request Feature
+        </a>
+        <a href="https://moma.corp.google.com/person/hikapil" target="_blank" rel="noopener noreferrer" class="action-chip" title="Creator Profile">
+          <span class="material-symbols-outlined" style="font-size: 14px;">person</span>
+          Kapil
+        </a>
+      </div>
+    </div>
+
+    <!-- Live Audio Oscilloscope & Frequency Spectrum Visualizer -->
+    <div class="visualizer-card">
+      <div class="visualizer-overlay">
+        <span class="pulse-dot" id="liveDot"></span>
+        <span id="visualizerTitle">Audio Engine Active • 0ms Latency</span>
+      </div>
+      <div class="canvas-container">
+        <canvas id="visualizerCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Master Control Panel -->
+    <div class="control-panel">
+      <div class="control-group">
+        <div class="control-label">
+          <span class="material-symbols-outlined" style="font-size: 16px;">volume_up</span>
+          Master Volume:
+        </div>
+        <div class="slider-box">
+          <input type="range" id="volumeSlider" min="0" max="100" value="85" oninput="updateVolume(this.value)">
+          <span class="badge-val" id="volVal">85%</span>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span class="material-symbols-outlined" style="font-size: 16px;">graphic_eq</span>
+          Pitch / Tone:
+        </div>
+        <div class="slider-box">
+          <input type="range" id="pitchSlider" min="50" max="150" value="100" oninput="updatePitch(this.value)">
+          <span class="badge-val" id="pitchVal">1.0x</span>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span class="material-symbols-outlined" style="font-size: 16px;">speed</span>
+          Metronome BPM:
+        </div>
+        <div class="slider-box">
+          <input type="range" id="bpmSlider" min="60" max="200" value="120" oninput="updateBpm(this.value)">
+          <span class="badge-val" id="bpmVal">120</span>
+        </div>
+        <button class="btn-secondary" id="metronomeBtn" style="padding: 4px 10px; font-size: 12px;" onclick="toggleMetronome()">
+          <span class="material-symbols-outlined" id="metroIcon" style="font-size: 15px;">timer</span>
+          <span id="metroText">Start Click</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Interactive Drum Kit Stage -->
+    <div class="drum-kit-stage">
+      <div class="drum-grid">
+        <!-- W: Crash Cymbal -->
+        <button class="drum-pad type-crash" data-key="w" data-sound="crash.mp3" onclick="triggerDrum('w')">
+          <span class="drum-key">W</span>
+          <span class="drum-name">Crash</span>
+          <span class="drum-sound-file">crash.mp3</span>
+        </button>
+
+        <!-- A: Kick Bass -->
+        <button class="drum-pad type-kick" data-key="a" data-sound="kick-bass.mp3" onclick="triggerDrum('a')">
+          <span class="drum-key">A</span>
+          <span class="drum-name">Kick Bass</span>
+          <span class="drum-sound-file">kick-bass.mp3</span>
+        </button>
+
+        <!-- S: Snare -->
+        <button class="drum-pad type-snare" data-key="s" data-sound="snare.mp3" onclick="triggerDrum('s')">
+          <span class="drum-key">S</span>
+          <span class="drum-name">Snare</span>
+          <span class="drum-sound-file">snare.mp3</span>
+        </button>
+
+        <!-- D: Tom 1 -->
+        <button class="drum-pad type-tom" data-key="d" data-sound="tom-1.mp3" onclick="triggerDrum('d')">
+          <span class="drum-key">D</span>
+          <span class="drum-name">Tom 1</span>
+          <span class="drum-sound-file">tom-1.mp3</span>
+        </button>
+
+        <!-- J: Tom 2 -->
+        <button class="drum-pad type-tom" data-key="j" data-sound="tom-2.mp3" onclick="triggerDrum('j')">
+          <span class="drum-key">J</span>
+          <span class="drum-name">Tom 2</span>
+          <span class="drum-sound-file">tom-2.mp3</span>
+        </button>
+
+        <!-- K: Tom 3 -->
+        <button class="drum-pad type-tom" data-key="k" data-sound="tom-3.mp3" onclick="triggerDrum('k')">
+          <span class="drum-key">K</span>
+          <span class="drum-name">Tom 3</span>
+          <span class="drum-sound-file">tom-3.mp3</span>
+        </button>
+
+        <!-- L: Tom 4 -->
+        <button class="drum-pad type-tom" data-key="l" data-sound="tom-4.mp3" onclick="triggerDrum('l')">
+          <span class="drum-key">L</span>
+          <span class="drum-name">Tom 4</span>
+          <span class="drum-sound-file">tom-4.mp3</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Practice Grooves & Loop Station Studio -->
+    <div class="feature-grid">
+      <!-- Left: Practice Beat Patterns -->
+      <div class="feature-card">
+        <h3>
+          <span class="material-symbols-outlined" style="font-size: 18px; color: var(--primary-blue);">queue_music</span>
+          Play-Along Auto Grooves
+        </h3>
+        <span style="font-size: 12px; color: var(--text-secondary);">Select a backing rhythm to jam along with:</span>
+        <div class="preset-chips-row">
+          <button class="preset-btn" id="grooveRock" onclick="toggleGroove('rock')">🎸 Classic Rock 4/4</button>
+          <button class="preset-btn" id="grooveFunk" onclick="toggleGroove('funk')">🕺 Disco Funk</button>
+          <button class="preset-btn" id="grooveHiphop" onclick="toggleGroove('hiphop')">🎧 Boom Bap Hip-Hop</button>
+          <button class="preset-btn" id="grooveFill" onclick="playDrumFill()">🥁 Tom Drum Fill</button>
+        </div>
+      </div>
+
+      <!-- Right: Record & Loop Station -->
+      <div class="feature-card">
+        <h3>
+          <span class="material-symbols-outlined" style="font-size: 18px; color: var(--primary-blue);">mic</span>
+          Beat Recorder & Loop Player
+        </h3>
+        <div class="recording-bar">
+          <div class="rec-indicator" id="recIndicator">
+            <span class="rec-dot"></span>
+            <span id="recStatusText">Ready to Record</span>
+          </div>
+          <span style="font-family: 'Roboto Mono', monospace;" id="recHitCount">0 Hits</span>
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="btn-danger" id="recToggleBtn" style="padding: 6px 12px; font-size: 12px;" onclick="toggleRecording()">
+            <span class="material-symbols-outlined" id="recIcon" style="font-size: 16px;">fiber_manual_record</span>
+            <span id="recBtnText">Record Beat</span>
+          </button>
+          <button class="btn-secondary" id="playRecBtn" style="padding: 6px 12px; font-size: 12px;" onclick="playRecording()" disabled>
+            <span class="material-symbols-outlined" style="font-size: 16px;">play_arrow</span>
+            Play Back
+          </button>
+          <button class="btn-secondary" id="clearRecBtn" style="padding: 6px 12px; font-size: 12px;" onclick="clearRecording()" disabled>
+            <span class="material-symbols-outlined" style="font-size: 16px;">delete</span>
+            Clear
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button class="btn-primary" onclick="playDrumSoloDemo()">
+        <span class="material-symbols-outlined">smart_toy</span>
+        Play Demo Drum Solo
+      </button>
+
+      <button class="btn-secondary" onclick="stopAllAudio()">
+        <span class="material-symbols-outlined">stop_circle</span>
+        Stop All Sounds
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Audio Context & Master Nodes
+    let audioCtx = null;
+    let masterGain = null;
+    let analyserNode = null;
+    let masterVolume = 0.85;
+    let playbackRateMultiplier = 1.0;
+
+    // Audio Buffer Cache
+    const soundBuffers = {};
+    const soundUrls = {
+      'w': ['https://kapilatgoogle.github.io/useful-tools/sounds/crash.mp3', 'https://kapilatgoogle.github.io/useful-tools/crash.mp3', 'sounds/crash.mp3'],
+      'a': ['https://kapilatgoogle.github.io/useful-tools/sounds/kick-bass.mp3', 'https://kapilatgoogle.github.io/useful-tools/kick-bass.mp3', 'sounds/kick-bass.mp3'],
+      's': ['https://kapilatgoogle.github.io/useful-tools/sounds/snare.mp3', 'https://kapilatgoogle.github.io/useful-tools/snare.mp3', 'sounds/snare.mp3'],
+      'd': ['https://kapilatgoogle.github.io/useful-tools/sounds/tom-1.mp3', 'https://kapilatgoogle.github.io/useful-tools/tom-1.mp3', 'sounds/tom-1.mp3'],
+      'j': ['https://kapilatgoogle.github.io/useful-tools/sounds/tom-2.mp3', 'https://kapilatgoogle.github.io/useful-tools/tom-2.mp3', 'sounds/tom-2.mp3'],
+      'k': ['https://kapilatgoogle.github.io/useful-tools/sounds/tom-3.mp3', 'https://kapilatgoogle.github.io/useful-tools/tom-3.mp3', 'sounds/tom-3.mp3'],
+      'l': ['https://kapilatgoogle.github.io/useful-tools/sounds/tom-4.mp3', 'https://kapilatgoogle.github.io/useful-tools/tom-4.mp3', 'sounds/tom-4.mp3']
+    };
+
+    // Recorder State
+    let isRecording = false;
+    let recordStartTime = 0;
+    let recordedEvents = [];
+    let isPlayingBack = false;
+
+    // Metronome & Groove State
+    let isMetronomeRunning = false;
+    let metronomeTimer = null;
+    let currentBpm = 120;
+    let activeGrooveName = null;
+    let grooveTimer = null;
+    let grooveStep = 0;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initAudio();
+      setupKeyboardListeners();
+      setupVisualizer();
+      preloadSounds();
+    });
+
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContextClass();
+
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = masterVolume;
+
+        analyserNode = audioCtx.createAnalyser();
+        analyserNode.fftSize = 256;
+
+        masterGain.connect(analyserNode);
+        analyserNode.connect(audioCtx.destination);
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    async function preloadSounds() {
+      for (const [key, urls] of Object.entries(soundUrls)) {
+        for (const url of urls) {
+          try {
+            const res = await fetch(url);
+            if (res.ok) {
+              const arrayBuf = await res.arrayBuffer();
+              if (audioCtx) {
+                audioCtx.decodeAudioData(arrayBuf, (buffer) => {
+                  soundBuffers[key] = buffer;
+                }, () => {});
+              }
+              break;
+            }
+          } catch (e) {
+            // Will fallback to synthesis seamlessly
+          }
+        }
+      }
+    }
+
+    function setupKeyboardListeners() {
+      window.addEventListener('keydown', (e) => {
+        if (e.repeat || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        const key = e.key.toLowerCase();
+        if (['w', 'a', 's', 'd', 'j', 'k', 'l'].includes(key)) {
+          triggerDrum(key);
+        }
+      });
+    }
+
+    function triggerDrum(key) {
+      initAudio();
+
+      const btn = document.querySelector(`.drum-pad[data-key="${key}"]`);
+      if (btn) {
+        btn.classList.add('hit');
+        setTimeout(() => btn.classList.remove('hit'), 120);
+      }
+
+      // Play Sound (Sample Buffer or High-Fidelity Synthesized Fallback)
+      if (soundBuffers[key]) {
+        playSampleBuffer(soundBuffers[key]);
+      } else {
+        playSynthesizedDrum(key);
+      }
+
+      // Record hit
+      if (isRecording) {
+        recordedEvents.push({
+          key: key,
+          time: Date.now() - recordStartTime
+        });
+        document.getElementById('recHitCount').textContent = `${recordedEvents.length} Hits`;
+      }
+    }
+
+    function playSampleBuffer(buffer) {
+      if (!audioCtx || !buffer) return;
+      const src = audioCtx.createBufferSource();
+      src.buffer = buffer;
+      src.playbackRate.value = playbackRateMultiplier;
+      src.connect(masterGain);
+      src.start(0);
+    }
+
+    /* High-Fidelity Web Audio API Drum Synthesizer (Instant 0ms Fallback) */
+    function playSynthesizedDrum(key) {
+      if (!audioCtx) return;
+      const t = audioCtx.currentTime;
+
+      if (key === 'a') {
+        // Kick Bass: Pitch-decaying sine wave + transient punch
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.frequency.setValueAtTime(140 * playbackRateMultiplier, t);
+        osc.frequency.exponentialRampToValueAtTime(32 * playbackRateMultiplier, t + 0.35);
+
+        gain.gain.setValueAtTime(1.0, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+
+        osc.connect(gain);
+        gain.connect(masterGain);
+
+        osc.start(t);
+        osc.stop(t + 0.36);
+      } else if (key === 's') {
+        // Snare: White noise burst + fundamental tone
+        const noiseBuf = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.2, audioCtx.sampleRate);
+        const output = noiseBuf.getChannelData(0);
+        for (let i = 0; i < noiseBuf.length; i++) {
+          output[i] = Math.random() * 2 - 1;
+        }
+
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = noiseBuf;
+
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.value = 1000;
+
+        const noiseGain = audioCtx.createGain();
+        noiseGain.gain.setValueAtTime(0.8, t);
+        noiseGain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+
+        noise.connect(filter);
+        filter.connect(noiseGain);
+        noiseGain.connect(masterGain);
+
+        noise.start(t);
+        noise.stop(t + 0.2);
+
+        // Snare body tone
+        const osc = audioCtx.createOscillator();
+        const toneGain = audioCtx.createGain();
+        osc.frequency.setValueAtTime(180 * playbackRateMultiplier, t);
+        osc.frequency.exponentialRampToValueAtTime(80, t + 0.1);
+        toneGain.gain.setValueAtTime(0.7, t);
+        toneGain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+
+        osc.connect(toneGain);
+        toneGain.connect(masterGain);
+        osc.start(t);
+        osc.stop(t + 0.1);
+      } else if (key === 'w') {
+        // Crash Cymbal: Dense metallic noise + bandpass filter
+        const crashBuf = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.8, audioCtx.sampleRate);
+        const output = crashBuf.getChannelData(0);
+        for (let i = 0; i < crashBuf.length; i++) {
+          output[i] = Math.random() * 2 - 1;
+        }
+
+        const crashSrc = audioCtx.createBufferSource();
+        crashSrc.buffer = crashBuf;
+
+        const bandpass = audioCtx.createBiquadFilter();
+        bandpass.type = 'bandpass';
+        bandpass.frequency.value = 6500;
+        bandpass.Q.value = 2.0;
+
+        const crashGain = audioCtx.createGain();
+        crashGain.gain.setValueAtTime(0.9, t);
+        crashGain.gain.exponentialRampToValueAtTime(0.001, t + 0.75);
+
+        crashSrc.connect(bandpass);
+        bandpass.connect(crashGain);
+        crashGain.connect(masterGain);
+
+        crashSrc.start(t);
+        crashSrc.stop(t + 0.76);
+      } else {
+        // Toms (D: Tom 1, J: Tom 2, K: Tom 3, L: Tom 4)
+        const tomFreqs = { 'd': 260, 'j': 200, 'k': 150, 'l': 105 };
+        const baseFreq = (tomFreqs[key] || 180) * playbackRateMultiplier;
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.frequency.setValueAtTime(baseFreq, t);
+        osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.5, t + 0.28);
+
+        gain.gain.setValueAtTime(0.9, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+
+        osc.connect(gain);
+        gain.connect(masterGain);
+
+        osc.start(t);
+        osc.stop(t + 0.29);
+      }
+    }
+
+    /* Controls */
+    function updateVolume(val) {
+      masterVolume = val / 100;
+      document.getElementById('volVal').textContent = `${val}%`;
+      if (masterGain) masterGain.gain.value = masterVolume;
+    }
+
+    function updatePitch(val) {
+      playbackRateMultiplier = val / 100;
+      document.getElementById('pitchVal').textContent = `${(val / 100).toFixed(1)}x`;
+    }
+
+    function updateBpm(val) {
+      currentBpm = parseInt(val, 10);
+      document.getElementById('bpmVal').textContent = currentBpm;
+      if (isMetronomeRunning) {
+        stopMetronome();
+        startMetronome();
+      }
+      if (activeGrooveName) {
+        restartGroove();
+      }
+    }
+
+    /* Metronome Click */
+    function toggleMetronome() {
+      initAudio();
+      if (isMetronomeRunning) {
+        stopMetronome();
+      } else {
+        startMetronome();
+      }
+    }
+
+    function startMetronome() {
+      isMetronomeRunning = true;
+      document.getElementById('metronomeBtn').classList.add('active');
+      document.getElementById('metroText').textContent = 'Stop Click';
+      document.getElementById('metroIcon').textContent = 'timer_off';
+
+      const intervalMs = (60 / currentBpm) * 1000;
+      let beatCount = 0;
+
+      metronomeTimer = setInterval(() => {
+        playClick(beatCount % 4 === 0);
+        beatCount++;
+      }, intervalMs);
+      playClick(true);
+    }
+
+    function stopMetronome() {
+      isMetronomeRunning = false;
+      if (metronomeTimer) clearInterval(metronomeTimer);
+      document.getElementById('metronomeBtn').classList.remove('active');
+      document.getElementById('metroText').textContent = 'Start Click';
+      document.getElementById('metroIcon').textContent = 'timer';
+    }
+
+    function playClick(isAccented) {
+      if (!audioCtx) return;
+      const t = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.frequency.setValueAtTime(isAccented ? 1200 : 800, t);
+      gain.gain.setValueAtTime(0.3, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+
+      osc.connect(gain);
+      gain.connect(masterGain);
+
+      osc.start(t);
+      osc.stop(t + 0.05);
+    }
+
+    /* Play-Along Grooves */
+    const groovePatterns = {
+      rock: [
+        ['a', 'w'], [], ['s'], [], ['a'], ['a'], ['s'], []
+      ],
+      funk: [
+        ['a'], ['s'], ['a'], ['s'], ['a', 'w'], [], ['s'], ['d']
+      ],
+      hiphop: [
+        ['a'], [], ['s'], [], ['a'], ['a'], ['s'], ['w']
+      ]
+    };
+
+    function toggleGroove(name) {
+      initAudio();
+      if (activeGrooveName === name) {
+        stopGroove();
+      } else {
+        startGroove(name);
+      }
+    }
+
+    function startGroove(name) {
+      stopGroove();
+      activeGrooveName = name;
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(`groove${name.charAt(0).toUpperCase() + name.slice(1)}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const pattern = groovePatterns[name];
+      grooveStep = 0;
+      const stepDuration = ((60 / currentBpm) * 1000) / 2; // 8th notes
+
+      grooveTimer = setInterval(() => {
+        const hits = pattern[grooveStep % pattern.length];
+        hits.forEach(k => triggerDrum(k));
+        grooveStep++;
+      }, stepDuration);
+    }
+
+    function stopGroove() {
+      activeGrooveName = null;
+      if (grooveTimer) clearInterval(grooveTimer);
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    }
+
+    function restartGroove() {
+      if (activeGrooveName) {
+        startGroove(activeGrooveName);
+      }
+    }
+
+    function playDrumFill() {
+      initAudio();
+      const fillSequence = [
+        { key: 's', delay: 0 },
+        { key: 's', delay: 100 },
+        { key: 'd', delay: 200 },
+        { key: 'd', delay: 300 },
+        { key: 'j', delay: 400 },
+        { key: 'k', delay: 500 },
+        { key: 'l', delay: 600 },
+        { key: 'w', delay: 700 },
+        { key: 'a', delay: 700 }
+      ];
+
+      fillSequence.forEach(item => {
+        setTimeout(() => triggerDrum(item.key), item.delay);
+      });
+    }
+
+    function playDrumSoloDemo() {
+      initAudio();
+      const solo = [
+        { key: 'w', delay: 0 },
+        { key: 'a', delay: 0 },
+        { key: 's', delay: 200 },
+        { key: 'a', delay: 400 },
+        { key: 's', delay: 600 },
+        { key: 'd', delay: 750 },
+        { key: 'j', delay: 850 },
+        { key: 'k', delay: 950 },
+        { key: 'l', delay: 1050 },
+        { key: 'w', delay: 1200 },
+        { key: 'a', delay: 1200 }
+      ];
+
+      solo.forEach(s => {
+        setTimeout(() => triggerDrum(s.key), s.delay);
+      });
+      showStatus('Playing Demo Drum Solo!', 'success');
+    }
+
+    /* Record & Playback */
+    function toggleRecording() {
+      if (isRecording) {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    }
+
+    function startRecording() {
+      initAudio();
+      isRecording = true;
+      recordStartTime = Date.now();
+      recordedEvents = [];
+
+      document.getElementById('recIndicator').classList.add('recording');
+      document.getElementById('recStatusText').textContent = 'Recording Beat...';
+      document.getElementById('recBtnText').textContent = 'Stop Recording';
+      document.getElementById('recIcon').textContent = 'stop';
+      document.getElementById('playRecBtn').disabled = true;
+      document.getElementById('clearRecBtn').disabled = true;
+    }
+
+    function stopRecording() {
+      isRecording = false;
+      document.getElementById('recIndicator').classList.remove('recording');
+      document.getElementById('recStatusText').textContent = `Recorded ${recordedEvents.length} Hits`;
+      document.getElementById('recBtnText').textContent = 'Record Beat';
+      document.getElementById('recIcon').textContent = 'fiber_manual_record';
+
+      document.getElementById('playRecBtn').disabled = recordedEvents.length === 0;
+      document.getElementById('clearRecBtn').disabled = recordedEvents.length === 0;
+    }
+
+    function playRecording() {
+      if (recordedEvents.length === 0 || isPlayingBack) return;
+      initAudio();
+      isPlayingBack = true;
+      document.getElementById('playRecBtn').disabled = true;
+
+      showStatus('Playing back recorded beat loop...', 'success');
+
+      recordedEvents.forEach((ev, idx) => {
+        setTimeout(() => {
+          triggerDrum(ev.key);
+          if (idx === recordedEvents.length - 1) {
+            isPlayingBack = false;
+            document.getElementById('playRecBtn').disabled = false;
+          }
+        }, ev.time);
+      });
+    }
+
+    function clearRecording() {
+      recordedEvents = [];
+      document.getElementById('recHitCount').textContent = '0 Hits';
+      document.getElementById('recStatusText').textContent = 'Ready to Record';
+      document.getElementById('playRecBtn').disabled = true;
+      document.getElementById('clearRecBtn').disabled = true;
+      showStatus('Recorded loop cleared.', 'success');
+    }
+
+    function stopAllAudio() {
+      stopMetronome();
+      stopGroove();
+      if (isRecording) stopRecording();
+      showStatus('All sounds and rhythms stopped.', 'success');
+    }
+
+    /* Oscilloscope Visualizer */
+    function setupVisualizer() {
+      const canvas = document.getElementById('visualizerCanvas');
+      const ctx = canvas.getContext('2d');
+
+      function resize() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function draw() {
+        requestAnimationFrame(draw);
+
+        ctx.fillStyle = '#111827';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        if (!analyserNode) {
+          // Draw idle resting line
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = '#374151';
+          ctx.beginPath();
+          ctx.moveTo(0, canvas.height / 2);
+          ctx.lineTo(canvas.width, canvas.height / 2);
+          ctx.stroke();
+          return;
+        }
+
+        const bufferLength = analyserNode.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        analyserNode.getByteTimeDomainData(dataArray);
+
+        ctx.lineWidth = 2.5;
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+        gradient.addColorStop(0, '#38bdf8');
+        gradient.addColorStop(0.5, '#818cf8');
+        gradient.addColorStop(1, '#ec4899');
+        ctx.strokeStyle = gradient;
+
+        ctx.beginPath();
+        const sliceWidth = canvas.width / bufferLength;
+        let x = 0;
+
+        for (let i = 0; i < bufferLength; i++) {
+          const v = dataArray[i] / 128.0;
+          const y = (v * canvas.height) / 2;
+
+          if (i === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+          x += sliceWidth;
+        }
+
+        ctx.lineTo(canvas.width, canvas.height / 2);
+        ctx.stroke();
+      }
+
+      draw();
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+      setTimeout(() => {
+        statusBox.className = 'status-box';
+        statusBox.textContent = '';
+      }, 3000);
+    }
+  </script>
+</body>
+
+</html>

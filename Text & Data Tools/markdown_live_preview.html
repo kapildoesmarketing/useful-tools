@@ -364,12 +364,101 @@
         transform: rotate(360deg);
       }
     }
+  
+    /* Header Bar: Feedback & Creator Chips */
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-left: auto;
+    }
+
+    .action-chip {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 16px;
+      cursor: pointer;
+      border: 1px solid var(--border-color);
+      background-color: #ffffff;
+      color: var(--text-secondary);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-sizing: border-box;
+      line-height: 1;
+    }
+
+    .action-chip .material-symbols-outlined {
+      font-size: 15px;
+    }
+
+    .action-chip:hover {
+      box-shadow: 0 1px 2px rgba(60, 64, 67, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .action-chip:active {
+      transform: scale(0.95);
+    }
+
+    .chip-bug:hover {
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border-color: #f5c6cb;
+    }
+
+    .chip-feature:hover {
+      background-color: #fef7e0;
+      color: #b06000;
+      border-color: #f9ab00;
+    }
+
+    .chip-creator:hover {
+      background-color: #e8f0fe;
+      color: var(--primary-blue);
+      border-color: #aecbfa;
+    }
   </style>
 </head>
 
 <body>
 
   <div class="container">
+    <!-- Header Bar: Feedback & Creator Chips -->
+    <div class="header-bar">
+      <div class="header-actions">
+        <a href="mailto:hikapil@google.com?cc=useful-tools@google.com&amp;subject=%5BUser%20Feedback%5D%20%7C%20Bug%20Found%20on%20go%2Fusefultools&amp;body=Hi%20Kapil%2C%0A%0AI%E2%80%99m%20reaching%20out%20to%20report%20a%20bug.%20Here%20are%20the%20relevant%20details%3A%0A%0ABug%20Description%3A%20%5BPlease%20provide%20a%20description%20of%20the%20issue%20here%5D%0ABug%20Screenshot%20(optional)%3A%20%5BPlease%20include%20the%20screenshot%20with%20this%20email%5D"
+          target="_blank" rel="noopener noreferrer" class="action-chip chip-bug" title="Report a Bug">
+          <span class="material-symbols-outlined">bug_report</span>
+          <span>Report Bug</span>
+        </a>
+
+        <a href="mailto:hikapil@google.com?cc=useful-tools@google.com&amp;subject=%5BUser%20Feedback%5D%20%7C%20New%20Tool%2FFeature%20Request%20for%20go%2Fusefultools&amp;body=Hi%20Kapil%2C%0A%0AI%E2%80%99m%20reaching%20out%20to%20request%20a%20new%20feature.%20Here%20are%20the%20relevant%20details%3A%0A%0AFeature%20Request%3A%20%5BPlease%20provide%20a%20description%20of%20the%20feature%20you&#39;d%20like%20to%20see%5D%0AWhy%20this%20would%20be%20helpful%3A%20%5BPlease%20explain%20how%20this%20feature%20would%20improve%20your%20experience%5D"
+          target="_blank" rel="noopener noreferrer" class="action-chip chip-feature" title="Request a New Feature">
+          <span class="material-symbols-outlined">lightbulb</span>
+          <span>Request Feature</span>
+        </a>
+
+        <a href="https://moma.corp.google.com/person/hikapil"
+          target="_blank" rel="noopener noreferrer" class="action-chip chip-creator" title="Meet the Creator on Moma">
+          <span class="material-symbols-outlined">person</span>
+          <span>Meet the Creator</span>
+        </a>
+      </div>
+    </div>
     <div class="grid">
       <!-- Input Panel -->
       <div class="input-group">

@@ -64,14 +64,18 @@ All tools MUST adhere to the following architectural rules:
 When asked to generate a *new* tool for this project, the AI Agent MUST:
 
 1.  **Use the Base Template:** Start with the standard HTML boilerplate, embedding the Google Fonts, Material Symbols, and standard `:root` CSS variables.
-2.  **Implement the Standard Toolbar:** All tools must have a uniform bottom toolbar layout featuring:
+2.  **Include the Header Bar:** Every tool must feature a top `.header-bar` containing `.action-chip` links on the right for:
+    *   🐛 **Report Bug** (`chip-bug`): mailto link with pre-filled bug template.
+    *   💡 **Request Feature** (`chip-feature`): mailto link with pre-filled feature request template.
+    *   👤 **Meet the Creator** (`chip-creator`): Link to Kapil's Moma profile (`https://moma.corp.google.com/person/hikapil`).
+3.  **Implement the Standard Toolbar:** All tools must have a uniform bottom toolbar layout featuring:
     *   Primary Action Button (Blue).
     *   Secondary Action Buttons (Copy, Download).
     *   A "Clear" button that resets inputs and triggers the `.flash-clear` CSS animation.
-3.  **Handle State Changes Visually:** Action buttons must swap icons (e.g., to a checkmark) and turn green (`--success-bg`) for 2 seconds upon successful completion (Copy/Download).
-4.  **Enforce Asynchronous Processing:** If the tool parses data (JSON, CSV, Base64, Image Data), immediately disable the primary button, inject a CSS `.spinner`, and defer the processing using `requestAnimationFrame` or an Inline Web Worker to ensure the browser paints the loading state.
-5.  **Fail Gracefully:** Catch all errors (e.g., malformed JSON, invalid image formats) and display them in red (`--danger-text`) inside the output box. Do not rely on `console.log` for error reporting to the user.
-6.  **Provide Google Sites Page Copy:** Along with the code, the agent MUST ALWAYS output the text copy to be pasted into Google Sites below the embed. This copy feeds internal SEO and must strictly follow this 4-part structure formatted as markdown blockquotes:
+4.  **Handle State Changes Visually:** Action buttons must swap icons (e.g., to a checkmark) and turn green (`--success-bg`) for 2 seconds upon successful completion (Copy/Download).
+5.  **Enforce Asynchronous Processing:** If the tool parses data (JSON, CSV, Base64, Image Data), immediately disable the primary button, inject a CSS `.spinner`, and defer the processing using `requestAnimationFrame` or an Inline Web Worker to ensure the browser paints the loading state.
+6.  **Fail Gracefully:** Catch all errors (e.g., malformed JSON, invalid image formats) and display them in red (`--danger-text`) inside the output box. Do not rely on `console.log` for error reporting to the user.
+7.  **Provide Google Sites Page Copy:** Along with the code, the agent MUST ALWAYS output the text copy to be pasted into Google Sites below the embed. This copy feeds internal SEO and must strictly follow this 4-part structure formatted as markdown blockquotes:
     *   **Section 1: The Quick Pitch:** (Google Sites `Text Box`). A punchy headline (e.g., "Transform spreadsheet data into developer-ready code instantly") followed by a 2-sentence description of the tool.
     *   **Section 2: Key Features:** (Google Sites `3 Image/Text columns`). 3 bullet points starting with an emoji on each headline (the 2nd bullet headline MUST ALWAYS be `🔒 **100% Secure:**` highlighting client-side local data processing).
     *   **Section 3: Step-by-Step Guide:** (Google Sites `Collapsible Group`). A numbered list of instructions on how to use the tool.
