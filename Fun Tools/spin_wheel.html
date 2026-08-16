@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Decision Spin Wheel & Raffle Studio</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+    }
+
+    h1, h2, h3, h4, .btn, .winner-title {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Standard Header Bar with Action Chips */
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .header-title-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-title-box h2 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .action-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-family: 'Roboto', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid var(--border-color);
+      background-color: #ffffff;
+      color: var(--text-main);
+    }
+
+    .action-chip .material-symbols-outlined {
+      font-size: 16px;
+    }
+
+    .action-chip:hover {
+      background-color: var(--bg-color);
+      border-color: #c6c9ce;
+      transform: translateY(-1px);
+    }
+
+    .chip-bug:hover {
+      color: var(--danger-text);
+      border-color: #fad2cf;
+      background-color: var(--danger-bg);
+    }
+
+    .chip-feature:hover {
+      color: #b06000;
+      border-color: #feefc3;
+      background-color: #fef7e0;
+    }
+
+    .chip-creator:hover {
+      color: var(--primary-blue);
+      border-color: #d2e3fc;
+      background-color: #e8f0fe;
+    }
+
+    /* Preset Quick Starters */
+    .preset-bar {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .preset-chip {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .preset-chip:hover {
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    /* Main Studio Grid */
+    .studio-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .studio-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Left: Wheel Stage Card */
+    .wheel-card {
+      background: radial-gradient(circle at 50% 50%, #1e293b, #0f172a);
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      min-height: 420px;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.5), 0 4px 14px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    .wheel-wrapper {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @media (max-width: 400px) {
+      .wheel-wrapper {
+        width: 270px;
+        height: 270px;
+      }
+    }
+
+    #wheelCanvas {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      cursor: pointer;
+      transition: transform 0.05s linear;
+    }
+
+    /* Center Spin Button Hub */
+    .wheel-hub {
+      position: absolute;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #ffffff, #e2e8f0);
+      border: 4px solid #1a73e8;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Google Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a73e8;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .wheel-hub:hover {
+      transform: scale(1.08);
+      background: #ffffff;
+      box-shadow: 0 0 16px rgba(26, 115, 232, 0.6);
+    }
+
+    .wheel-hub:active {
+      transform: scale(0.94);
+    }
+
+    /* Pointer Indicator */
+    .wheel-pointer {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-top: 26px solid #f59e0b;
+      filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.6));
+      z-index: 12;
+      pointer-events: none;
+      transition: transform 0.08s ease;
+    }
+
+    .wheel-pointer.tick {
+      transform: translateX(-50%) rotate(-12deg);
+    }
+
+    /* Winner Banner */
+    .winner-banner {
+      margin-top: 14px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 8px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 2;
+      color: #ffffff;
+    }
+
+    .winner-text {
+      font-size: 18px;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+
+    /* Right: Choices & Settings Panel */
+    .options-panel {
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Comma Input Box */
+    .quick-input-box {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    textarea {
+      font-family: 'Roboto', sans-serif;
+      font-size: 13px;
+      line-height: 1.4;
+      padding: 8px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      resize: vertical;
+      height: 60px;
+      outline: none;
+    }
+
+    textarea:focus, input[type="text"]:focus {
+      border-color: var(--primary-blue);
+    }
+
+    /* Segment Customization List */
+    .choices-list {
+      max-height: 190px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-right: 2px;
+    }
+
+    .choice-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 5px 8px;
+    }
+
+    .color-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.1);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .choice-name-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 12px;
+      color: var(--text-main);
+      background: transparent;
+    }
+
+    .weight-box {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .weight-input {
+      width: 36px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 2px 4px;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      text-align: center;
+      outline: none;
+    }
+
+    .btn-icon {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px;
+      border-radius: 4px;
+    }
+
+    .btn-icon:hover {
+      color: var(--danger-text);
+      background-color: var(--danger-bg);
+    }
+
+    /* Color Palette Theme Chips */
+    .theme-chips-row {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .theme-chip {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .theme-chip:hover {
+      border-color: var(--primary-blue);
+    }
+
+    .theme-chip.active {
+      background-color: var(--primary-blue);
+      color: #ffffff;
+      border-color: var(--primary-blue);
+      font-weight: 700;
+    }
+
+    /* Winner Popup Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.65);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background-color: #ffffff;
+      border-radius: 12px;
+      max-width: 400px;
+      width: 100%;
+      padding: 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+      animation: modalPop 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes modalPop {
+      0% { transform: scale(0.9); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .winner-tag {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .winner-highlight {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--primary-blue);
+      word-break: break-word;
+    }
+
+    /* History Grid */
+    .history-card {
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .history-list {
+      max-height: 100px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 11px;
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Bottom Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 7px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.96);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 17px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 140px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Header Bar with Action Chips -->
+    <div class="header-bar">
+      <div class="header-title-box">
+        <span class="material-symbols-outlined" style="font-size: 24px; color: var(--primary-blue);">pie_chart</span>
+        <h2>Custom Decision Spin Wheel & Raffle Studio</h2>
+      </div>
+
+      <div class="header-actions">
+        <a href="mailto:hikapil@google.com?cc=useful-tools@google.com&amp;subject=%5BUser%20Feedback%5D%20%7C%20Bug%20Found%20on%20go%2Fusefultools&amp;body=Hi%20Kapil%2C%0A%0AI%E2%80%99m%20reaching%20out%20to%20report%20a%20bug.%20Here%20are%20the%20relevant%20details%3A%0A%0ABug%20Description%3A%20%5BPlease%20provide%20a%20description%20of%20the%20issue%20here%5D"
+          target="_blank" rel="noopener noreferrer" class="action-chip chip-bug" title="Report a Bug">
+          <span class="material-symbols-outlined">bug_report</span>
+          <span>Report Bug</span>
+        </a>
+
+        <a href="mailto:hikapil@google.com?cc=useful-tools@google.com&amp;subject=%5BUser%20Feedback%5D%20%7C%20New%20Tool%2FFeature%20Request%20for%20go%2Fusefultools&amp;body=Hi%20Kapil%2C%0A%0AI%E2%80%99m%20reaching%20out%20to%20request%20a%20new%20feature.%20Here%20are%20the%20relevant%20details%3A%0A%0AFeature%20Request%3A%20%5BPlease%20provide%20a%20description%20of%20the%20feature%20you&#39;d%20like%20to%20see%5D"
+          target="_blank" rel="noopener noreferrer" class="action-chip chip-feature" title="Request a New Feature">
+          <span class="material-symbols-outlined">lightbulb</span>
+          <span>Request Feature</span>
+        </a>
+
+        <a href="https://moma.corp.google.com/person/hikapil"
+          target="_blank" rel="noopener noreferrer" class="action-chip chip-creator" title="Meet the Creator on Moma">
+          <span class="material-symbols-outlined">person</span>
+          <span>Meet the Creator</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Preset Quick Starters -->
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <label>Quick Presets:</label>
+      <div class="preset-bar">
+        <button class="preset-chip" onclick="loadPreset('yesno')">✅ Yes / No / Maybe</button>
+        <button class="preset-chip" onclick="loadPreset('food')">🍕 What to Eat?</button>
+        <button class="preset-chip" onclick="loadPreset('team')">👥 Team Standup Picker</button>
+        <button class="preset-chip" onclick="loadPreset('numbers')">🔢 Numbers 1-10</button>
+        <button class="preset-chip" onclick="loadPreset('activity')">🎯 Weekend Activity</button>
+        <button class="preset-chip" onclick="loadPreset('poker')">🃏 Agile Story Points</button>
+      </div>
+    </div>
+
+    <!-- Main Studio Grid -->
+    <div class="studio-grid">
+      <!-- Left: Wheel Stage Card -->
+      <div class="wheel-card">
+        <div class="wheel-wrapper">
+          <div class="wheel-pointer" id="wheelPointer"></div>
+          <canvas id="wheelCanvas" width="600" height="600" onclick="spinWheel()"></canvas>
+          <div class="wheel-hub" onclick="spinWheel()" title="Click to Spin!">SPIN</div>
+        </div>
+
+        <div class="winner-banner" id="winnerBanner">
+          <span class="material-symbols-outlined" style="color: #f59e0b;">emoji_events</span>
+          <div>
+            <span style="font-size: 10px; color: #94a3b8; text-transform: uppercase;">Selected Outcome</span>
+            <div class="winner-text" id="winnerText">Ready to Spin!</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Choices & Settings Panel -->
+      <div class="options-panel">
+        <div class="panel-header">
+          <h3 class="panel-title">
+            <span class="material-symbols-outlined" style="font-size: 16px; color: var(--primary-blue);">tune</span>
+            Wheel Customizer
+          </h3>
+          <span style="font-size: 11px; color: var(--text-secondary);" id="choiceCountBadge">4 Choices</span>
+        </div>
+
+        <!-- Quick Comma-Separated Input -->
+        <div class="quick-input-box">
+          <label>Quick Input (Comma or Line Separated):</label>
+          <textarea id="quickInput" placeholder="Choice 1, Choice 2, Choice 3..." oninput="handleQuickInput(this.value)"></textarea>
+        </div>
+
+        <!-- Palette Theme Chips -->
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <label>Color Theme:</label>
+          <div class="theme-chips-row">
+            <button class="theme-chip active" onclick="setPalette('vibrant', this)">Vibrant</button>
+            <button class="theme-chip" onclick="setPalette('pastel', this)">Pastel</button>
+            <button class="theme-chip" onclick="setPalette('cyber', this)">Cyber</button>
+            <button class="theme-chip" onclick="setPalette('sunset', this)">Sunset</button>
+            <button class="theme-chip" onclick="setPalette('gold', this)">Gold</button>
+          </div>
+        </div>
+
+        <!-- Individual Choices List with Ratio Weights -->
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label>Choices & Size Ratios:</label>
+            <button class="btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="addEmptyChoice()">+ Add Choice</button>
+          </div>
+          <div class="choices-list" id="choicesList">
+            <!-- Rendered in JS -->
+          </div>
+        </div>
+
+        <!-- History Summary Card -->
+        <div class="history-card">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label>Past Winners:</label>
+            <span style="font-size: 10px; color: var(--text-secondary);" id="historyCount">0 Spins</span>
+          </div>
+          <div class="history-list" id="historyList">
+            <span style="color: var(--text-secondary); font-size: 11px; text-align: center; padding: 12px;">No spins yet. Click SPIN to play!</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Bottom Toolbar -->
+    <div class="toolbar">
+      <button class="btn-primary" id="spinBtn" onclick="spinWheel()">
+        <span class="material-symbols-outlined">rotate_right</span>
+        Spin Wheel
+      </button>
+
+      <button class="btn-secondary" onclick="toggleSound()">
+        <span class="material-symbols-outlined" id="soundIcon">volume_up</span>
+        <span id="soundText">Sound ON</span>
+      </button>
+
+      <button class="btn-secondary" onclick="shuffleChoices()">
+        <span class="material-symbols-outlined">shuffle</span>
+        Shuffle
+      </button>
+
+      <button class="btn-secondary" onclick="copyHistory()">
+        <span class="material-symbols-outlined" id="copyIcon">content_copy</span>
+        <span id="copyText">Copy History</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Winner Modal Popup -->
+  <div class="modal-overlay" id="winnerModal" onclick="if(event.target===this) closeWinnerModal()">
+    <div class="modal-card">
+      <span class="material-symbols-outlined" style="font-size: 48px; color: #f59e0b;">emoji_events</span>
+      <span class="winner-tag">Winner Selected!</span>
+      <div class="winner-highlight" id="modalWinnerName">Choice 1</div>
+      <div style="display: flex; gap: 8px; margin-top: 8px; width: 100%;">
+        <button class="btn-secondary" style="flex: 1;" onclick="removeWinnerChoice()">
+          <span class="material-symbols-outlined">delete</span>
+          Remove Choice
+        </button>
+        <button class="btn-primary" style="flex: 1;" onclick="closeWinnerModal(); spinWheel();">
+          <span class="material-symbols-outlined">replay</span>
+          Spin Again
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Palettes
+    const palettes = {
+      vibrant: ['#1a73e8', '#ea4335', '#fbbc04', '#34a853', '#9333ea', '#06b6d4', '#ec4899', '#f97316'],
+      pastel: ['#93c5fd', '#fca5a5', '#fde047', '#86efac', '#d8b4fe', '#67e8f9', '#f472b6', '#fed7aa'],
+      cyber: ['#06b6d4', '#ec4899', '#a855f7', '#3b82f6', '#10b981', '#f59e0b'],
+      sunset: ['#f43f5e', '#fb7185', '#fda4af', '#f97316', '#fb923c', '#fdba74'],
+      gold: ['#f59e0b', '#d97706', '#b45309', '#fde047', '#eab308', '#ca8a04']
+    };
+
+    let activePalette = 'vibrant';
+
+    // Choices Data: [{ text: 'Choice 1', weight: 1, color: '#...' }]
+    let choices = [
+      { text: 'Pizza', weight: 1, color: '#1a73e8' },
+      { text: 'Burger', weight: 1, color: '#ea4335' },
+      { text: 'Sushi', weight: 1, color: '#fbbc04' },
+      { text: 'Salad', weight: 1, color: '#34a853' }
+    ];
+
+    // Presets
+    const presets = {
+      yesno: ['Yes', 'No', 'Maybe', 'Ask Again'],
+      food: ['Pizza', 'Burger', 'Sushi', 'Tacos', 'Pasta', 'Salad'],
+      team: ['Alex', 'Sarah', 'Kapil', 'David', 'Emma', 'Michael'],
+      numbers: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+      activity: ['Movie Night', 'Gaming', 'Gym / Workout', 'Read a Book', 'Cooking', 'Walk Outside'],
+      poker: ['1 Pt', '2 Pts', '3 Pts', '5 Pts', '8 Pts', '13 Pts', '21 Pts', 'Coffee ☕']
+    };
+
+    // Spin State
+    let currentAngle = 0;
+    let isSpinning = false;
+    let soundEnabled = true;
+    let audioCtx = null;
+    let lastTickIndex = -1;
+    let winningChoice = null;
+    const historyList = [];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      syncQuickInput();
+      renderChoicesList();
+      drawWheel();
+    });
+
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContextClass();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundIcon').textContent = soundEnabled ? 'volume_up' : 'volume_off';
+      document.getElementById('soundText').textContent = soundEnabled ? 'Sound ON' : 'Sound OFF';
+    }
+
+    function setPalette(palKey, btn) {
+      activePalette = palKey;
+      document.querySelectorAll('.theme-chip').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const colors = palettes[palKey];
+      choices.forEach((c, idx) => {
+        c.color = colors[idx % colors.length];
+      });
+
+      renderChoicesList();
+      drawWheel();
+    }
+
+    function loadPreset(key) {
+      const items = presets[key];
+      if (!items) return;
+      const colors = palettes[activePalette];
+
+      choices = items.map((text, idx) => ({
+        text,
+        weight: 1,
+        color: colors[idx % colors.length]
+      }));
+
+      syncQuickInput();
+      renderChoicesList();
+      drawWheel();
+    }
+
+    function handleQuickInput(val) {
+      const parts = val.split(/[,\n]/).map(s => s.trim()).filter(s => s.length > 0);
+      if (parts.length === 0) return;
+
+      const colors = palettes[activePalette];
+      choices = parts.map((text, idx) => {
+        const existing = choices[idx];
+        return {
+          text,
+          weight: existing ? existing.weight : 1,
+          color: existing ? existing.color : colors[idx % colors.length]
+        };
+      });
+
+      renderChoicesList();
+      drawWheel();
+    }
+
+    function syncQuickInput() {
+      document.getElementById('quickInput').value = choices.map(c => c.text).join(', ');
+    }
+
+    function addEmptyChoice() {
+      const colors = palettes[activePalette];
+      choices.push({
+        text: `Option ${choices.length + 1}`,
+        weight: 1,
+        color: colors[choices.length % colors.length]
+      });
+      syncQuickInput();
+      renderChoicesList();
+      drawWheel();
+    }
+
+    function removeChoice(idx) {
+      if (choices.length <= 2) {
+        showStatus('Wheel must have at least 2 choices.', 'error');
+        return;
+      }
+      choices.splice(idx, 1);
+      syncQuickInput();
+      renderChoicesList();
+      drawWheel();
+    }
+
+    function shuffleChoices() {
+      for (let i = choices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [choices[i], choices[j]] = [choices[j], choices[i]];
+      }
+      syncQuickInput();
+      renderChoicesList();
+      drawWheel();
+      showStatus('Choices shuffled!', 'success');
+    }
+
+    function renderChoicesList() {
+      const list = document.getElementById('choicesList');
+      document.getElementById('choiceCountBadge').textContent = `${choices.length} Choices`;
+      list.innerHTML = '';
+
+      choices.forEach((c, idx) => {
+        const row = document.createElement('div');
+        row.className = 'choice-row';
+
+        row.innerHTML = `
+          <div class="color-dot" style="background-color: ${c.color};" onclick="cycleChoiceColor(${idx})" title="Click to change color"></div>
+          <input type="text" class="choice-name-input" value="${escapeHtml(c.text)}" onchange="updateChoiceText(${idx}, this.value)">
+          <div class="weight-box" title="Size Ratio (Weight)">
+            <span>Ratio:</span>
+            <input type="number" min="1" max="10" class="weight-input" value="${c.weight}" onchange="updateChoiceWeight(${idx}, this.value)">
+          </div>
+          <button class="btn-icon" onclick="removeChoice(${idx})" title="Delete Choice">
+            <span class="material-symbols-outlined" style="font-size: 16px;">close</span>
+          </button>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    function updateChoiceText(idx, val) {
+      if (choices[idx]) {
+        choices[idx].text = val || `Option ${idx + 1}`;
+        syncQuickInput();
+        drawWheel();
+      }
+    }
+
+    function updateChoiceWeight(idx, val) {
+      const w = Math.max(1, Math.min(20, parseInt(val, 10) || 1));
+      if (choices[idx]) {
+        choices[idx].weight = w;
+        drawWheel();
+      }
+    }
+
+    function cycleChoiceColor(idx) {
+      const colors = palettes[activePalette];
+      const currentIdx = colors.indexOf(choices[idx].color);
+      const nextColor = colors[(currentIdx + 1) % colors.length];
+      choices[idx].color = nextColor;
+      renderChoicesList();
+      drawWheel();
+    }
+
+    /* Wheel Rendering on Canvas */
+    function drawWheel() {
+      const canvas = document.getElementById('wheelCanvas');
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+      const radius = width / 2;
+      const totalWeight = choices.reduce((sum, c) => sum + (c.weight || 1), 0);
+
+      ctx.clearRect(0, 0, width, height);
+
+      let startAngle = currentAngle;
+
+      choices.forEach((c) => {
+        const sliceAngle = ((c.weight || 1) / totalWeight) * 2 * Math.PI;
+        const endAngle = startAngle + sliceAngle;
+
+        // Draw Wedge
+        ctx.beginPath();
+        ctx.moveTo(radius, radius);
+        ctx.arc(radius, radius, radius - 6, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = c.color;
+        ctx.fill();
+
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#ffffff';
+        ctx.stroke();
+
+        // Draw Text
+        ctx.save();
+        ctx.translate(radius, radius);
+        ctx.rotate(startAngle + sliceAngle / 2);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 20px "Google Sans", sans-serif';
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 4;
+
+        let label = c.text;
+        if (label.length > 14) label = label.substring(0, 12) + '..';
+        ctx.fillText(label, radius - 28, 7);
+        ctx.restore();
+
+        // Draw Edge Peg
+        const pegX = radius + (radius - 12) * Math.cos(startAngle);
+        const pegY = radius + (radius - 12) * Math.sin(startAngle);
+        ctx.beginPath();
+        ctx.arc(pegX, pegY, 5, 0, 2 * Math.PI);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#94a3b8';
+        ctx.stroke();
+
+        startAngle = endAngle;
+      });
+
+      // Outer Ring
+      ctx.beginPath();
+      ctx.arc(radius, radius, radius - 4, 0, 2 * Math.PI);
+      ctx.lineWidth = 8;
+      ctx.strokeStyle = '#0f172a';
+      ctx.stroke();
+    }
+
+    /* Spin Physics Engine */
+    function spinWheel() {
+      if (isSpinning || choices.length < 2) return;
+      isSpinning = true;
+      initAudio();
+
+      document.getElementById('spinBtn').disabled = true;
+      document.getElementById('winnerText').textContent = 'Spinning...';
+
+      const totalWeight = choices.reduce((sum, c) => sum + (c.weight || 1), 0);
+
+      // Random target spin (5 to 9 full rotations + random slice offset)
+      const minRotations = 6;
+      const extraAngle = Math.random() * 2 * Math.PI;
+      const totalSpin = minRotations * 2 * Math.PI + extraAngle;
+      const spinDuration = 4500; // 4.5s
+      const startTime = performance.now();
+      const initialAngle = currentAngle;
+
+      function animateSpin(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / spinDuration);
+
+        // Ease Out Cubic Deceleration
+        const easeOut = 1 - Math.pow(1 - progress, 3.5);
+        currentAngle = initialAngle + totalSpin * easeOut;
+
+        // Check for pointer ticks
+        checkPointerTick(currentAngle, totalWeight);
+
+        drawWheel();
+
+        if (progress < 1) {
+          requestAnimationFrame(animateSpin);
+        } else {
+          isSpinning = false;
+          document.getElementById('spinBtn').disabled = false;
+          finalizeWinner(currentAngle, totalWeight);
+        }
+      }
+
+      requestAnimationFrame(animateSpin);
+    }
+
+    function checkPointerTick(angle, totalWeight) {
+      // Pointer is at top: 3*PI/2 radians (or -PI/2)
+      const normalized = (2 * Math.PI - (angle % (2 * Math.PI)) + 3 * Math.PI / 2) % (2 * Math.PI);
+      let cumulative = 0;
+      let activeIdx = 0;
+
+      for (let i = 0; i < choices.length; i++) {
+        const slice = ((choices[i].weight || 1) / totalWeight) * 2 * Math.PI;
+        cumulative += slice;
+        if (normalized <= cumulative) {
+          activeIdx = i;
+          break;
+        }
+      }
+
+      if (activeIdx !== lastTickIndex) {
+        lastTickIndex = activeIdx;
+        const pointer = document.getElementById('wheelPointer');
+        pointer.classList.add('tick');
+        setTimeout(() => pointer.classList.remove('tick'), 60);
+        if (soundEnabled) playTickSound();
+      }
+    }
+
+    function finalizeWinner(angle, totalWeight) {
+      const normalized = (2 * Math.PI - (angle % (2 * Math.PI)) + 3 * Math.PI / 2) % (2 * Math.PI);
+      let cumulative = 0;
+      let winnerIdx = 0;
+
+      for (let i = 0; i < choices.length; i++) {
+        const slice = ((choices[i].weight || 1) / totalWeight) * 2 * Math.PI;
+        cumulative += slice;
+        if (normalized <= cumulative) {
+          winnerIdx = i;
+          break;
+        }
+      }
+
+      winningChoice = choices[winnerIdx];
+      document.getElementById('winnerText').textContent = winningChoice.text;
+      document.getElementById('modalWinnerName').textContent = winningChoice.text;
+
+      // Trigger Celebration Confetti
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+
+      if (soundEnabled) playVictorySound();
+
+      // Record History
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      historyList.unshift({
+        text: winningChoice.text,
+        time: timeStr
+      });
+      renderHistory();
+
+      // Open Winner Modal after small delay
+      setTimeout(() => {
+        document.getElementById('winnerModal').classList.add('open');
+      }, 500);
+    }
+
+    function renderHistory() {
+      const list = document.getElementById('historyList');
+      document.getElementById('historyCount').textContent = `${historyList.length} Spins`;
+
+      if (historyList.length === 0) {
+        list.innerHTML = '<span style="color: var(--text-secondary); font-size: 11px; text-align: center; padding: 12px;">No spins yet.</span>';
+        return;
+      }
+
+      list.innerHTML = historyList.slice(0, 20).map((h, i) => `
+        <div class="history-item">
+          <strong>#${historyList.length - i}: ${escapeHtml(h.text)}</strong>
+          <span style="color: var(--text-secondary); font-family: 'Roboto Mono', monospace; font-size: 10px;">${h.time}</span>
+        </div>
+      `).join('');
+    }
+
+    function removeWinnerChoice() {
+      if (!winningChoice) return;
+      const idx = choices.findIndex(c => c.text === winningChoice.text);
+      if (idx !== -1) {
+        removeChoice(idx);
+      }
+      closeWinnerModal();
+      showStatus(`Removed "${winningChoice.text}" from the wheel.`, 'success');
+    }
+
+    function closeWinnerModal() {
+      document.getElementById('winnerModal').classList.remove('open');
+    }
+
+    /* Web Audio Sound Synthesizers */
+    function playTickSound() {
+      if (!audioCtx) return;
+      const t = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.frequency.setValueAtTime(800 + Math.random() * 200, t);
+      gain.gain.setValueAtTime(0.15, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.02);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(t);
+      osc.stop(t + 0.03);
+    }
+
+    function playVictorySound() {
+      if (!audioCtx) return;
+      const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+      notes.forEach((freq, i) => {
+        const t = audioCtx.currentTime + i * 0.1;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(0.3, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(t);
+        osc.stop(t + 0.36);
+      });
+    }
+
+    function copyHistory() {
+      if (historyList.length === 0) return;
+      const text = historyList.map((h, i) => `${i + 1}. [${h.time}] ${h.text}`).join('\n');
+
+      try {
+        navigator.clipboard.writeText(text);
+        triggerSuccessButton('copyIcon', 'copyText', 'Copied!');
+      } catch (e) {
+        const temp = document.createElement('textarea');
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        triggerSuccessButton('copyIcon', 'copyText', 'Copied!');
+      }
+    }
+
+    function triggerSuccessButton(iconId, textId, successText) {
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2000);
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+      setTimeout(() => {
+        statusBox.className = 'status-box';
+        statusBox.textContent = '';
+      }, 3000);
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+  </script>
+</body>
+
+</html>
