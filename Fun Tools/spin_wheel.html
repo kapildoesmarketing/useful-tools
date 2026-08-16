@@ -186,7 +186,7 @@
       align-items: center;
       justify-content: center;
       position: relative;
-      min-height: 420px;
+      min-height: 440px;
       box-shadow: inset 0 2px 10px rgba(0,0,0,0.5), 0 4px 14px rgba(0,0,0,0.08);
       overflow: hidden;
     }
@@ -268,24 +268,39 @@
       transform: translateX(-50%) rotate(-12deg);
     }
 
-    /* Winner Banner */
+    /* Winner Banner on Main Screen */
     .winner-banner {
       margin-top: 14px;
       background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
       border: 1px solid #334155;
       border-radius: 8px;
-      padding: 8px 18px;
+      padding: 10px 18px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      justify-content: space-between;
+      gap: 14px;
       z-index: 2;
       color: #ffffff;
+      max-width: 90%;
+      flex-wrap: wrap;
+    }
+
+    .winner-content {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .winner-text {
       font-size: 18px;
       font-weight: 700;
       color: #38bdf8;
+    }
+
+    .banner-actions {
+      display: flex;
+      gap: 6px;
     }
 
     /* Right: Choices & Settings Panel */
@@ -315,7 +330,7 @@
       gap: 6px;
     }
 
-    /* Comma Input Box */
+    /* Quick Input Box */
     .quick-input-box {
       display: flex;
       flex-direction: column;
@@ -340,7 +355,7 @@
       background-color: #ffffff;
       color: var(--text-main);
       resize: vertical;
-      height: 60px;
+      height: 56px;
       outline: none;
     }
 
@@ -350,7 +365,7 @@
 
     /* Segment Customization List */
     .choices-list {
-      max-height: 190px;
+      max-height: 170px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -422,7 +437,7 @@
       background-color: var(--danger-bg);
     }
 
-    /* Color Palette Theme Chips */
+    /* Theme Chips & Settings */
     .theme-chips-row {
       display: flex;
       gap: 4px;
@@ -452,6 +467,24 @@
       font-weight: 700;
     }
 
+    /* Options / Toggles */
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-main);
+      padding-top: 4px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
     /* Winner Popup Modal */
     .modal-overlay {
       display: none;
@@ -474,21 +507,40 @@
     .modal-card {
       background-color: #ffffff;
       border-radius: 12px;
-      max-width: 400px;
+      max-width: 440px;
       width: 100%;
       padding: 24px;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
       box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
       animation: modalPop 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
     }
 
     @keyframes modalPop {
       0% { transform: scale(0.9); opacity: 0; }
       100% { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-close-icon {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      border-radius: 50%;
+    }
+
+    .modal-close-icon:hover {
+      background-color: var(--bg-color);
+      color: var(--text-main);
     }
 
     .winner-tag {
@@ -504,6 +556,15 @@
       font-weight: 700;
       color: var(--primary-blue);
       word-break: break-word;
+      padding: 4px 10px;
+    }
+
+    .modal-action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      width: 100%;
+      margin-top: 6px;
     }
 
     /* History Grid */
@@ -511,14 +572,14 @@
       background-color: var(--bg-color);
       border: 1px solid var(--border-color);
       border-radius: 8px;
-      padding: 12px 14px;
+      padding: 10px 12px;
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
 
     .history-list {
-      max-height: 100px;
+      max-height: 90px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -549,6 +610,13 @@
       background-color: var(--success-bg);
       color: var(--success-text);
       border: 1px solid #c3e6cb;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
     }
 
     /* Bottom Toolbar */
@@ -673,11 +741,22 @@
           <div class="wheel-hub" onclick="spinWheel()" title="Click to Spin!">SPIN</div>
         </div>
 
+        <!-- Inline Winner Banner with Quick Actions -->
         <div class="winner-banner" id="winnerBanner">
-          <span class="material-symbols-outlined" style="color: #f59e0b;">emoji_events</span>
-          <div>
-            <span style="font-size: 10px; color: #94a3b8; text-transform: uppercase;">Selected Outcome</span>
-            <div class="winner-text" id="winnerText">Ready to Spin!</div>
+          <div class="winner-content">
+            <span class="material-symbols-outlined" style="color: #f59e0b; font-size: 24px;">emoji_events</span>
+            <div>
+              <span style="font-size: 10px; color: #94a3b8; text-transform: uppercase;">Selected Outcome</span>
+              <div class="winner-text" id="winnerText">Ready to Spin!</div>
+            </div>
+          </div>
+          <div class="banner-actions" id="bannerActions" style="display: none;">
+            <button class="btn-secondary" style="padding: 4px 8px; font-size: 11px; background: rgba(255,255,255,0.1); color: #ffffff; border-color: #475569;" onclick="copyWinnerOutcome()" title="Copy to clipboard">
+              <span class="material-symbols-outlined" style="font-size: 14px;">content_copy</span>
+            </button>
+            <button class="btn-secondary" style="padding: 4px 8px; font-size: 11px; background: rgba(255,255,255,0.1); color: #f87171; border-color: #475569;" onclick="removeWinnerChoice()" title="Remove this choice">
+              <span class="material-symbols-outlined" style="font-size: 14px;">delete</span>
+            </button>
           </div>
         </div>
       </div>
@@ -721,6 +800,14 @@
           </div>
         </div>
 
+        <!-- Settings & Popup Toggle -->
+        <div class="settings-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="chkShowModal" checked>
+            Show Winner Popup Modal
+          </label>
+        </div>
+
         <!-- History Summary Card -->
         <div class="history-card">
           <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -728,7 +815,7 @@
             <span style="font-size: 10px; color: var(--text-secondary);" id="historyCount">0 Spins</span>
           </div>
           <div class="history-list" id="historyList">
-            <span style="color: var(--text-secondary); font-size: 11px; text-align: center; padding: 12px;">No spins yet. Click SPIN to play!</span>
+            <span style="color: var(--text-secondary); font-size: 11px; text-align: center; padding: 10px;">No spins yet. Click SPIN to play!</span>
           </div>
         </div>
       </div>
@@ -741,7 +828,7 @@
     <div class="toolbar">
       <button class="btn-primary" id="spinBtn" onclick="spinWheel()">
         <span class="material-symbols-outlined">rotate_right</span>
-        Spin Wheel
+        Spin Wheel (Space)
       </button>
 
       <button class="btn-secondary" onclick="toggleSound()">
@@ -761,20 +848,40 @@
     </div>
   </div>
 
-  <!-- Winner Modal Popup -->
+  <!-- Improved Multi-Action Winner Popup Modal -->
   <div class="modal-overlay" id="winnerModal" onclick="if(event.target===this) closeWinnerModal()">
     <div class="modal-card">
-      <span class="material-symbols-outlined" style="font-size: 48px; color: #f59e0b;">emoji_events</span>
+      <button class="modal-close-icon" onclick="closeWinnerModal()" title="Close (Esc)">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+
+      <span class="material-symbols-outlined" style="font-size: 44px; color: #f59e0b;">emoji_events</span>
       <span class="winner-tag">Winner Selected!</span>
       <div class="winner-highlight" id="modalWinnerName">Choice 1</div>
-      <div style="display: flex; gap: 8px; margin-top: 8px; width: 100%;">
-        <button class="btn-secondary" style="flex: 1;" onclick="removeWinnerChoice()">
-          <span class="material-symbols-outlined">delete</span>
-          Remove Choice
+
+      <div class="modal-action-grid">
+        <!-- 1. Accept & Keep -->
+        <button class="btn-primary" onclick="closeWinnerModal()">
+          <span class="material-symbols-outlined">check</span>
+          Done (Keep)
         </button>
-        <button class="btn-primary" style="flex: 1;" onclick="closeWinnerModal(); spinWheel();">
+
+        <!-- 2. Spin Again -->
+        <button class="btn-secondary" onclick="closeWinnerModal(); spinWheel();">
           <span class="material-symbols-outlined">replay</span>
           Spin Again
+        </button>
+
+        <!-- 3. Copy Result -->
+        <button class="btn-secondary" onclick="copyWinnerOutcome()">
+          <span class="material-symbols-outlined">content_copy</span>
+          Copy Result
+        </button>
+
+        <!-- 4. Remove from Wheel -->
+        <button class="btn-secondary" style="color: var(--danger-text);" onclick="removeWinnerChoice()">
+          <span class="material-symbols-outlined">delete</span>
+          Remove Choice
         </button>
       </div>
     </div>
@@ -823,6 +930,7 @@
       syncQuickInput();
       renderChoicesList();
       drawWheel();
+      setupKeyboard();
     });
 
     function initAudio() {
@@ -833,6 +941,20 @@
       if (audioCtx.state === 'suspended') {
         audioCtx.resume();
       }
+    }
+
+    function setupKeyboard() {
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeWinnerModal();
+        } else if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          if (document.getElementById('winnerModal').classList.contains('open')) {
+            closeWinnerModal();
+          }
+          spinWheel();
+        }
+      });
     }
 
     function toggleSound() {
@@ -1050,10 +1172,11 @@
 
       document.getElementById('spinBtn').disabled = true;
       document.getElementById('winnerText').textContent = 'Spinning...';
+      document.getElementById('bannerActions').style.display = 'none';
 
       const totalWeight = choices.reduce((sum, c) => sum + (c.weight || 1), 0);
 
-      // Random target spin (5 to 9 full rotations + random slice offset)
+      // Random target spin
       const minRotations = 6;
       const extraAngle = Math.random() * 2 * Math.PI;
       const totalSpin = minRotations * 2 * Math.PI + extraAngle;
@@ -1069,9 +1192,7 @@
         const easeOut = 1 - Math.pow(1 - progress, 3.5);
         currentAngle = initialAngle + totalSpin * easeOut;
 
-        // Check for pointer ticks
         checkPointerTick(currentAngle, totalWeight);
-
         drawWheel();
 
         if (progress < 1) {
@@ -1087,7 +1208,6 @@
     }
 
     function checkPointerTick(angle, totalWeight) {
-      // Pointer is at top: 3*PI/2 radians (or -PI/2)
       const normalized = (2 * Math.PI - (angle % (2 * Math.PI)) + 3 * Math.PI / 2) % (2 * Math.PI);
       let cumulative = 0;
       let activeIdx = 0;
@@ -1127,8 +1247,9 @@
       winningChoice = choices[winnerIdx];
       document.getElementById('winnerText').textContent = winningChoice.text;
       document.getElementById('modalWinnerName').textContent = winningChoice.text;
+      document.getElementById('bannerActions').style.display = 'flex';
 
-      // Trigger Celebration Confetti
+      // Confetti Explosion
       if (typeof confetti === 'function') {
         confetti({
           particleCount: 80,
@@ -1139,7 +1260,7 @@
 
       if (soundEnabled) playVictorySound();
 
-      // Record History
+      // History Log
       const now = new Date();
       const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       historyList.unshift({
@@ -1148,10 +1269,13 @@
       });
       renderHistory();
 
-      // Open Winner Modal after small delay
-      setTimeout(() => {
-        document.getElementById('winnerModal').classList.add('open');
-      }, 500);
+      // Open Modal if checked
+      const showModal = document.getElementById('chkShowModal').checked;
+      if (showModal) {
+        setTimeout(() => {
+          document.getElementById('winnerModal').classList.add('open');
+        }, 400);
+      }
     }
 
     function renderHistory() {
@@ -1159,7 +1283,7 @@
       document.getElementById('historyCount').textContent = `${historyList.length} Spins`;
 
       if (historyList.length === 0) {
-        list.innerHTML = '<span style="color: var(--text-secondary); font-size: 11px; text-align: center; padding: 12px;">No spins yet.</span>';
+        list.innerHTML = '<span style="color: var(--text-secondary); font-size: 11px; text-align: center; padding: 10px;">No spins yet.</span>';
         return;
       }
 
@@ -1178,14 +1302,30 @@
         removeChoice(idx);
       }
       closeWinnerModal();
-      showStatus(`Removed "${winningChoice.text}" from the wheel.`, 'success');
+      showStatus(`Removed "${winningChoice.text}" from wheel.`, 'success');
+    }
+
+    function copyWinnerOutcome() {
+      if (!winningChoice) return;
+      try {
+        navigator.clipboard.writeText(winningChoice.text);
+        showStatus(`Copied "${winningChoice.text}" to clipboard!`, 'success');
+      } catch (e) {
+        const temp = document.createElement('input');
+        temp.value = winningChoice.text;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        showStatus(`Copied "${winningChoice.text}" to clipboard!`, 'success');
+      }
     }
 
     function closeWinnerModal() {
       document.getElementById('winnerModal').classList.remove('open');
     }
 
-    /* Web Audio Sound Synthesizers */
+    /* Web Audio Synthesizer */
     function playTickSound() {
       if (!audioCtx) return;
       const t = audioCtx.currentTime;
@@ -1204,7 +1344,7 @@
 
     function playVictorySound() {
       if (!audioCtx) return;
-      const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+      const notes = [523.25, 659.25, 783.99, 1046.50];
       notes.forEach((freq, i) => {
         const t = audioCtx.currentTime + i * 0.1;
         const osc = audioCtx.createOscillator();
@@ -1227,7 +1367,7 @@
 
       try {
         navigator.clipboard.writeText(text);
-        triggerSuccessButton('copyIcon', 'copyText', 'Copied!');
+        triggerSuccessButton('copyIcon', 'copyText', 'Copied History!');
       } catch (e) {
         const temp = document.createElement('textarea');
         temp.value = text;
@@ -1235,7 +1375,7 @@
         temp.select();
         document.execCommand('copy');
         document.body.removeChild(temp);
-        triggerSuccessButton('copyIcon', 'copyText', 'Copied!');
+        triggerSuccessButton('copyIcon', 'copyText', 'Copied History!');
       }
     }
 
