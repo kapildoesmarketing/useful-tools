@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Virtual Drum Kit & Pro Beat Studio</title>
+  <title>Virtual Drum Kit & Beat Studio</title>
   <link
     href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@500;700&display=swap"
     rel="stylesheet">
@@ -24,11 +24,6 @@
       --danger-text: #c5221f;
       --text-main: #202124;
       --text-secondary: #5f6368;
-      --dark-surface: #0f172a;
-      --dark-card: #1e293b;
-      --accent-gold: #f59e0b;
-      --accent-cyan: #06b6d4;
-      --accent-purple: #8b5cf6;
     }
 
     * {
@@ -45,25 +40,25 @@
       color: var(--text-main);
     }
 
-    h1, h2, h3, h4, .btn, .tab-btn {
+    h1, h2, h3, h4, .btn, .drum-btn {
       font-family: 'Google Sans', sans-serif;
     }
 
     .container {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
       max-width: 100%;
       margin: 0 auto;
     }
 
-    /* Standard Header Bar with Action Chips */
+    /* Standard Header Bar */
     .header-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 10px;
       padding-bottom: 8px;
       border-bottom: 1px solid var(--border-color);
     }
@@ -71,16 +66,16 @@
     .header-title-box {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .header-title-box h2 {
       margin: 0;
-      font-size: 20px;
+      font-size: 18px;
       color: var(--text-main);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .header-actions {
@@ -94,7 +89,7 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 6px 12px;
+      padding: 5px 12px;
       border-radius: 16px;
       font-family: 'Roboto', sans-serif;
       font-size: 12px;
@@ -134,112 +129,45 @@
       background-color: #e8f0fe;
     }
 
-    /* Top Studio Bar: Visualizer & Master Deck */
-    .top-studio-deck {
+    /* Compact Top Bar: Controls & Mini Visualizer */
+    .top-controls-bar {
       display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 14px;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 14px;
+      align-items: center;
     }
 
-    @media (max-width: 900px) {
-      .top-studio-deck {
+    @media (max-width: 768px) {
+      .top-controls-bar {
         grid-template-columns: 1fr;
       }
     }
 
-    /* Audio Visualizer Stage */
-    .visualizer-card {
-      background: linear-gradient(135deg, #0b0f19, #111827);
-      border-radius: 10px;
-      border: 1px solid #1f2937;
-      padding: 10px 14px;
+    .controls-row {
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      position: relative;
-      overflow: hidden;
-      min-height: 90px;
-      box-shadow: inset 0 2px 8px rgba(0,0,0,0.6);
-    }
-
-    .visualizer-header {
-      display: flex;
-      justify-content: space-between;
       align-items: center;
-      font-size: 11px;
-      color: #94a3b8;
-      z-index: 2;
+      gap: 14px;
+      flex-wrap: wrap;
     }
 
-    .status-badge {
+    .ctrl-item {
       display: flex;
       align-items: center;
       gap: 6px;
-      color: #34d399;
-      font-weight: 500;
-    }
-
-    .pulse-dot {
-      width: 7px;
-      height: 7px;
-      background-color: #10b981;
-      border-radius: 50%;
-      box-shadow: 0 0 8px #10b981;
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.8); }
-    }
-
-    #visualizerCanvas {
-      width: 100%;
-      height: 52px;
-      display: block;
-    }
-
-    /* Master Control Rack */
-    .master-controls {
-      background-color: var(--bg-color);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 12px 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .control-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .control-label {
       font-size: 12px;
       font-weight: 500;
       color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      min-width: 90px;
-    }
-
-    .control-slider-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 1;
     }
 
     input[type="range"] {
-      flex: 1;
+      width: 80px;
       accent-color: var(--primary-blue);
       cursor: pointer;
-      height: 5px;
+      height: 4px;
     }
 
     .val-badge {
@@ -247,334 +175,158 @@
       font-size: 11px;
       font-weight: 700;
       color: var(--primary-blue);
-      min-width: 44px;
-      text-align: right;
+      min-width: 36px;
     }
 
-    /* View Switcher Tabs */
-    .view-switcher-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .tab-pills {
-      display: flex;
-      background-color: var(--bg-color);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 3px;
-      gap: 4px;
-    }
-
-    .tab-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: none;
-      border: none;
-      padding: 6px 14px;
+    /* Mini Waveform Visualizer */
+    .mini-visualizer-box {
+      width: 140px;
+      height: 32px;
+      background: #0f172a;
       border-radius: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.15s ease;
+      overflow: hidden;
+      border: 1px solid #334155;
     }
 
-    .tab-btn:hover {
-      color: var(--text-main);
+    #visualizerCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
     }
 
-    .tab-btn.active {
-      background-color: #ffffff;
-      color: var(--primary-blue);
-      font-weight: 700;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    /* Main Drum Kit Stage */
-    .stage-container {
-      background: radial-gradient(circle at 50% 30%, #1e293b, #0f172a 80%);
+    /* Drum Kit Main Stage (Responsive & Compact) */
+    .drum-kit-stage {
+      background: radial-gradient(circle at 50% 40%, #1e293b, #0f172a);
       border: 1px solid #334155;
       border-radius: 12px;
-      padding: 24px 16px;
-      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.1);
-      position: relative;
-      min-height: 380px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      padding: 20px 14px;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.08);
     }
 
-    /* Realistic Acoustic Drum Kit Layout */
-    .acoustic-kit-layout {
-      position: relative;
-      width: 100%;
-      max-width: 780px;
-      height: 360px;
+    .drum-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      justify-items: center;
+      align-items: center;
+      max-width: 960px;
       margin: 0 auto;
     }
 
-    .drum-piece {
-      position: absolute;
-      border-radius: 50%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: transform 0.06s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.06s ease, filter 0.06s ease;
-      touch-action: manipulation;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,0.25);
+    @media (max-width: 840px) {
+      .drum-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
     }
 
-    .drum-piece:hover {
-      filter: brightness(1.1);
-      transform: scale(1.03);
+    @media (max-width: 500px) {
+      .drum-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
-    .drum-piece:active,
-    .drum-piece.hit {
-      transform: scale(0.94) !important;
-      filter: brightness(1.3) !important;
-    }
-
-    /* Acoustic Drum Styles */
-    .piece-crash {
-      width: 130px;
-      height: 130px;
-      top: 10px;
-      left: 30px;
-      background: radial-gradient(circle at 35% 35%, #fde047, #ca8a04 60%, #854d0e);
-      border: 5px solid #eab308;
-      box-shadow: 0 10px 24px rgba(202, 138, 4, 0.4), inset 0 0 16px rgba(254, 240, 138, 0.5);
-    }
-    .piece-crash.hit {
-      box-shadow: 0 0 35px #fde047, inset 0 0 20px #ffffff !important;
-    }
-
-    .piece-kick {
-      width: 170px;
-      height: 170px;
-      bottom: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: radial-gradient(circle at 40% 40%, #1e1e1e, #0a0a0a);
-      border: 8px solid #b91c1c;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(239, 68, 68, 0.3);
-    }
-    .piece-kick:hover { transform: translateX(-50%) scale(1.03); }
-    .piece-kick.hit {
-      transform: translateX(-50%) scale(0.94) !important;
-      box-shadow: 0 0 40px #ef4444 !important;
-      border-color: #f87171 !important;
-    }
-
-    .piece-snare {
-      width: 125px;
-      height: 125px;
-      bottom: 40px;
-      left: 140px;
-      background: radial-gradient(circle at 35% 35%, #e2e8f0, #94a3b8 70%, #475569);
-      border: 6px solid #0284c7;
-      color: #0f172a;
-    }
-    .piece-snare.hit {
-      box-shadow: 0 0 35px #38bdf8 !important;
-      border-color: #38bdf8 !important;
-    }
-
-    .piece-tom1 {
-      width: 105px;
-      height: 105px;
-      top: 30px;
-      left: 270px;
-      background: radial-gradient(circle at 35% 35%, #7e22ce, #3b0764);
-      border: 5px solid #a855f7;
-    }
-    .piece-tom1.hit { box-shadow: 0 0 30px #c084fc !important; border-color: #e9d5ff !important; }
-
-    .piece-tom2 {
-      width: 115px;
-      height: 115px;
-      top: 30px;
-      right: 250px;
-      background: radial-gradient(circle at 35% 35%, #6b21a8, #2e1065);
-      border: 5px solid #9333ea;
-    }
-    .piece-tom2.hit { box-shadow: 0 0 30px #d8b4fe !important; border-color: #f3e8ff !important; }
-
-    .piece-tom3 {
-      width: 120px;
-      height: 120px;
-      top: 155px;
-      right: 175px;
-      background: radial-gradient(circle at 35% 35%, #581c87, #1e1b4b);
-      border: 5px solid #7c3aed;
-    }
-    .piece-tom3.hit { box-shadow: 0 0 30px #a78bfa !important; border-color: #ddd6fe !important; }
-
-    .piece-tom4 {
-      width: 135px;
-      height: 135px;
-      bottom: 25px;
-      right: 35px;
-      background: radial-gradient(circle at 35% 35%, #4c1d95, #0f172a);
-      border: 6px solid #6366f1;
-    }
-    .piece-tom4.hit { box-shadow: 0 0 35px #818cf8 !important; border-color: #c7d2fe !important; }
-
-    .piece-key {
-      font-size: 24px;
-      font-weight: 700;
-      line-height: 1;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-      color: #ffffff;
-    }
-
-    .piece-snare .piece-key { color: #0f172a; text-shadow: none; }
-    .piece-crash .piece-key { color: #451a03; text-shadow: none; }
-
-    .piece-label {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: rgba(255, 255, 255, 0.85);
-      margin-top: 2px;
-    }
-    .piece-snare .piece-label { color: #334155; }
-    .piece-crash .piece-label { color: #78350f; }
-
-    /* MPC Studio Grid Mode */
-    .mpc-grid-layout {
-      display: none;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 16px;
+    /* Drum Buttons (Modern Tactile Style) */
+    .drum-btn {
       width: 100%;
-      max-width: 860px;
-      margin: 0 auto;
-    }
-
-    .mpc-pad {
+      max-width: 120px;
       aspect-ratio: 1;
-      border-radius: 12px;
-      background: linear-gradient(145deg, #1e293b, #0f172a);
-      border: 2px solid #334155;
+      border-radius: 50%;
+      border: 4px solid #475569;
+      background: radial-gradient(circle at 35% 35%, #334155, #1e293b);
+      color: #ffffff;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 2px;
       cursor: pointer;
-      transition: all 0.08s ease;
-      color: #ffffff;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+      position: relative;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+      transition: transform 0.08s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.08s ease, border-color 0.08s ease;
+      touch-action: manipulation;
+      padding: 0;
     }
 
-    .mpc-pad:hover {
+    .drum-btn:hover {
       border-color: #64748b;
       transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.6);
     }
 
-    .mpc-pad:active,
-    .mpc-pad.hit {
-      transform: scale(0.93);
+    .drum-btn:active,
+    .drum-btn.hit {
+      transform: scale(0.92) translateY(2px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8), 0 0 20px rgba(96, 165, 250, 0.8) !important;
+    }
+
+    /* Color Coded Instruments */
+    .drum-btn.type-crash {
+      border-color: #d97706;
+      background: radial-gradient(circle at 35% 35%, #b45309, #78350f);
+    }
+    .drum-btn.type-crash:active,
+    .drum-btn.type-crash.hit {
+      border-color: #fde047 !important;
+      box-shadow: 0 0 24px #facc15 !important;
+    }
+
+    .drum-btn.type-kick {
+      border-color: #dc2626;
+      background: radial-gradient(circle at 35% 35%, #991b1b, #450a0a);
+    }
+    .drum-btn.type-kick:active,
+    .drum-btn.type-kick.hit {
+      border-color: #f87171 !important;
+      box-shadow: 0 0 24px #ef4444 !important;
+    }
+
+    .drum-btn.type-snare {
+      border-color: #0284c7;
+      background: radial-gradient(circle at 35% 35%, #0369a1, #082f49);
+    }
+    .drum-btn.type-snare:active,
+    .drum-btn.type-snare.hit {
       border-color: #38bdf8 !important;
-      background: radial-gradient(circle at 50% 50%, #0284c7, #075985) !important;
       box-shadow: 0 0 24px #38bdf8 !important;
     }
 
-    /* 16-Step Beat Sequencer */
-    .sequencer-card {
-      background-color: var(--bg-color);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+    .drum-btn.type-tom {
+      border-color: #7c3aed;
+      background: radial-gradient(circle at 35% 35%, #5b21b6, #2e1065);
+    }
+    .drum-btn.type-tom:active,
+    .drum-btn.type-tom.hit {
+      border-color: #c084fc !important;
+      box-shadow: 0 0 24px #c084fc !important;
     }
 
-    .sequencer-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .sequencer-header h3 {
-      margin: 0;
-      font-size: 15px;
+    .drum-key-badge {
+      font-size: 22px;
       font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--text-main);
+      color: #ffffff;
+      line-height: 1;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
     }
 
-    .sequencer-grid-table {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-    }
-
-    .seq-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .seq-label {
-      width: 70px;
-      font-size: 11px;
+    .drum-label {
+      font-size: 10px;
       font-weight: 700;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 4px;
+      color: #cbd5e1;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    .seq-step {
-      width: 28px;
-      height: 28px;
-      border-radius: 4px;
-      background-color: #e2e8f0;
-      border: 1px solid var(--border-color);
-      cursor: pointer;
-      transition: all 0.1s ease;
+    .drum-sub {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 8px;
+      color: #94a3b8;
     }
 
-    .seq-step:hover {
-      border-color: var(--primary-blue);
-      background-color: #cbd5e1;
-    }
-
-    .seq-step.active {
-      background-color: var(--primary-blue);
-      border-color: var(--primary-hover);
-      box-shadow: 0 0 6px rgba(26, 115, 232, 0.5);
-    }
-
-    .seq-step.current {
-      outline: 2px solid #f59e0b;
-    }
-
-    .seq-step.beat-start {
-      margin-left: 3px;
-    }
-
-    /* Beat Presets & Recorder Row */
+    /* Interactive Groove Station & Beat Recorder Grid */
     .studio-bottom-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 12px;
     }
 
     @media (max-width: 768px) {
@@ -586,16 +338,22 @@
     .feature-card {
       background-color: var(--bg-color);
       border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 14px 16px;
+      border-radius: 8px;
+      padding: 12px 14px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
 
-    .feature-card h3 {
+    .feature-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .feature-header h3 {
       margin: 0;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       color: var(--text-main);
       display: flex;
@@ -612,9 +370,9 @@
     .preset-btn {
       background-color: #ffffff;
       border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 6px 12px;
-      font-size: 12px;
+      border-radius: 14px;
+      padding: 5px 10px;
+      font-size: 11px;
       font-weight: 500;
       color: var(--text-main);
       cursor: pointer;
@@ -636,16 +394,16 @@
       border-color: var(--primary-blue);
     }
 
-    /* Recording Timeline Bar */
-    .recording-bar {
+    /* Beat Recorder Row */
+    .rec-box {
       display: flex;
       align-items: center;
       justify-content: space-between;
       background: #ffffff;
       border: 1px solid var(--border-color);
       border-radius: 6px;
-      padding: 8px 12px;
-      font-size: 12px;
+      padding: 6px 10px;
+      font-size: 11px;
     }
 
     .rec-indicator {
@@ -661,8 +419,8 @@
     }
 
     .rec-dot {
-      width: 9px;
-      height: 9px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background-color: #9ca3af;
     }
@@ -677,10 +435,133 @@
       100% { opacity: 1; }
     }
 
+    /* Modal for 16-Step Pattern Sequencer */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background-color: #ffffff;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      max-width: 680px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      animation: modalPop 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes modalPop {
+      0% { transform: scale(0.95); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 15px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-secondary);
+      display: flex;
+      padding: 4px;
+    }
+
+    .close-btn:hover {
+      color: var(--text-main);
+    }
+
+    .seq-grid-table {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 4px 0;
+    }
+
+    .seq-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .seq-label {
+      width: 65px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .seq-step {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      background-color: #f1f5f9;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: all 0.08s ease;
+      padding: 0;
+    }
+
+    .seq-step:hover {
+      border-color: var(--primary-blue);
+      background-color: #e2e8f0;
+    }
+
+    .seq-step.active {
+      background-color: var(--primary-blue);
+      border-color: var(--primary-hover);
+      box-shadow: 0 0 6px rgba(26, 115, 232, 0.4);
+    }
+
+    .seq-step.current {
+      outline: 2px solid #f59e0b;
+    }
+
+    .seq-step.beat-start {
+      margin-left: 3px;
+    }
+
     /* Status Box */
     .status-box {
-      font-size: 13px;
-      padding: 10px 14px;
+      font-size: 12px;
+      padding: 8px 12px;
       border-radius: 6px;
       display: none;
     }
@@ -699,20 +580,19 @@
       border: 1px solid #f5c6cb;
     }
 
-    /* Toolbar */
+    /* Bottom Toolbar */
     .toolbar {
       display: flex;
-      gap: 12px;
-      margin-top: 8px;
+      gap: 10px;
       flex-wrap: wrap;
       align-items: center;
     }
 
     button {
       font-family: 'Google Sans', sans-serif;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 500;
-      padding: 8px 16px;
+      padding: 7px 14px;
       border-radius: 4px;
       cursor: pointer;
       border: 1px solid transparent;
@@ -724,7 +604,7 @@
     }
 
     button:active {
-      transform: scale(0.95);
+      transform: scale(0.96);
     }
 
     button:disabled {
@@ -734,13 +614,12 @@
     }
 
     .material-symbols-outlined {
-      font-size: 18px;
+      font-size: 17px;
     }
 
     .btn-primary {
       background-color: var(--primary-blue);
       color: white;
-      min-width: 150px;
     }
 
     .btn-primary:hover:not(:disabled) {
@@ -785,8 +664,8 @@
     <!-- Header Bar with Standard Action Chips -->
     <div class="header-bar">
       <div class="header-title-box">
-        <span class="material-symbols-outlined" style="font-size: 26px; color: var(--primary-blue);">album</span>
-        <h2>Virtual Drum Kit & Pro Beat Studio</h2>
+        <span class="material-symbols-outlined" style="font-size: 24px; color: var(--primary-blue);">album</span>
+        <h2>Virtual Drum Kit & Beat Studio</h2>
       </div>
 
       <div class="header-actions">
@@ -810,205 +689,123 @@
       </div>
     </div>
 
-    <!-- Top Studio Deck: Oscilloscope Visualizer & Master Control Deck -->
-    <div class="top-studio-deck">
-      <!-- Real-time Oscilloscope Spectrum Canvas -->
-      <div class="visualizer-card">
-        <div class="visualizer-header">
-          <span class="status-badge">
-            <span class="pulse-dot"></span>
-            Web Audio Engine Active (0ms Latency)
-          </span>
-          <span id="vuLevelText">Stereo Output: OK</span>
+    <!-- Top Master Controls & Mini Waveform Bar -->
+    <div class="top-controls-bar">
+      <div class="controls-row">
+        <!-- Master Volume -->
+        <div class="ctrl-item">
+          <span class="material-symbols-outlined" style="font-size: 16px;">volume_up</span>
+          Vol:
+          <input type="range" id="volumeSlider" min="0" max="100" value="85" oninput="updateVolume(this.value)">
+          <span class="val-badge" id="volVal">85%</span>
         </div>
+
+        <!-- Pitch -->
+        <div class="ctrl-item">
+          <span class="material-symbols-outlined" style="font-size: 16px;">tune</span>
+          Pitch:
+          <input type="range" id="pitchSlider" min="50" max="150" value="100" oninput="updatePitch(this.value)">
+          <span class="val-badge" id="pitchVal">1.0x</span>
+        </div>
+
+        <!-- Metronome BPM -->
+        <div class="ctrl-item">
+          <span class="material-symbols-outlined" style="font-size: 16px;">speed</span>
+          BPM:
+          <input type="range" id="bpmSlider" min="60" max="200" value="120" oninput="updateBpm(this.value)">
+          <span class="val-badge" id="bpmVal">120</span>
+          <button class="btn-secondary" id="metronomeBtn" style="padding: 3px 8px; font-size: 11px;" onclick="toggleMetronome()">Click</button>
+        </div>
+      </div>
+
+      <!-- Real-time Mini Waveform -->
+      <div class="mini-visualizer-box" title="Real-time Audio Engine Oscilloscope">
         <canvas id="visualizerCanvas"></canvas>
       </div>
-
-      <!-- Master Audio Controls -->
-      <div class="master-controls">
-        <div class="control-row">
-          <div class="control-label">
-            <span class="material-symbols-outlined" style="font-size: 16px;">volume_up</span>
-            Volume:
-          </div>
-          <div class="control-slider-group">
-            <input type="range" id="volumeSlider" min="0" max="100" value="85" oninput="updateVolume(this.value)">
-            <span class="val-badge" id="volVal">85%</span>
-          </div>
-        </div>
-
-        <div class="control-row">
-          <div class="control-label">
-            <span class="material-symbols-outlined" style="font-size: 16px;">tune</span>
-            Pitch:
-          </div>
-          <div class="control-slider-group">
-            <input type="range" id="pitchSlider" min="50" max="150" value="100" oninput="updatePitch(this.value)">
-            <span class="val-badge" id="pitchVal">1.0x</span>
-          </div>
-        </div>
-
-        <div class="control-row">
-          <div class="control-label">
-            <span class="material-symbols-outlined" style="font-size: 16px;">speed</span>
-            Tempo:
-          </div>
-          <div class="control-slider-group">
-            <input type="range" id="bpmSlider" min="60" max="200" value="120" oninput="updateBpm(this.value)">
-            <span class="val-badge" id="bpmVal">120 BPM</span>
-          </div>
-          <button class="btn-secondary" id="metronomeBtn" style="padding: 2px 8px; font-size: 11px;" onclick="toggleMetronome()">Click</button>
-        </div>
-      </div>
     </div>
 
-    <!-- View Switcher Bar -->
-    <div class="view-switcher-bar">
-      <div class="tab-pills">
-        <button class="tab-btn active" id="tabAcoustic" onclick="setViewMode('acoustic')">
-          <span class="material-symbols-outlined" style="font-size: 16px;">album</span>
-          Realistic Drum Set
+    <!-- Drum Kit Main Stage (Responsive & Non-Overflowing) -->
+    <div class="drum-kit-stage">
+      <div class="drum-grid">
+        <!-- W: Crash -->
+        <button class="drum-btn type-crash" data-key="w" onclick="triggerDrum('w')">
+          <span class="drum-key-badge">W</span>
+          <span class="drum-label">Crash</span>
+          <span class="drum-sub">crash.mp3</span>
         </button>
-        <button class="tab-btn" id="tabMpc" onclick="setViewMode('mpc')">
-          <span class="material-symbols-outlined" style="font-size: 16px;">grid_view</span>
-          Studio MPC Pads
+
+        <!-- A: Kick Bass -->
+        <button class="drum-btn type-kick" data-key="a" onclick="triggerDrum('a')">
+          <span class="drum-key-badge">A</span>
+          <span class="drum-label">Kick</span>
+          <span class="drum-sub">kick-bass.mp3</span>
+        </button>
+
+        <!-- S: Snare -->
+        <button class="drum-btn type-snare" data-key="s" onclick="triggerDrum('s')">
+          <span class="drum-key-badge">S</span>
+          <span class="drum-label">Snare</span>
+          <span class="drum-sub">snare.mp3</span>
+        </button>
+
+        <!-- D: Tom 1 -->
+        <button class="drum-btn type-tom" data-key="d" onclick="triggerDrum('d')">
+          <span class="drum-key-badge">D</span>
+          <span class="drum-label">Tom 1</span>
+          <span class="drum-sub">tom-1.mp3</span>
+        </button>
+
+        <!-- J: Tom 2 -->
+        <button class="drum-btn type-tom" data-key="j" onclick="triggerDrum('j')">
+          <span class="drum-key-badge">J</span>
+          <span class="drum-label">Tom 2</span>
+          <span class="drum-sub">tom-2.mp3</span>
+        </button>
+
+        <!-- K: Tom 3 -->
+        <button class="drum-btn type-tom" data-key="k" onclick="triggerDrum('k')">
+          <span class="drum-key-badge">K</span>
+          <span class="drum-label">Tom 3</span>
+          <span class="drum-sub">tom-3.mp3</span>
+        </button>
+
+        <!-- L: Tom 4 -->
+        <button class="drum-btn type-tom" data-key="l" onclick="triggerDrum('l')">
+          <span class="drum-key-badge">L</span>
+          <span class="drum-label">Tom 4</span>
+          <span class="drum-sub">tom-4.mp3</span>
         </button>
       </div>
-
-      <div style="font-size: 12px; color: var(--text-secondary);">
-        Trigger with Keys: <strong style="color: var(--primary-blue);">W, A, S, D, J, K, L</strong>
-      </div>
     </div>
 
-    <!-- Main Stage: Acoustic Kit vs MPC Grid -->
-    <div class="stage-container">
-      <!-- 1. Realistic Acoustic Drum Set Layout -->
-      <div class="acoustic-kit-layout" id="acousticKit">
-        <!-- W: Crash Cymbal -->
-        <div class="drum-piece piece-crash" data-key="w" onclick="triggerDrum('w')">
-          <span class="piece-key">W</span>
-          <span class="piece-label">Crash</span>
-        </div>
-
-        <!-- A: Kick Bass Drum -->
-        <div class="drum-piece piece-kick" data-key="a" onclick="triggerDrum('a')">
-          <span class="piece-key">A</span>
-          <span class="piece-label">Kick Bass</span>
-        </div>
-
-        <!-- S: Snare Drum -->
-        <div class="drum-piece piece-snare" data-key="s" onclick="triggerDrum('s')">
-          <span class="piece-key">S</span>
-          <span class="piece-label">Snare</span>
-        </div>
-
-        <!-- D: Tom 1 (High) -->
-        <div class="drum-piece piece-tom1" data-key="d" onclick="triggerDrum('d')">
-          <span class="piece-key">D</span>
-          <span class="piece-label">Tom 1</span>
-        </div>
-
-        <!-- J: Tom 2 (Mid-High) -->
-        <div class="drum-piece piece-tom2" data-key="j" onclick="triggerDrum('j')">
-          <span class="piece-key">J</span>
-          <span class="piece-label">Tom 2</span>
-        </div>
-
-        <!-- K: Tom 3 (Mid-Low) -->
-        <div class="drum-piece piece-tom3" data-key="k" onclick="triggerDrum('k')">
-          <span class="piece-key">K</span>
-          <span class="piece-label">Tom 3</span>
-        </div>
-
-        <!-- L: Tom 4 (Floor Tom) -->
-        <div class="drum-piece piece-tom4" data-key="l" onclick="triggerDrum('l')">
-          <span class="piece-key">L</span>
-          <span class="piece-label">Tom 4</span>
-        </div>
-      </div>
-
-      <!-- 2. Studio MPC Pad Grid Layout -->
-      <div class="mpc-grid-layout" id="mpcGrid">
-        <div class="mpc-pad" data-key="w" onclick="triggerDrum('w')">
-          <span class="piece-key" style="color: #fde047;">W</span>
-          <span class="piece-label">Crash Cymbal</span>
-        </div>
-        <div class="mpc-pad" data-key="a" onclick="triggerDrum('a')">
-          <span class="piece-key" style="color: #f87171;">A</span>
-          <span class="piece-label">Kick Bass</span>
-        </div>
-        <div class="mpc-pad" data-key="s" onclick="triggerDrum('s')">
-          <span class="piece-key" style="color: #38bdf8;">S</span>
-          <span class="piece-label">Snare Drum</span>
-        </div>
-        <div class="mpc-pad" data-key="d" onclick="triggerDrum('d')">
-          <span class="piece-key" style="color: #c084fc;">D</span>
-          <span class="piece-label">High Tom 1</span>
-        </div>
-        <div class="mpc-pad" data-key="j" onclick="triggerDrum('j')">
-          <span class="piece-key" style="color: #d8b4fe;">J</span>
-          <span class="piece-label">Mid Tom 2</span>
-        </div>
-        <div class="mpc-pad" data-key="k" onclick="triggerDrum('k')">
-          <span class="piece-key" style="color: #a78bfa;">K</span>
-          <span class="piece-label">Low Tom 3</span>
-        </div>
-        <div class="mpc-pad" data-key="l" onclick="triggerDrum('l')">
-          <span class="piece-key" style="color: #818cf8;">L</span>
-          <span class="piece-label">Floor Tom 4</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 16-Step Multi-Track Beat Sequencer -->
-    <div class="sequencer-card">
-      <div class="sequencer-header">
-        <h3>
-          <span class="material-symbols-outlined" style="font-size: 18px; color: var(--primary-blue);">view_column</span>
-          16-Step Pattern Sequencer
-        </h3>
-        <div style="display: flex; gap: 6px;">
-          <button class="btn-secondary" id="seqPlayBtn" style="padding: 4px 10px; font-size: 12px;" onclick="toggleSequencer()">
-            <span class="material-symbols-outlined" id="seqPlayIcon" style="font-size: 16px;">play_arrow</span>
-            <span id="seqPlayText">Play Loop</span>
-          </button>
-          <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="clearSequencer()">
-            <span class="material-symbols-outlined" style="font-size: 16px;">restart_alt</span>
-            Clear Grid
-          </button>
-        </div>
-      </div>
-
-      <div class="sequencer-grid-table" id="sequencerGrid">
-        <!-- Generated dynamically in JavaScript -->
-      </div>
-    </div>
-
-    <!-- Practice Grooves & Loop Recorder Studio -->
+    <!-- Play-Along Auto Grooves & Live Beat Recorder -->
     <div class="studio-bottom-grid">
-      <!-- Left: Auto Play-Along Grooves -->
+      <!-- Left: Auto Play-Along Grooves (Instant 1-Click Play/Stop) -->
       <div class="feature-card">
-        <h3>
-          <span class="material-symbols-outlined" style="font-size: 18px; color: var(--primary-blue);">queue_music</span>
-          Play-Along Rhythm Presets
-        </h3>
-        <span style="font-size: 12px; color: var(--text-secondary);">Load instant drum patterns to practice your timing:</span>
+        <div class="feature-header">
+          <h3>
+            <span class="material-symbols-outlined" style="font-size: 16px; color: var(--primary-blue);">queue_music</span>
+            Play-Along Grooves (Click to Play/Stop)
+          </h3>
+        </div>
         <div class="preset-chips-row">
-          <button class="preset-btn" id="grooveRock" onclick="loadGroovePreset('rock')">🎸 Classic Rock</button>
-          <button class="preset-btn" id="grooveFunk" onclick="loadGroovePreset('funk')">🕺 Disco Funk</button>
-          <button class="preset-btn" id="grooveHiphop" onclick="loadGroovePreset('hiphop')">🎧 Boom Bap</button>
-          <button class="preset-btn" id="grooveTrap" onclick="loadGroovePreset('trap')">⚡ Trap Beat</button>
+          <button class="preset-btn" id="grooveRock" onclick="toggleGroove('rock')">🎸 Classic Rock</button>
+          <button class="preset-btn" id="grooveFunk" onclick="toggleGroove('funk')">🕺 Disco Funk</button>
+          <button class="preset-btn" id="grooveHiphop" onclick="toggleGroove('hiphop')">🎧 Boom Bap</button>
+          <button class="preset-btn" id="grooveTrap" onclick="toggleGroove('trap')">⚡ Trap Beat</button>
           <button class="preset-btn" onclick="playDrumFill()">🥁 Drum Fill</button>
         </div>
       </div>
 
-      <!-- Right: Beat Recorder & Loop Player -->
+      <!-- Right: Live Beat Recorder & Loop Station -->
       <div class="feature-card">
-        <h3>
-          <span class="material-symbols-outlined" style="font-size: 18px; color: var(--primary-blue);">mic</span>
-          Live Beat Recorder
-        </h3>
-        <div class="recording-bar">
+        <div class="feature-header">
+          <h3>
+            <span class="material-symbols-outlined" style="font-size: 16px; color: var(--primary-blue);">mic</span>
+            Beat Recorder
+          </h3>
+        </div>
+        <div class="rec-box">
           <div class="rec-indicator" id="recIndicator">
             <span class="rec-dot"></span>
             <span id="recStatusText">Ready to Record</span>
@@ -1016,17 +813,17 @@
           <span style="font-family: 'Roboto Mono', monospace;" id="recHitCount">0 Hits</span>
         </div>
 
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button class="btn-danger" id="recToggleBtn" style="padding: 6px 12px; font-size: 12px;" onclick="toggleRecording()">
-            <span class="material-symbols-outlined" id="recIcon" style="font-size: 16px;">fiber_manual_record</span>
-            <span id="recBtnText">Record Beat</span>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+          <button class="btn-danger" id="recToggleBtn" style="padding: 4px 10px; font-size: 11px;" onclick="toggleRecording()">
+            <span class="material-symbols-outlined" id="recIcon" style="font-size: 15px;">fiber_manual_record</span>
+            <span id="recBtnText">Record</span>
           </button>
-          <button class="btn-secondary" id="playRecBtn" style="padding: 6px 12px; font-size: 12px;" onclick="playRecording()" disabled>
-            <span class="material-symbols-outlined" style="font-size: 16px;">play_arrow</span>
+          <button class="btn-secondary" id="playRecBtn" style="padding: 4px 10px; font-size: 11px;" onclick="playRecording()" disabled>
+            <span class="material-symbols-outlined" style="font-size: 15px;">play_arrow</span>
             Play Back
           </button>
-          <button class="btn-secondary" id="clearRecBtn" style="padding: 6px 12px; font-size: 12px;" onclick="clearRecording()" disabled>
-            <span class="material-symbols-outlined" style="font-size: 16px;">delete</span>
+          <button class="btn-secondary" id="clearRecBtn" style="padding: 4px 10px; font-size: 11px;" onclick="clearRecording()" disabled>
+            <span class="material-symbols-outlined" style="font-size: 15px;">delete</span>
             Clear
           </button>
         </div>
@@ -1036,37 +833,75 @@
     <!-- Status Box -->
     <div id="statusBox" class="status-box"></div>
 
-    <!-- Toolbar -->
+    <!-- Bottom Toolbar -->
     <div class="toolbar">
-      <button class="btn-primary" onclick="playDrumSoloDemo()">
+      <button class="btn-primary" onclick="openSequencerModal()">
+        <span class="material-symbols-outlined">grid_view</span>
+        Open 16-Step Beat Sequencer
+      </button>
+
+      <button class="btn-secondary" onclick="playDrumSoloDemo()">
         <span class="material-symbols-outlined">smart_toy</span>
         Play Demo Solo
       </button>
 
       <button class="btn-secondary" onclick="stopAllAudio()">
         <span class="material-symbols-outlined">stop_circle</span>
-        Stop All Audio
+        Stop All Rhythms
       </button>
     </div>
   </div>
 
+  <!-- 16-Step Sequencer Popup Modal -->
+  <div class="modal-overlay" id="sequencerModal" onclick="if(event.target===this) closeSequencerModal()">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>
+          <span class="material-symbols-outlined" style="font-size: 20px; color: var(--primary-blue);">view_column</span>
+          16-Step Pattern Sequencer
+        </h3>
+        <button class="close-btn" onclick="closeSequencerModal()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+        <span style="font-size: 12px; color: var(--text-secondary);">Click steps to toggle drum hits:</span>
+        <div style="display: flex; gap: 6px;">
+          <button class="btn-secondary" id="modalSeqPlayBtn" style="padding: 4px 10px; font-size: 12px;" onclick="toggleSequencer()">
+            <span class="material-symbols-outlined" id="modalSeqPlayIcon" style="font-size: 16px;">play_arrow</span>
+            <span id="modalSeqPlayText">Play Loop</span>
+          </button>
+          <button class="btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="clearSequencer()">
+            <span class="material-symbols-outlined" style="font-size: 16px;">restart_alt</span>
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <div class="seq-grid-table" id="sequencerGrid">
+        <!-- Dynamically built in JavaScript -->
+      </div>
+    </div>
+  </div>
+
   <script>
-    // Audio Context & Master Graph
+    // Web Audio Context & Nodes
     let audioCtx = null;
     let masterGain = null;
     let analyserNode = null;
     let masterVolume = 0.85;
     let playbackRateMultiplier = 1.0;
 
-    // Instrument Configuration
+    // Instrument Definitions
     const instruments = [
-      { key: 'w', name: 'Crash', file: 'crash.mp3', pan: -0.5 },
-      { key: 'a', name: 'Kick', file: 'kick-bass.mp3', pan: 0.0 },
-      { key: 's', name: 'Snare', file: 'snare.mp3', pan: -0.2 },
-      { key: 'd', name: 'Tom 1', file: 'tom-1.mp3', pan: -0.3 },
-      { key: 'j', name: 'Tom 2', file: 'tom-2.mp3', pan: 0.1 },
-      { key: 'k', name: 'Tom 3', file: 'tom-3.mp3', pan: 0.3 },
-      { key: 'l', name: 'Tom 4', file: 'tom-4.mp3', pan: 0.5 }
+      { key: 'w', name: 'Crash', file: 'crash.mp3' },
+      { key: 'a', name: 'Kick', file: 'kick-bass.mp3' },
+      { key: 's', name: 'Snare', file: 'snare.mp3' },
+      { key: 'd', name: 'Tom 1', file: 'tom-1.mp3' },
+      { key: 'j', name: 'Tom 2', file: 'tom-2.mp3' },
+      { key: 'k', name: 'Tom 3', file: 'tom-3.mp3' },
+      { key: 'l', name: 'Tom 4', file: 'tom-4.mp3' }
     ];
 
     // Audio Buffer Cache
@@ -1077,7 +912,7 @@
       'sounds/'
     ];
 
-    // Sequencer Grid State (7 rows x 16 steps)
+    // 16-Step Sequencer State
     const sequencerSteps = 16;
     const sequencerData = {
       'w': new Array(16).fill(false),
@@ -1091,6 +926,11 @@
     let isSequencerRunning = false;
     let sequencerTimer = null;
     let currentStep = 0;
+
+    // Play-Along Groove State
+    let activeGrooveName = null;
+    let grooveTimer = null;
+    let grooveStep = 0;
 
     // Recorder State
     let isRecording = false;
@@ -1109,7 +949,6 @@
       setupKeyboardListeners();
       setupVisualizer();
       preloadSounds();
-      loadGroovePreset('rock');
     });
 
     function initAudio() {
@@ -1121,7 +960,7 @@
         masterGain.gain.value = masterVolume;
 
         analyserNode = audioCtx.createAnalyser();
-        analyserNode.fftSize = 256;
+        analyserNode.fftSize = 128;
 
         masterGain.connect(analyserNode);
         analyserNode.connect(audioCtx.destination);
@@ -1146,7 +985,7 @@
               break;
             }
           } catch (e) {
-            // Fallback to synthesis
+            // Synthesis fallback ready
           }
         }
       }
@@ -1165,21 +1004,18 @@
     function triggerDrum(key) {
       initAudio();
 
-      // Animate active piece / pad
-      const elements = document.querySelectorAll(`[data-key="${key}"]`);
-      elements.forEach(el => {
-        el.classList.add('hit');
-        setTimeout(() => el.classList.remove('hit'), 120);
-      });
+      const btn = document.querySelector(`.drum-btn[data-key="${key}"]`);
+      if (btn) {
+        btn.classList.add('hit');
+        setTimeout(() => btn.classList.remove('hit'), 120);
+      }
 
-      // Play Sample or Synthesizer
       if (soundBuffers[key]) {
         playSampleBuffer(soundBuffers[key]);
       } else {
         playSynthesizedDrum(key);
       }
 
-      // Record hit
       if (isRecording) {
         recordedEvents.push({
           key: key,
@@ -1198,7 +1034,7 @@
       src.start(0);
     }
 
-    /* High-Fidelity Synthesized Drums */
+    /* High-Fidelity Synthesizer Fallback */
     function playSynthesizedDrum(key) {
       if (!audioCtx) return;
       const t = audioCtx.currentTime;
@@ -1286,131 +1122,54 @@
       }
     }
 
-    /* View Switcher */
-    function setViewMode(mode) {
-      document.getElementById('tabAcoustic').classList.toggle('active', mode === 'acoustic');
-      document.getElementById('tabMpc').classList.toggle('active', mode === 'mpc');
+    /* Play-Along Grooves (Instant 1-Click Play/Stop) */
+    const groovePatterns = {
+      rock: [
+        ['a', 'w'], [], ['s'], [], ['a'], ['a'], ['s'], []
+      ],
+      funk: [
+        ['a'], ['s'], ['a'], ['s'], ['a', 'w'], [], ['s'], ['d']
+      ],
+      hiphop: [
+        ['a'], [], ['s'], [], ['a'], ['a'], ['s'], ['w']
+      ],
+      trap: [
+        ['a', 'w'], ['w'], ['w'], ['a', 'w'], ['s', 'w'], ['w'], ['a', 'w'], ['w']
+      ]
+    };
 
-      document.getElementById('acousticKit').style.display = mode === 'acoustic' ? 'block' : 'none';
-      document.getElementById('mpcGrid').style.display = mode === 'mpc' ? 'grid' : 'none';
-    }
-
-    /* 16-Step Sequencer */
-    function buildSequencerDOM() {
-      const grid = document.getElementById('sequencerGrid');
-      grid.innerHTML = '';
-
-      instruments.forEach(inst => {
-        const row = document.createElement('div');
-        row.className = 'seq-row';
-
-        const label = document.createElement('div');
-        label.className = 'seq-label';
-        label.innerHTML = `<strong>${inst.key.toUpperCase()}</strong> ${inst.name}`;
-        row.appendChild(label);
-
-        for (let step = 0; step < sequencerSteps; step++) {
-          const stepBtn = document.createElement('button');
-          stepBtn.className = `seq-step ${step % 4 === 0 ? 'beat-start' : ''}`;
-          stepBtn.id = `seq_${inst.key}_${step}`;
-          stepBtn.onclick = () => {
-            sequencerData[inst.key][step] = !sequencerData[inst.key][step];
-            stepBtn.classList.toggle('active', sequencerData[inst.key][step]);
-          };
-          row.appendChild(stepBtn);
-        }
-
-        grid.appendChild(row);
-      });
-    }
-
-    function toggleSequencer() {
+    function toggleGroove(name) {
       initAudio();
-      if (isSequencerRunning) {
-        stopSequencer();
+      if (activeGrooveName === name) {
+        stopGroove();
       } else {
-        startSequencer();
+        startGroove(name);
       }
     }
 
-    function startSequencer() {
-      isSequencerRunning = true;
-      document.getElementById('seqPlayText').textContent = 'Stop Loop';
-      document.getElementById('seqPlayIcon').textContent = 'stop';
-      document.getElementById('seqPlayBtn').classList.add('btn-success');
+    function startGroove(name) {
+      stopGroove();
+      stopSequencer();
+      activeGrooveName = name;
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(`groove${name.charAt(0).toUpperCase() + name.slice(1)}`);
+      if (activeBtn) activeBtn.classList.add('active');
 
-      currentStep = 0;
-      const stepDuration = ((60 / currentBpm) * 1000) / 4; // 16th notes
+      const pattern = groovePatterns[name];
+      grooveStep = 0;
+      const stepDuration = ((60 / currentBpm) * 1000) / 2; // 8th notes
 
-      sequencerTimer = setInterval(() => {
-        // Highlight current column
-        document.querySelectorAll('.seq-step').forEach(el => el.classList.remove('current'));
-
-        instruments.forEach(inst => {
-          const stepBtn = document.getElementById(`seq_${inst.key}_${currentStep}`);
-          if (stepBtn) stepBtn.classList.add('current');
-
-          if (sequencerData[inst.key][currentStep]) {
-            triggerDrum(inst.key);
-          }
-        });
-
-        currentStep = (currentStep + 1) % sequencerSteps;
+      grooveTimer = setInterval(() => {
+        const hits = pattern[grooveStep % pattern.length];
+        hits.forEach(k => triggerDrum(k));
+        grooveStep++;
       }, stepDuration);
     }
 
-    function stopSequencer() {
-      isSequencerRunning = false;
-      if (sequencerTimer) clearInterval(sequencerTimer);
-      document.getElementById('seqPlayText').textContent = 'Play Loop';
-      document.getElementById('seqPlayIcon').textContent = 'play_arrow';
-      document.getElementById('seqPlayBtn').classList.remove('btn-success');
-      document.querySelectorAll('.seq-step').forEach(el => el.classList.remove('current'));
-    }
-
-    function clearSequencer() {
-      instruments.forEach(inst => {
-        sequencerData[inst.key].fill(false);
-        for (let s = 0; s < sequencerSteps; s++) {
-          const btn = document.getElementById(`seq_${inst.key}_${s}`);
-          if (btn) btn.classList.remove('active');
-        }
-      });
-      showStatus('Sequencer grid cleared.', 'success');
-    }
-
-    function loadGroovePreset(type) {
-      clearSequencer();
+    function stopGroove() {
+      activeGrooveName = null;
+      if (grooveTimer) clearInterval(grooveTimer);
       document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-      const activeBtn = document.getElementById(`groove${type.charAt(0).toUpperCase() + type.slice(1)}`);
-      if (activeBtn) activeBtn.classList.add('active');
-
-      if (type === 'rock') {
-        // Kick on 0, 8; Snare on 4, 12; Crash on 0; Tom on 14, 15
-        [0, 8].forEach(s => setSeqStep('a', s, true));
-        [4, 12].forEach(s => setSeqStep('s', s, true));
-        setSeqStep('w', 0, true);
-        [14, 15].forEach(s => setSeqStep('d', s, true));
-      } else if (type === 'funk') {
-        [0, 6, 10].forEach(s => setSeqStep('a', s, true));
-        [4, 12].forEach(s => setSeqStep('s', s, true));
-        [0, 8].forEach(s => setSeqStep('w', s, true));
-        [14, 15].forEach(s => setSeqStep('j', s, true));
-      } else if (type === 'hiphop') {
-        [0, 3, 8, 11].forEach(s => setSeqStep('a', s, true));
-        [4, 12].forEach(s => setSeqStep('s', s, true));
-        [0, 6, 12].forEach(s => setSeqStep('w', s, true));
-      } else if (type === 'trap') {
-        [0, 5, 8, 13].forEach(s => setSeqStep('a', s, true));
-        [8].forEach(s => setSeqStep('s', s, true));
-        [0, 2, 4, 6, 8, 10, 12, 14].forEach(s => setSeqStep('w', s, true));
-      }
-    }
-
-    function setSeqStep(key, step, state) {
-      sequencerData[key][step] = state;
-      const btn = document.getElementById(`seq_${key}_${step}`);
-      if (btn) btn.classList.toggle('active', state);
     }
 
     function playDrumFill() {
@@ -1448,6 +1207,103 @@
       showStatus('Playing Demo Drum Solo!', 'success');
     }
 
+    /* 16-Step Sequencer Modal */
+    function openSequencerModal() {
+      document.getElementById('sequencerModal').classList.add('open');
+    }
+
+    function closeSequencerModal() {
+      document.getElementById('sequencerModal').classList.remove('open');
+    }
+
+    function buildSequencerDOM() {
+      const grid = document.getElementById('sequencerGrid');
+      grid.innerHTML = '';
+
+      // Default Rock pattern loaded into sequencer
+      [0, 8].forEach(s => sequencerData['a'][s] = true);
+      [4, 12].forEach(s => sequencerData['s'][s] = true);
+      sequencerData['w'][0] = true;
+      [14, 15].forEach(s => sequencerData['d'][s] = true);
+
+      instruments.forEach(inst => {
+        const row = document.createElement('div');
+        row.className = 'seq-row';
+
+        const label = document.createElement('div');
+        label.className = 'seq-label';
+        label.innerHTML = `<strong>${inst.key.toUpperCase()}</strong> ${inst.name}`;
+        row.appendChild(label);
+
+        for (let step = 0; step < sequencerSteps; step++) {
+          const stepBtn = document.createElement('button');
+          stepBtn.className = `seq-step ${step % 4 === 0 ? 'beat-start' : ''} ${sequencerData[inst.key][step] ? 'active' : ''}`;
+          stepBtn.id = `seq_${inst.key}_${step}`;
+          stepBtn.onclick = () => {
+            sequencerData[inst.key][step] = !sequencerData[inst.key][step];
+            stepBtn.classList.toggle('active', sequencerData[inst.key][step]);
+          };
+          row.appendChild(stepBtn);
+        }
+
+        grid.appendChild(row);
+      });
+    }
+
+    function toggleSequencer() {
+      initAudio();
+      if (isSequencerRunning) {
+        stopSequencer();
+      } else {
+        startSequencer();
+      }
+    }
+
+    function startSequencer() {
+      stopGroove();
+      isSequencerRunning = true;
+      document.getElementById('modalSeqPlayText').textContent = 'Stop Loop';
+      document.getElementById('modalSeqPlayIcon').textContent = 'stop';
+      document.getElementById('modalSeqPlayBtn').classList.add('btn-success');
+
+      currentStep = 0;
+      const stepDuration = ((60 / currentBpm) * 1000) / 4; // 16th notes
+
+      sequencerTimer = setInterval(() => {
+        document.querySelectorAll('.seq-step').forEach(el => el.classList.remove('current'));
+
+        instruments.forEach(inst => {
+          const stepBtn = document.getElementById(`seq_${inst.key}_${currentStep}`);
+          if (stepBtn) stepBtn.classList.add('current');
+
+          if (sequencerData[inst.key][currentStep]) {
+            triggerDrum(inst.key);
+          }
+        });
+
+        currentStep = (currentStep + 1) % sequencerSteps;
+      }, stepDuration);
+    }
+
+    function stopSequencer() {
+      isSequencerRunning = false;
+      if (sequencerTimer) clearInterval(sequencerTimer);
+      document.getElementById('modalSeqPlayText').textContent = 'Play Loop';
+      document.getElementById('modalSeqPlayIcon').textContent = 'play_arrow';
+      document.getElementById('modalSeqPlayBtn').classList.remove('btn-success');
+      document.querySelectorAll('.seq-step').forEach(el => el.classList.remove('current'));
+    }
+
+    function clearSequencer() {
+      instruments.forEach(inst => {
+        sequencerData[inst.key].fill(false);
+        for (let s = 0; s < sequencerSteps; s++) {
+          const btn = document.getElementById(`seq_${inst.key}_${s}`);
+          if (btn) btn.classList.remove('active');
+        }
+      });
+    }
+
     /* Master Controls */
     function updateVolume(val) {
       masterVolume = val / 100;
@@ -1462,10 +1318,14 @@
 
     function updateBpm(val) {
       currentBpm = parseInt(val, 10);
-      document.getElementById('bpmVal').textContent = `${currentBpm} BPM`;
+      document.getElementById('bpmVal').textContent = currentBpm;
       if (isSequencerRunning) {
         stopSequencer();
         startSequencer();
+      }
+      if (activeGrooveName) {
+        stopGroove();
+        startGroove(activeGrooveName);
       }
       if (isMetronomeRunning) {
         stopMetronome();
@@ -1485,7 +1345,6 @@
 
     function startMetronome() {
       isMetronomeRunning = true;
-      document.getElementById('metronomeBtn').classList.add('active');
       document.getElementById('metronomeBtn').style.backgroundColor = '#e8f0fe';
 
       const intervalMs = (60 / currentBpm) * 1000;
@@ -1500,7 +1359,6 @@
     function stopMetronome() {
       isMetronomeRunning = false;
       if (metronomeTimer) clearInterval(metronomeTimer);
-      document.getElementById('metronomeBtn').classList.remove('active');
       document.getElementById('metronomeBtn').style.backgroundColor = '';
     }
 
@@ -1535,7 +1393,7 @@
 
       document.getElementById('recIndicator').classList.add('recording');
       document.getElementById('recStatusText').textContent = 'Recording Beat...';
-      document.getElementById('recBtnText').textContent = 'Stop Recording';
+      document.getElementById('recBtnText').textContent = 'Stop';
       document.getElementById('recIcon').textContent = 'stop';
       document.getElementById('playRecBtn').disabled = true;
       document.getElementById('clearRecBtn').disabled = true;
@@ -1545,7 +1403,7 @@
       isRecording = false;
       document.getElementById('recIndicator').classList.remove('recording');
       document.getElementById('recStatusText').textContent = `Recorded ${recordedEvents.length} Hits`;
-      document.getElementById('recBtnText').textContent = 'Record Beat';
+      document.getElementById('recBtnText').textContent = 'Record';
       document.getElementById('recIcon').textContent = 'fiber_manual_record';
 
       document.getElementById('playRecBtn').disabled = recordedEvents.length === 0;
@@ -1558,7 +1416,7 @@
       isPlayingBack = true;
       document.getElementById('playRecBtn').disabled = true;
 
-      showStatus('Playing back recorded beat loop...', 'success');
+      showStatus('Playing back recorded beat...', 'success');
 
       recordedEvents.forEach((ev, idx) => {
         setTimeout(() => {
@@ -1577,17 +1435,18 @@
       document.getElementById('recStatusText').textContent = 'Ready to Record';
       document.getElementById('playRecBtn').disabled = true;
       document.getElementById('clearRecBtn').disabled = true;
-      showStatus('Recorded loop cleared.', 'success');
+      showStatus('Recorded beat cleared.', 'success');
     }
 
     function stopAllAudio() {
+      stopGroove();
       stopSequencer();
       stopMetronome();
       if (isRecording) stopRecording();
       showStatus('All rhythms stopped.', 'success');
     }
 
-    /* Oscilloscope Visualizer */
+    /* Waveform Visualizer */
     function setupVisualizer() {
       const canvas = document.getElementById('visualizerCanvas');
       const ctx = canvas.getContext('2d');
@@ -1602,12 +1461,12 @@
       function draw() {
         requestAnimationFrame(draw);
 
-        ctx.fillStyle = '#0b0f19';
+        ctx.fillStyle = '#0f172a';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         if (!analyserNode) {
           ctx.lineWidth = 1.5;
-          ctx.strokeStyle = '#1e293b';
+          ctx.strokeStyle = '#334155';
           ctx.beginPath();
           ctx.moveTo(0, canvas.height / 2);
           ctx.lineTo(canvas.width, canvas.height / 2);
@@ -1619,11 +1478,11 @@
         const dataArray = new Uint8Array(bufferLength);
         analyserNode.getByteTimeDomainData(dataArray);
 
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1.8;
         const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
         gradient.addColorStop(0, '#38bdf8');
-        gradient.addColorStop(0.5, '#a855f7');
-        gradient.addColorStop(1, '#f43f5e');
+        gradient.addColorStop(0.5, '#818cf8');
+        gradient.addColorStop(1, '#ec4899');
         ctx.strokeStyle = gradient;
 
         ctx.beginPath();
