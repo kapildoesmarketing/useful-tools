@@ -46,6 +46,7 @@
       padding: 16px;
       background-color: #ffffff;
       color: var(--text-main);
+      overflow-x: hidden;
     }
 
     h1, h2, h3, h4, .btn, .stat-number, .badge-title {
@@ -237,7 +238,7 @@
       top: 50%;
       transform: translateY(-50%);
       font-size: 18px;
-      transition: left 0.1s linear;
+      transition: left 0.12s linear;
       z-index: 2;
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
     }
@@ -253,7 +254,7 @@
       text-transform: uppercase;
     }
 
-    /* Live HUD Stats */
+    /* Live HUD Bar */
     .hud-bar {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -293,44 +294,75 @@
       line-height: 1.1;
     }
 
-    /* Typing Code Area */
-    .typing-terminal {
-      background-color: var(--dark-code-bg);
-      border: 1px solid #334155;
-      border-radius: 10px;
-      padding: 20px;
+    /* Typing Code Terminal */
+    .terminal-container {
       position: relative;
-      cursor: text;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #334155;
+      background-color: var(--dark-code-bg);
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15), inset 0 2px 8px rgba(0,0,0,0.5);
-      min-height: 180px;
-      max-height: 260px;
+    }
+
+    .terminal-header {
+      background: #1e293b;
+      padding: 6px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #334155;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .window-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+
+    .typing-terminal {
+      padding: 16px 20px;
+      cursor: text;
+      min-height: 170px;
+      max-height: 240px;
       overflow-y: auto;
       font-family: 'Fira Code', 'Roboto Mono', monospace;
-      font-size: 16px;
-      line-height: 1.7;
+      font-size: 15px;
+      line-height: 1.8;
       letter-spacing: 0.5px;
       white-space: pre-wrap;
       word-break: break-word;
+      position: relative;
     }
 
-    .typing-terminal:focus-within {
-      border-color: var(--primary-blue);
-      box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.3), inset 0 2px 8px rgba(0,0,0,0.5);
-    }
-
-    /* Hidden Real Input for Mobile & Keystrokes */
+    /* Embedded Zero-Scroll Hidden Focus Input */
     #hiddenInput {
       position: absolute;
-      top: -9999px;
-      left: -9999px;
+      top: 0;
+      left: 0;
+      width: 1px;
+      height: 1px;
       opacity: 0;
+      border: none;
+      outline: none;
       pointer-events: none;
     }
 
     /* Character States */
     .char {
       position: relative;
-      transition: color 0.05s ease;
+      transition: color 0.04s ease;
     }
 
     .char.correct {
@@ -346,34 +378,16 @@
 
     .char.current {
       color: var(--char-current);
-      background-color: rgba(56, 189, 248, 0.2);
+      background-color: rgba(56, 189, 248, 0.25);
       border-radius: 2px;
+      box-shadow: 0 0 4px rgba(56, 189, 248, 0.5);
     }
 
     .char.pending {
       color: var(--char-dim);
     }
 
-    /* Animated Caret */
-    .caret {
-      position: absolute;
-      width: 2px;
-      background-color: #38bdf8;
-      height: 1.2em;
-      top: 0;
-      left: 0;
-      animation: blinkCaret 1s infinite;
-      display: inline-block;
-      pointer-events: none;
-      z-index: 10;
-    }
-
-    @keyframes blinkCaret {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
-
-    /* Interactive Mechanical On-Screen Keyboard */
+    /* Interactive Visual Keyboard */
     .keyboard-card {
       background-color: var(--bg-color);
       border: 1px solid var(--border-color);
@@ -439,7 +453,7 @@
       50% { transform: scale(1.05); }
     }
 
-    /* Results Dashboard Modal / Screen */
+    /* Results Dashboard Modal */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -636,7 +650,7 @@
 <body>
 
   <div class="container">
-    <!-- Header Bar with Standard Action Chips -->
+    <!-- Header Bar with Action Chips -->
     <div class="header-bar">
       <div class="header-title-box">
         <span class="material-symbols-outlined" style="font-size: 24px; color: var(--primary-blue);">keyboard</span>
@@ -669,16 +683,16 @@
       <div class="selector-group">
         <span class="ctrl-label">
           <span class="material-symbols-outlined" style="font-size: 15px;">code</span>
-          Language / Mode:
+          Mode:
         </span>
         <button class="chip-pill active" onclick="setLanguage('python', this)">🐍 Python</button>
         <button class="chip-pill" onclick="setLanguage('javascript', this)">⚡ JavaScript</button>
         <button class="chip-pill" onclick="setLanguage('sql', this)">🗄️ SQL</button>
         <button class="chip-pill" onclick="setLanguage('htmlcss', this)">🎨 HTML & CSS</button>
-        <button class="chip-pill" onclick="setLanguage('bash', this)">💻 Bash / Linux</button>
+        <button class="chip-pill" onclick="setLanguage('bash', this)">💻 Bash / CLI</button>
         <button class="chip-pill" onclick="setLanguage('regex', this)">🔍 Regex</button>
         <button class="chip-pill" onclick="setLanguage('english', this)">📖 English Words</button>
-        <button class="chip-pill" onclick="openCustomTextModal()">✏️ Custom Code</button>
+        <button class="chip-pill" onclick="openCustomTextModal()">✏️ Custom</button>
       </div>
 
       <div class="selector-group">
@@ -701,7 +715,7 @@
         <div class="finish-line"></div>
       </div>
       <div class="race-lane" style="opacity: 0.75;">
-        <span class="racer-label">Target (60 WPM Pace)</span>
+        <span class="racer-label">Target Pace (60 WPM)</span>
         <div class="racer-icon" id="targetRacer">🚀</div>
         <div class="finish-line"></div>
       </div>
@@ -727,14 +741,25 @@
       </div>
     </div>
 
-    <!-- Typing Code Terminal -->
-    <div class="typing-terminal" id="typingArea" onclick="focusInput()">
-      <div id="codeDisplay"></div>
-      <!-- Hidden Input for mobile & focus capture -->
-      <input type="text" id="hiddenInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <!-- Typing Code Terminal with Line Info -->
+    <div class="terminal-container" onclick="focusInput()">
+      <div class="terminal-header">
+        <div class="window-dots">
+          <div class="dot dot-red"></div>
+          <div class="dot dot-yellow"></div>
+          <div class="dot dot-green"></div>
+        </div>
+        <span id="terminalFileTitle">main.py</span>
+        <span style="font-size: 10px; color: #64748b;">Click & Type</span>
+      </div>
+
+      <div class="typing-terminal" id="typingArea">
+        <div id="codeDisplay"></div>
+        <input type="text" id="hiddenInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+      </div>
     </div>
 
-    <!-- Interactive On-Screen Visual Keyboard -->
+    <!-- Interactive Visual Mechanical Keyboard -->
     <div class="keyboard-card" id="visualKeyboard">
       <div class="kb-row" id="kbRow1"></div>
       <div class="kb-row" id="kbRow2"></div>
@@ -871,6 +896,17 @@
       ]
     };
 
+    const fileTitles = {
+      python: 'algorithm.py',
+      javascript: 'service.js',
+      sql: 'analytics_query.sql',
+      htmlcss: 'styles.css',
+      bash: 'deploy.sh',
+      regex: 'validator.re',
+      english: 'passage.txt',
+      custom: 'custom_script.txt'
+    };
+
     // Keyboard layout definition
     const keyboardLayout = [
       ['`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 'Backspace'],
@@ -882,7 +918,7 @@
 
     // State Variables
     let currentLanguage = 'python';
-    let currentDuration = 30; // 0 = full code
+    let currentDuration = 30;
     let currentSnippetIndex = 0;
     let targetText = '';
     let userTyped = '';
@@ -917,6 +953,7 @@
       currentSnippetIndex = 0;
       document.querySelectorAll('.controls-deck .selector-group:first-child .chip-pill').forEach(b => b.classList.remove('active'));
       if (btn) btn.classList.add('active');
+      document.getElementById('terminalFileTitle').textContent = fileTitles[lang] || 'script.txt';
       restartTest();
     }
 
@@ -965,26 +1002,37 @@
 
       highlightTargetKey();
       updateRaceProgress();
+
+      // Scroll current char into view inside terminal without scrolling main window
+      const currentCharEl = document.getElementById(`char_${userTyped.length}`);
+      if (currentCharEl) {
+        currentCharEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
     }
 
     function setupKeyboardListener() {
       window.addEventListener('keydown', (e) => {
-        // Tab + Enter restart
         if (e.key === 'Tab') {
           e.preventDefault();
           return;
         }
 
-        if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT' && e.target.id !== 'hiddenInput') {
+        if (e.target.tagName === 'TEXTAREA' || (e.target.tagName === 'INPUT' && e.target.id !== 'hiddenInput')) {
           return;
         }
 
         if (testFinished) {
           if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
             closeResultsModal();
             restartTest();
           }
           return;
+        }
+
+        // Prevent space and enter from scrolling page
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
         }
 
         handleKeyInput(e);
@@ -992,7 +1040,10 @@
     }
 
     function focusInput() {
-      document.getElementById('hiddenInput').focus();
+      const inp = document.getElementById('hiddenInput');
+      if (inp) {
+        inp.focus({ preventScroll: true });
+      }
     }
 
     function handleKeyInput(e) {
@@ -1011,10 +1062,8 @@
       if (e.key.length === 1 || e.key === 'Enter') {
         const charToAppend = e.key === 'Enter' ? '\n' : e.key;
 
-        // Ignore if user is done
         if (userTyped.length >= targetText.length) return;
 
-        // Start timer on first keystroke
         if (!testActive && !testFinished) {
           startTestTimer();
         }
@@ -1035,7 +1084,6 @@
         renderCodeTerminal();
         highlightActiveKeyCap(e.key);
 
-        // Auto-complete check
         if (userTyped.length >= targetText.length) {
           finishTest();
         }
@@ -1094,7 +1142,7 @@
     }
 
     function updateTargetPaceRacer(elapsedSec) {
-      const targetWpm = 60; // 60 WPM pace
+      const targetWpm = 60;
       const totalEstimatedSec = currentDuration > 0 ? currentDuration : (targetText.length / 5) / (targetWpm / 60);
       const pacePct = Math.min(92, Math.round((elapsedSec / totalEstimatedSec) * 92));
       document.getElementById('targetRacer').style.left = `${pacePct}%`;
@@ -1117,7 +1165,6 @@
       const finalAccuracy = userTyped.length > 0 ? Math.round((correctChars / userTyped.length) * 100) : 100;
       const finalCpm = Math.round(correctChars / minutes);
 
-      // Determine Badge
       let badgeTitle = 'Syntax Apprentice 🐣';
       let badgeIcon = 'school';
 
@@ -1141,7 +1188,6 @@
       document.getElementById('resAccuracy').textContent = `${finalAccuracy}%`;
       document.getElementById('resCpm').textContent = finalCpm;
 
-      // Weak Keys
       const weakKeys = Object.keys(errorCharsMap);
       if (weakKeys.length > 0) {
         const topWeak = weakKeys.sort((a, b) => errorCharsMap[b] - errorCharsMap[a]).slice(0, 4);
@@ -1152,7 +1198,6 @@
         document.getElementById('weakKeysBox').style.display = 'none';
       }
 
-      // Trigger Confetti Celebration if > 90% accuracy
       if (finalAccuracy >= 90 && typeof confetti === 'function') {
         confetti({
           particleCount: 75,
@@ -1298,6 +1343,7 @@
 
       codeSnippets.custom = [val];
       currentLanguage = 'custom';
+      document.getElementById('terminalFileTitle').textContent = fileTitles.custom;
       closeCustomTextModal();
       restartTest();
     }
