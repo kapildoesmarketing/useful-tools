@@ -294,7 +294,7 @@
       line-height: 1.1;
     }
 
-    /* Typing Code Terminal */
+    /* Typing Code Terminal with Line Info */
     .terminal-container {
       position: relative;
       border-radius: 10px;
@@ -678,20 +678,20 @@
       </div>
     </div>
 
-    <!-- Category & Language Selection Controls -->
+    <!-- Category & Language Selection Controls (English & 60s as Default) -->
     <div class="controls-deck">
       <div class="selector-group">
         <span class="ctrl-label">
           <span class="material-symbols-outlined" style="font-size: 15px;">code</span>
           Mode:
         </span>
-        <button class="chip-pill active" onclick="setLanguage('python', this)">🐍 Python</button>
-        <button class="chip-pill" onclick="setLanguage('javascript', this)">⚡ JavaScript</button>
-        <button class="chip-pill" onclick="setLanguage('sql', this)">🗄️ SQL</button>
-        <button class="chip-pill" onclick="setLanguage('htmlcss', this)">🎨 HTML & CSS</button>
-        <button class="chip-pill" onclick="setLanguage('bash', this)">💻 Bash / CLI</button>
-        <button class="chip-pill" onclick="setLanguage('regex', this)">🔍 Regex</button>
-        <button class="chip-pill" onclick="setLanguage('english', this)">📖 English Words</button>
+        <button class="chip-pill active" id="btnModeEnglish" onclick="setLanguage('english', this)">📖 English Words</button>
+        <button class="chip-pill" id="btnModePython" onclick="setLanguage('python', this)">🐍 Python</button>
+        <button class="chip-pill" id="btnModeJs" onclick="setLanguage('javascript', this)">⚡ JavaScript</button>
+        <button class="chip-pill" id="btnModeSql" onclick="setLanguage('sql', this)">🗄️ SQL</button>
+        <button class="chip-pill" id="btnModeHtml" onclick="setLanguage('htmlcss', this)">🎨 HTML & CSS</button>
+        <button class="chip-pill" id="btnModeBash" onclick="setLanguage('bash', this)">💻 Bash / CLI</button>
+        <button class="chip-pill" id="btnModeRegex" onclick="setLanguage('regex', this)">🔍 Regex</button>
         <button class="chip-pill" onclick="openCustomTextModal()">✏️ Custom</button>
       </div>
 
@@ -701,8 +701,8 @@
           Duration:
         </span>
         <button class="chip-pill" onclick="setDuration(15, this)">15s</button>
-        <button class="chip-pill active" onclick="setDuration(30, this)">30s</button>
-        <button class="chip-pill" onclick="setDuration(60, this)">60s</button>
+        <button class="chip-pill" onclick="setDuration(30, this)">30s</button>
+        <button class="chip-pill active" onclick="setDuration(60, this)">60s</button>
         <button class="chip-pill" onclick="setDuration(0, this)">Full Code</button>
       </div>
     </div>
@@ -733,7 +733,7 @@
       </div>
       <div class="hud-card">
         <span class="hud-label">Time Remaining</span>
-        <span class="hud-value" id="hudTime">30s</span>
+        <span class="hud-value" id="hudTime">60s</span>
       </div>
       <div class="hud-card">
         <span class="hud-label">Errors</span>
@@ -749,7 +749,7 @@
           <div class="dot dot-yellow"></div>
           <div class="dot dot-green"></div>
         </div>
-        <span id="terminalFileTitle">main.py</span>
+        <span id="terminalFileTitle">passage.txt</span>
         <span style="font-size: 10px; color: #64748b;">Click & Type</span>
       </div>
 
@@ -864,6 +864,11 @@
   <script>
     // Snippets Library
     const codeSnippets = {
+      english: [
+        `The quick brown fox jumps over the lazy dog. Technology empowers developers to build incredible tools that improve everyday workflows and automate complex programming tasks with elegance.`,
+        `Continuous learning is the key to software mastery. Writing clean, readable code and understanding algorithms allows engineers to collaborate efficiently and design resilient systems.`,
+        `Focus and practice turn great ideas into impactful applications. When you type with precision, rhythm, and accuracy, writing code becomes as natural as thinking.`
+      ],
       python: [
         `def quick_sort(arr):\n    if len(arr) <= 1:\n        return arr\n    pivot = arr[len(arr) // 2]\n    left = [x for x in arr if x < pivot]\n    middle = [x for x in arr if x == pivot]\n    right = [x for x in arr if x > pivot]\n    return quick_sort(left) + middle + quick_sort(right)`,
         `import asyncio\n\nasync def fetch_data(api_url: str) -> dict:\n    async with aiohttp.ClientSession() as session:\n        async with session.get(api_url) as response:\n            return await response.json()`,
@@ -889,21 +894,17 @@
       regex: [
         `const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/;\nconst ipRegex = /^(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;`,
         `const urlPattern = /https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)/gi;`
-      ],
-      english: [
-        `The quick brown fox jumps over the lazy dog. Technology empowers developers to build incredible tools that improve everyday workflows and automate complex programming tasks with elegance.`,
-        `Continuous learning is the key to software mastery. Writing clean, readable code and understanding algorithms allows engineers to collaborate efficiently and design resilient systems.`
       ]
     };
 
     const fileTitles = {
+      english: 'passage.txt',
       python: 'algorithm.py',
       javascript: 'service.js',
       sql: 'analytics_query.sql',
       htmlcss: 'styles.css',
       bash: 'deploy.sh',
       regex: 'validator.re',
-      english: 'passage.txt',
       custom: 'custom_script.txt'
     };
 
@@ -916,14 +917,15 @@
       ['Ctrl', 'Alt', 'Space', 'Alt', 'Ctrl']
     ];
 
-    // State Variables
-    let currentLanguage = 'python';
-    let currentDuration = 30;
+    // State Variables (Default to English and 60s)
+    let currentLanguage = 'english';
+    let currentDuration = 60;
     let currentSnippetIndex = 0;
     let targetText = '';
     let userTyped = '';
     let testActive = false;
     let testFinished = false;
+    let finishTimestamp = 0;
     let startTime = null;
     let timerInterval = null;
     let totalErrors = 0;
@@ -953,7 +955,7 @@
       currentSnippetIndex = 0;
       document.querySelectorAll('.controls-deck .selector-group:first-child .chip-pill').forEach(b => b.classList.remove('active'));
       if (btn) btn.classList.add('active');
-      document.getElementById('terminalFileTitle').textContent = fileTitles[lang] || 'script.txt';
+      document.getElementById('terminalFileTitle').textContent = fileTitles[lang] || 'passage.txt';
       restartTest();
     }
 
@@ -965,13 +967,13 @@
     }
 
     function nextSnippet() {
-      const list = codeSnippets[currentLanguage] || codeSnippets.python;
+      const list = codeSnippets[currentLanguage] || codeSnippets.english;
       currentSnippetIndex = (currentSnippetIndex + 1) % list.length;
       restartTest();
     }
 
     function loadSnippet() {
-      const list = codeSnippets[currentLanguage] || codeSnippets.python;
+      const list = codeSnippets[currentLanguage] || codeSnippets.english;
       targetText = list[currentSnippetIndex % list.length];
       renderCodeTerminal();
     }
@@ -1012,6 +1014,7 @@
 
     function setupKeyboardListener() {
       window.addEventListener('keydown', (e) => {
+        // Tab + Enter restart shortcut
         if (e.key === 'Tab') {
           e.preventDefault();
           return;
@@ -1021,8 +1024,13 @@
           return;
         }
 
+        // When test is finished, protect results modal from runaway keystrokes
         if (testFinished) {
-          if (e.key === 'Enter' || e.key === ' ') {
+          const timeSinceFinish = Date.now() - finishTimestamp;
+          if (e.key === 'Escape') {
+            closeResultsModal();
+          } else if (e.key === 'Enter' && timeSinceFinish > 1000) {
+            // Require 1 second cooldown before Enter restarts
             e.preventDefault();
             closeResultsModal();
             restartTest();
@@ -1030,7 +1038,7 @@
           return;
         }
 
-        // Prevent space and enter from scrolling page
+        // Prevent space and enter from scrolling page during test
         if (e.key === ' ' || e.key === 'Enter') {
           e.preventDefault();
         }
@@ -1151,6 +1159,7 @@
     function finishTest() {
       testActive = false;
       testFinished = true;
+      finishTimestamp = Date.now();
       if (timerInterval) clearInterval(timerInterval);
 
       const elapsedSec = (Date.now() - startTime) / 1000;
@@ -1213,6 +1222,7 @@
       if (timerInterval) clearInterval(timerInterval);
       testActive = false;
       testFinished = false;
+      finishTimestamp = 0;
       startTime = null;
       userTyped = '';
       totalErrors = 0;
