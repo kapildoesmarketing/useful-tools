@@ -135,7 +135,7 @@
     .drop-zone {
       border: 2px dashed var(--border-color);
       border-radius: 10px;
-      padding: 28px 20px;
+      padding: 22px 20px;
       text-align: center;
       background-color: var(--bg-color);
       cursor: pointer;
@@ -153,17 +153,17 @@
     }
 
     .drop-icon {
-      font-size: 40px;
+      font-size: 36px;
       color: var(--primary-blue);
     }
 
     /* Document Info Card */
     .doc-info-card {
       display: none;
-      background-color: var(--bg-color);
-      border: 1px solid var(--border-color);
+      background-color: #e8f0fe;
+      border: 1px solid #d2e3fc;
       border-radius: 8px;
-      padding: 12px 16px;
+      padding: 10px 16px;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
@@ -176,21 +176,15 @@
       gap: 10px;
     }
 
-    .doc-badge {
-      background-color: #e8f0fe;
-      color: var(--primary-blue);
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-family: 'Roboto Mono', monospace;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
     /* Compression Presets & Control Grid */
     .control-panel {
-      display: none;
+      display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px 16px;
     }
 
     .preset-grid {
@@ -206,7 +200,7 @@
     }
 
     .preset-card {
-      background-color: #ffffff;
+      background-color: var(--bg-color);
       border: 1.5px solid var(--border-color);
       border-radius: 8px;
       padding: 12px 14px;
@@ -303,7 +297,7 @@
 
     /* Live Side-by-Side Quality Preview Stage */
     .preview-stage {
-      display: none;
+      display: flex;
       flex-direction: column;
       gap: 10px;
       background: #ffffff;
@@ -336,12 +330,14 @@
     .preview-box {
       border: 1px solid var(--border-color);
       border-radius: 6px;
-      padding: 8px;
-      background: #f1f3f4;
+      padding: 10px;
+      background: #f8f9fa;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      min-height: 220px;
+      justify-content: center;
       overflow: hidden;
     }
 
@@ -359,15 +355,29 @@
       overflow: auto;
       display: flex;
       justify-content: center;
+      align-items: center;
       background: #ffffff;
       border: 1px solid #dadce0;
       border-radius: 4px;
+      min-height: 180px;
     }
 
     .canvas-wrapper canvas {
       max-width: 100%;
       height: auto;
       object-fit: contain;
+    }
+
+    .preview-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      color: #94a3b8;
+      font-size: 12px;
+      padding: 20px;
+      text-align: center;
     }
 
     /* Progress & Results Dashboard */
@@ -501,7 +511,7 @@
     .btn-primary {
       background-color: var(--primary-blue);
       color: white;
-      min-width: 140px;
+      min-width: 150px;
     }
 
     .btn-primary:hover:not(:disabled) {
@@ -562,14 +572,14 @@
       </div>
     </div>
 
-    <!-- Drag & Drop Upload Zone -->
+    <!-- 1. Drag & Drop Upload Zone -->
     <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
       <span class="material-symbols-outlined drop-icon">upload_file</span>
       <div style="font-size: 14px; font-weight: 500; color: var(--text-main);">
         Drag & Drop your PDF file here, or <span style="color: var(--primary-blue); text-decoration: underline;">browse files</span>
       </div>
       <div style="font-size: 11px; color: var(--text-secondary);">
-        100% Client-Side • Secure & Private • No file size limits
+        100% In-Browser & Private • No file size limits
       </div>
       <input type="file" id="fileInput" accept="application/pdf" style="display: none;" onchange="handleFileSelected(event)">
     </div>
@@ -577,7 +587,7 @@
     <!-- Loaded Document Info Card -->
     <div class="doc-info-card" id="docInfoCard">
       <div class="doc-info-left">
-        <span class="material-symbols-outlined" style="font-size: 28px; color: #d93025;">picture_as_pdf</span>
+        <span class="material-symbols-outlined" style="font-size: 26px; color: #d93025;">picture_as_pdf</span>
         <div>
           <div id="docName" style="font-size: 13px; font-weight: 700; color: var(--text-main);">document.pdf</div>
           <div style="font-size: 11px; color: var(--text-secondary);">
@@ -585,19 +595,21 @@
           </div>
         </div>
       </div>
-      <button class="btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="resetAll()">
-        <span class="material-symbols-outlined" style="font-size: 15px;">change_circle</span>
-        Change PDF
-      </button>
+      <div style="display: flex; gap: 6px;">
+        <button class="btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="document.getElementById('fileInput').click()">
+          <span class="material-symbols-outlined" style="font-size: 14px;">upload_file</span>
+          Upload Another
+        </button>
+      </div>
     </div>
 
-    <!-- Compression Controls Deck -->
+    <!-- 2. Compression Profile Control Deck (Always Visible) -->
     <div class="control-panel" id="controlPanel">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <span style="font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
-          Choose Compression Profile
+          1. Select Compression Profile
         </span>
-        <span style="font-size: 11px; color: var(--text-secondary);">Adjust quality to find the perfect size balance</span>
+        <span style="font-size: 11px; color: var(--text-secondary);">Choose preset or customize DPI & quality</span>
       </div>
 
       <!-- Preset Cards -->
@@ -607,7 +619,7 @@
             <span class="material-symbols-outlined" style="font-size: 16px; color: var(--primary-blue);">high_quality</span>
             High Fidelity
           </div>
-          <div class="preset-desc">Crisp text & diagrams (300 DPI eq, 88% quality). Zero noticeable loss.</div>
+          <div class="preset-desc">Crisp text & diagrams (300 DPI eq, 88% quality). Zero noticeable visual loss.</div>
           <span class="preset-badge">~20% - 40% smaller</span>
         </div>
 
@@ -616,7 +628,7 @@
             <span class="material-symbols-outlined" style="font-size: 16px; color: var(--success-text);">auto_fix_high</span>
             Recommended
           </div>
-          <div class="preset-desc">Ideal for sharing reports & presentations (150 DPI eq, 75% quality).</div>
+          <div class="preset-desc">Balanced optimization for reports & decks (150 DPI eq, 75% quality).</div>
           <span class="preset-badge">~40% - 65% smaller</span>
         </div>
 
@@ -634,8 +646,8 @@
             <span class="material-symbols-outlined" style="font-size: 16px; color: #8e24aa;">tune</span>
             Custom Pro
           </div>
-          <div class="preset-desc">Full manual control over DPI scale, JPEG quality, and color mode.</div>
-          <span class="preset-badge" style="background-color: #f3e8fd; color: #8e24aa;">Full Control</span>
+          <div class="preset-desc">Full manual control over DPI scale, JPEG quality, and color profile.</div>
+          <span class="preset-badge" style="background-color: #f3e8fd; color: #8e24aa;">Custom Sliders</span>
         </div>
       </div>
 
@@ -670,12 +682,12 @@
       </div>
     </div>
 
-    <!-- Live Side-by-Side Quality Preview Stage -->
+    <!-- 3. Live Side-by-Side Quality Preview Stage (Always Visible) -->
     <div class="preview-stage" id="previewStage">
       <div class="preview-header">
         <div style="display: flex; align-items: center; gap: 6px;">
           <span class="material-symbols-outlined" style="font-size: 18px; color: var(--primary-blue);">preview</span>
-          <span style="font-size: 13px; font-weight: 700; color: var(--text-main);">Page 1 Live Quality Preview</span>
+          <span style="font-size: 13px; font-weight: 700; color: var(--text-main);">2. Live Quality Preview (Page 1)</span>
         </div>
         <div style="font-size: 11px; color: var(--text-secondary);">
           Inspect text clarity & sharpness before compressing the full document
@@ -685,23 +697,31 @@
       <div class="preview-columns">
         <div class="preview-box">
           <span class="preview-label">Original Document</span>
-          <div class="canvas-wrapper">
-            <canvas id="canvasOriginal"></canvas>
+          <div class="canvas-wrapper" id="origCanvasWrapper">
+            <div class="preview-placeholder" id="origPlaceholder">
+              <span class="material-symbols-outlined" style="font-size: 32px;">picture_as_pdf</span>
+              <span>Upload a PDF to view original page</span>
+            </div>
+            <canvas id="canvasOriginal" style="display: none;"></canvas>
           </div>
-          <span style="font-size: 11px; color: var(--text-secondary);" id="origPageMetrics">Loading...</span>
+          <span style="font-size: 11px; color: var(--text-secondary);" id="origPageMetrics">No document loaded</span>
         </div>
 
         <div class="preview-box">
           <span class="preview-label" style="color: var(--primary-blue);">Compressed Preview</span>
-          <div class="canvas-wrapper">
-            <canvas id="canvasCompressed"></canvas>
+          <div class="canvas-wrapper" id="compCanvasWrapper">
+            <div class="preview-placeholder" id="compPlaceholder">
+              <span class="material-symbols-outlined" style="font-size: 32px;">compress</span>
+              <span>Upload a PDF to preview compression</span>
+            </div>
+            <canvas id="canvasCompressed" style="display: none;"></canvas>
           </div>
-          <span style="font-size: 11px; color: var(--success-text); font-weight: 700;" id="compPageMetrics">Generating preview...</span>
+          <span style="font-size: 11px; color: var(--success-text); font-weight: 700;" id="compPageMetrics">Awaiting PDF input</span>
         </div>
       </div>
     </div>
 
-    <!-- Processing Progress Bar -->
+    <!-- 4. Processing Progress Bar -->
     <div class="progress-box" id="progressBox">
       <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 500;">
         <span id="progressText">Compressing page 1 of 1...</span>
@@ -712,9 +732,9 @@
       </div>
     </div>
 
-    <!-- Final Results Dashboard -->
+    <!-- 5. Final Results Dashboard -->
     <div class="results-dashboard" id="resultsDashboard">
-      <div style="display: flex; align-items: center; justify-content: space-between;">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
         <div style="display: flex; align-items: center; gap: 6px;">
           <span class="material-symbols-outlined" style="font-size: 22px; color: var(--success-text);">check_circle</span>
           <span style="font-size: 15px; font-weight: 700; color: var(--success-text);">Compression Complete!</span>
@@ -748,11 +768,16 @@
     <!-- Status Box -->
     <div id="statusBox" class="status-box"></div>
 
-    <!-- Bottom Toolbar -->
-    <div class="toolbar" id="mainToolbar" style="display: none;">
-      <button class="btn-primary" id="startCompressBtn" onclick="startFullCompression()">
+    <!-- 6. Bottom Action Toolbar (Always Visible) -->
+    <div class="toolbar" id="mainToolbar">
+      <button class="btn-primary" id="startCompressBtn" onclick="startFullCompression()" disabled>
         <span class="material-symbols-outlined">compress</span>
         Compress Entire PDF
+      </button>
+
+      <button class="btn-secondary" onclick="loadSamplePDF()">
+        <span class="material-symbols-outlined">description</span>
+        Load Sample PDF
       </button>
 
       <button class="btn-secondary" onclick="renderLivePreview()">
@@ -841,9 +866,7 @@
 
         document.getElementById('dropZone').style.display = 'none';
         document.getElementById('docInfoCard').style.display = 'flex';
-        document.getElementById('controlPanel').style.display = 'flex';
-        document.getElementById('previewStage').style.display = 'flex';
-        document.getElementById('mainToolbar').style.display = 'flex';
+        document.getElementById('startCompressBtn').disabled = false;
         document.getElementById('resultsDashboard').style.display = 'none';
 
         // Render Page 1 Preview
@@ -871,7 +894,9 @@
         customDeck.style.display = 'none';
       }
 
-      renderLivePreview();
+      if (pdfDoc) {
+        renderLivePreview();
+      }
     }
 
     function updateCustomSliders() {
@@ -885,7 +910,9 @@
       presets.custom.quality = quality / 100;
       presets.custom.colorMode = document.getElementById('selectColorMode').value;
 
-      renderLivePreview();
+      if (pdfDoc) {
+        renderLivePreview();
+      }
     }
 
     function getActiveSettings() {
@@ -900,11 +927,21 @@
 
     /* Live Quality Preview for Page 1 */
     async function renderLivePreview() {
-      if (!pdfDoc) return;
+      if (!pdfDoc) {
+        showStatus('Upload a PDF or click "Load Sample PDF" to preview quality.', 'error');
+        return;
+      }
 
       const settings = getActiveSettings();
       const origCanvas = document.getElementById('canvasOriginal');
       const compCanvas = document.getElementById('canvasCompressed');
+      const origPlaceholder = document.getElementById('origPlaceholder');
+      const compPlaceholder = document.getElementById('compPlaceholder');
+
+      origPlaceholder.style.display = 'none';
+      compPlaceholder.style.display = 'none';
+      origCanvas.style.display = 'block';
+      compCanvas.style.display = 'block';
 
       try {
         const page = await pdfDoc.getPage(1);
@@ -955,9 +992,64 @@
       }
     }
 
+    /* Built-in Sample PDF Generator for Instant Demo */
+    async function loadSamplePDF() {
+      showStatus('Generating sample PDF report...', 'success');
+      try {
+        const doc = await PDFLib.PDFDocument.create();
+        const page1 = doc.addPage([595.28, 841.89]); // A4
+        const page2 = doc.addPage([595.28, 841.89]);
+
+        // Draw sample text & shapes
+        page1.drawText('Quarterly Business Performance Report', { x: 50, y: 780, size: 20 });
+        page1.drawText('High-Resolution Graphics & Text Quality Sample', { x: 50, y: 750, size: 12 });
+        page1.drawRectangle({
+          x: 50,
+          y: 500,
+          width: 495,
+          height: 220,
+          color: PDFLib.rgb(0.9, 0.94, 0.98),
+          borderColor: PDFLib.rgb(0.1, 0.45, 0.91),
+          borderWidth: 1.5
+        });
+        page1.drawText('Section 1: Executive Summary & Financial Highlights', { x: 65, y: 690, size: 14 });
+        page1.drawText('This sample document demonstrates client-side PDF compression fidelity.', { x: 65, y: 660, size: 11 });
+        page1.drawText('Notice how text remains sharp and legible across different compression levels.', { x: 65, y: 640, size: 11 });
+
+        page2.drawText('Page 2: Analytics & Infrastructure Metrics', { x: 50, y: 780, size: 18 });
+        page2.drawText('End-to-End client side compression via pdf-lib and PDF.js.', { x: 50, y: 750, size: 12 });
+
+        const bytes = await doc.save();
+        originalFileName = 'sample_report.pdf';
+        originalFileSize = bytes.byteLength;
+        rawPdfBytes = bytes;
+
+        pdfDoc = await pdfjsLib.getDocument({ data: rawPdfBytes.slice() }).promise;
+        totalPages = pdfDoc.numPages;
+
+        document.getElementById('docName').textContent = originalFileName;
+        document.getElementById('docOriginalSize').textContent = formatBytes(originalFileSize);
+        document.getElementById('docPages').textContent = totalPages;
+
+        document.getElementById('dropZone').style.display = 'none';
+        document.getElementById('docInfoCard').style.display = 'flex';
+        document.getElementById('startCompressBtn').disabled = false;
+        document.getElementById('resultsDashboard').style.display = 'none';
+
+        await renderLivePreview();
+        showStatus('Sample PDF loaded. Ready to test compression.', 'success');
+      } catch (err) {
+        console.error(err);
+        showStatus('Failed to generate sample PDF: ' + err.message, 'error');
+      }
+    }
+
     /* Compress Full Multi-Page Document */
     async function startFullCompression() {
-      if (!pdfDoc) return;
+      if (!pdfDoc) {
+        showStatus('Please upload a PDF file first.', 'error');
+        return;
+      }
 
       const settings = getActiveSettings();
       const startBtn = document.getElementById('startCompressBtn');
@@ -973,7 +1065,6 @@
       resultsDashboard.style.display = 'none';
 
       try {
-        // Create new output PDF using pdf-lib
         const outPdfDoc = await PDFLib.PDFDocument.create();
 
         for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
@@ -982,21 +1073,18 @@
           progressPercent.textContent = `${pct}%`;
           progressBarFill.style.width = `${pct}%`;
 
-          // Yield to browser for UI updates
           await new Promise(r => setTimeout(r, 10));
 
           const page = await pdfDoc.getPage(pageNum);
           const unscaledViewport = page.getViewport({ scale: 1.0 });
           const renderViewport = page.getViewport({ scale: settings.scale });
 
-          // Render page to offscreen canvas
           const canvas = document.createElement('canvas');
           canvas.width = renderViewport.width;
           canvas.height = renderViewport.height;
           const ctx = canvas.getContext('2d');
           await page.render({ canvasContext: ctx, viewport: renderViewport }).promise;
 
-          // Apply color filters
           if (settings.colorMode === 'grayscale' || settings.colorMode === 'monochrome') {
             const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imgData.data;
@@ -1016,11 +1104,9 @@
             ctx.putImageData(imgData, 0, 0);
           }
 
-          // Convert to compressed JPEG data
           const jpegDataUrl = canvas.toDataURL('image/jpeg', settings.quality);
           const jpegBytes = dataURLToUint8Array(jpegDataUrl);
 
-          // Embed in pdf-lib
           const embeddedImage = await outPdfDoc.embedJpg(jpegBytes);
           const newPage = outPdfDoc.addPage([unscaledViewport.width, unscaledViewport.height]);
           newPage.drawImage(embeddedImage, {
@@ -1040,7 +1126,6 @@
         const savedBytes = Math.max(0, originalFileSize - compressedSize);
         const percentSaved = Math.round((savedBytes / originalFileSize) * 100);
 
-        // Display results
         document.getElementById('resOrigSize').textContent = formatBytes(originalFileSize);
         document.getElementById('resCompSize').textContent = formatBytes(compressedSize);
         document.getElementById('resSavedSize').textContent = formatBytes(savedBytes);
@@ -1082,12 +1167,18 @@
       document.getElementById('fileInput').value = '';
       document.getElementById('dropZone').style.display = 'flex';
       document.getElementById('docInfoCard').style.display = 'none';
-      document.getElementById('controlPanel').style.display = 'none';
-      document.getElementById('previewStage').style.display = 'none';
-      document.getElementById('mainToolbar').style.display = 'none';
+      document.getElementById('startCompressBtn').disabled = true;
       document.getElementById('progressBox').style.display = 'none';
       document.getElementById('resultsDashboard').style.display = 'none';
-      showStatus('Reset completed. Upload a new PDF.', 'success');
+
+      document.getElementById('canvasOriginal').style.display = 'none';
+      document.getElementById('canvasCompressed').style.display = 'none';
+      document.getElementById('origPlaceholder').style.display = 'flex';
+      document.getElementById('compPlaceholder').style.display = 'flex';
+      document.getElementById('origPageMetrics').textContent = 'No document loaded';
+      document.getElementById('compPageMetrics').textContent = 'Awaiting PDF input';
+
+      showStatus('Reset completed. Ready for a new PDF.', 'success');
     }
 
     function dataURLToUint8Array(dataURL) {
