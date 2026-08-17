@@ -1,11 +1,15 @@
 ================================================================================
-💡 USEFUL TOOLS - "FUN TOOLS" EXPANSION IDEAS & FEATURE ROADMAP
+💡 USEFUL TOOLS - EXPANSION IDEAS & FEATURE ROADMAP
 ================================================================================
 
 Below is a curated list of creative, interactive, and high-engagement tool
-ideas tailored for the "Fun Tools" category on go/usefultools. All ideas are
+ideas tailored for go/usefultools across different categories. All ideas are
 designed to be 100% client-side (no backend required), instant-loading, and
 optimized for Google Sites embedding.
+
+================================================================================
+PART 1: 🎮 FUN & INTERACTIVE TOOLS SECTION
+================================================================================
 
 --------------------------------------------------------------------------------
 1. 🎵 INTERACTIVE MUSIC & AUDIO TOYS
@@ -32,7 +36,7 @@ optimized for Google Sites embedding.
      - Record & playback melodies with interactive visual note trails.
 
 --------------------------------------------------------------------------------
-2. 🎮 CASUAL RETRO GAMES & BRAIN TEASERS
+2. 🕹️ CASUAL RETRO GAMES & BRAIN TEASERS
 --------------------------------------------------------------------------------
 
 2.1. Word Guess Challenge (Wordle Clone & Custom Puzzle Maker)
@@ -49,12 +53,7 @@ optimized for Google Sites embedding.
      - Nostalgic retro games with modern smooth controls.
      - Customizable grid sizes, difficulty speeds, and retro CRT screen glow filter.
 
-2.4. Speed Typing Test & Code Racer
-     - Measure real-time Words Per Minute (WPM), raw keystrokes, and accuracy percentage.
-     - Multiple test modes: Common Words, Famous Quotes, Programming Code Snippets, or Custom Text.
-     - Real-time heat-map showing common typo keys.
-
-2.5. Tic-Tac-Toe & Connect Four (AI + Local 2-Player)
+2.4. Tic-Tac-Toe & Connect Four (AI + Local 2-Player)
      - Play against an unbeatable/smart Minimax AI or play with a colleague locally.
      - Custom board themes, score counters, and sound effects.
 
@@ -90,27 +89,81 @@ optimized for Google Sites embedding.
 4. 👥 TEAM, SOCIAL & DECISION TOOLS
 --------------------------------------------------------------------------------
 
-4.1. Secret Santa & Gift Exchange Matcher
-     - Input names and email addresses or generate instant secret reveal links.
-     - Custom exclusion rules (e.g. prevent spouses or same-subteam members from being paired).
-     - 100% private: no backend required, encrypted in URL hashes.
-
-4.2. Tournament Bracket & Random Team Generator
+4.1. Tournament Bracket & Random Team Generator
      - Input a list of participants to split into balanced teams (2v2, 3v3, 4v4).
      - Single & Double Elimination tournament bracket generator with clickable winner progression.
      - Export bracket graphic as PNG.
 
-4.3. Team Icebreaker & "Would You Rather?" Generator
+4.2. Team Icebreaker & "Would You Rather?" Generator
      - Hundreds of curated, workplace-friendly conversation starters, dilemmas, and hot takes.
      - Categories: Fun & Quirky, Tech & Work, Philosophy, Food Debates, Pop Culture.
      - Timer mode for lightning-round team meetings.
 
-4.4. Magic 8-Ball & Fortune Cookie
+4.3. Magic 8-Ball & Fortune Cookie
      - 3D floating 8-ball with mystical floating answers and fortune cookie cracker.
      - Custom answers mode: enter your own secret funny responses for team inside jokes.
 
-4.5. Fake Hacker Terminal & Sci-Fi Matrix Typer
+4.4. Fake Hacker Terminal & Sci-Fi Matrix Typer
      - Fun novelty tool: smash random keys on your keyboard to output realistic hacker code on screen.
      - "ACCESS GRANTED" flashing alarms, radar animations, and matrix digital rain.
+
+================================================================================
+PART 2: 📄 PDF TOOLS SECTION EXPANSION IDEAS
+================================================================================
+
+--------------------------------------------------------------------------------
+5. 📑 PDF EDITING, ANNOTATION & PAGE MANAGEMENT
+--------------------------------------------------------------------------------
+
+5.1. PDF Page Organizer, Reorder & Rotator (Drag & Drop)
+     - Visual grid of PDF page thumbnails with smooth drag-and-drop reordering.
+     - Rotate individual pages or all pages (90° clockwise, 90° counter-clockwise, 180°).
+     - Delete unwanted pages or duplicate specific pages with 1 click.
+     - Instant client-side re-bundling and PDF download using pdf-lib.
+
+5.2. PDF Watermark & Page Numbering Tool
+     - Text Watermark: add customizable text ("CONFIDENTIAL", "DRAFT", "COPY") with opacity, rotation angle, font size, and color controls.
+     - Image Watermark: stamp transparent PNG logos, company badges, or seals onto pages.
+     - Page Numbering: add headers/footers with dynamic formats ("Page X of Y", "X", "- X -"), position selectors (Top/Bottom, Left/Center/Right), and page range exclusions (e.g. skip cover page).
+
+5.3. PDF Signature, Stamp & Annotation Studio
+     - Draw a digital signature on canvas, type signature with cursive fonts, or upload a signature image.
+     - Position, scale, and place signatures, date stamps, and "APPROVED" / "PAID" / "CONFIDENTIAL" badges on any page.
+     - Add text notes, highlight boxes, and rectangular markup.
+     - Flatten and export signed documents client-side without quality loss.
+
+5.4. PDF Redactor & Sanitizer (Permanent Text/Area Blackout)
+     - Securely redact sensitive personal info, credit cards, SSNs, or proprietary data by drawing blackout rectangles over pages.
+     - True client-side flattening/rasterization of redacted sections to guarantee text underneath cannot be copied or recovered.
+     - Built-in keyword search & redact helper.
+
+--------------------------------------------------------------------------------
+6. ⚙️ PDF CONVERSION, EXTRACTION & OPTIMIZATION
+--------------------------------------------------------------------------------
+
+6.1. PDF OCR & Searchable Text Extractor
+     - Extract selectable digital text from PDF documents.
+     - Scanned Document OCR: run 100% in-browser OCR (via Tesseract.js) to recognize text from scanned paper PDFs or photos without uploading files to any external server.
+     - Export recognized text as TXT, Markdown, or Searchable PDF.
+
+6.2. PDF Compressor & DPI Resizer
+     - Compress large image-heavy PDFs by rendering pages to canvas with adjustable JPEG quality (High, Medium, Low) and DPI settings (72, 150, 300 DPI).
+     - Live side-by-side file size reduction estimation before downloading.
+
+6.3. PDF Grayscale & Print Ink Saver
+     - Convert color PDFs into clean monochrome or high-contrast grayscale to save printer ink and toner.
+     - Brightness, contrast, and threshold adjustment sliders for enhancing faint scanned receipts or documents.
+
+6.4. PDF N-Up & Booklet Layout Creator (2-Up, 4-Up, Handouts)
+     - Combine multiple PDF pages into a single sheet (2 pages per sheet, 4 pages per sheet, or presentation handout style).
+     - Booklet imposition mode: rearranges pages into printable double-sided folded booklet sequence.
+
+6.5. PDF Metadata & Document Properties Editor
+     - View and modify document metadata: Title, Author, Subject, Keywords, Creator, and Creation Date.
+     - 1-click "Sanitize & Strip All Metadata" for privacy and anonymization before publishing documents publicly.
+
+6.6. PDF Form Filler & Data Exporter
+     - View and fill interactive AcroForm fields (text fields, checkboxes, radio buttons, dropdowns) directly in the browser.
+     - Export completed PDF or extract all form field data into JSON/CSV spreadsheets.
 
 ================================================================================
