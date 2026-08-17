@@ -933,8 +933,8 @@
           audioCtx = new (window.AudioContext || window.webkitAudioContext)();
           const source = audioCtx.createMediaElementSource(playbackVideo);
           const dest = audioCtx.createMediaStreamDestination();
+          // Connect ONLY to destination stream (NOT audioCtx.destination) for silent encoding
           source.connect(dest);
-          source.connect(audioCtx.destination);
           audioStream = dest.stream;
 
           audioStream.getAudioTracks().forEach(track => canvasStream.addTrack(track));
