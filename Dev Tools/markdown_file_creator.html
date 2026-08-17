@@ -336,16 +336,6 @@
       font-family: 'Roboto Mono', monospace;
     }
 
-    .frontmatter-tag {
-      display: inline-block;
-      background: #ddf4ff;
-      color: #0969da;
-      padding: 1px 6px;
-      border-radius: 10px;
-      font-size: 10.5px;
-      margin-right: 4px;
-    }
-
     /* GitHub-style Markdown Render CSS */
     .markdown-body {
       font-size: 13.5px;
@@ -509,6 +499,69 @@
       color: var(--text-secondary);
     }
 
+    /* Modals */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.65);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background-color: #ffffff;
+      border-radius: 10px;
+      max-width: 440px;
+      width: 100%;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+      animation: modalPop 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes modalPop {
+      0% { transform: scale(0.94); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .modal-input-group label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+
+    .modal-input-group input, .modal-input-group select {
+      font-family: 'Roboto', sans-serif;
+      font-size: 12.5px;
+      padding: 6px 9px;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      outline: none;
+    }
+
+    .modal-input-group input:focus, .modal-input-group select:focus {
+      border-color: var(--primary-blue);
+    }
+
     /* Status Box */
     .status-box {
       font-size: 12px;
@@ -636,7 +689,7 @@
         <span style="font-size: 11.5px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">
           Template:
         </span>
-        <select id="templateSelect" style="font-size: 12px; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border-color);" onchange="applyTemplate(this.value)">
+        <select id="templateSelect" style="font-size: 12px; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border-color); background: #fff; cursor: pointer;" onchange="applyTemplate(this.value)">
           <option value="skill" selected>🤖 Enterprise Agent SKILL.md</option>
           <option value="readme">📄 Project README.md</option>
           <option value="rfc">📐 Design Doc / RFC</option>
@@ -697,16 +750,16 @@
 
           <div class="tool-divider"></div>
 
-          <button class="tool-btn" onclick="insertLinkDialog()" title="Insert Link [title](url)">
+          <button class="tool-btn" onclick="openLinkModal()" title="Insert Link [title](url)">
             <span class="material-symbols-outlined">link</span>
           </button>
-          <button class="tool-btn" onclick="insertImageDialog()" title="Insert Image ![alt](url)">
+          <button class="tool-btn" onclick="openImageModal()" title="Insert Image ![alt](url)">
             <span class="material-symbols-outlined">image</span>
           </button>
-          <button class="tool-btn" onclick="insertTableDialog()" title="Insert Table">
+          <button class="tool-btn" onclick="openTableModal()" title="Insert Table">
             <span class="material-symbols-outlined">table</span>
           </button>
-          <button class="tool-btn" onclick="insertCodeBlock()" title="Insert Code Block (```)">
+          <button class="tool-btn" onclick="openCodeBlockModal()" title="Insert Code Block (```)">
             <span class="material-symbols-outlined">data_object</span>
           </button>
           <button class="tool-btn" onclick="insertAlert('NOTE')" title="GitHub Alert [!NOTE]">
@@ -791,6 +844,111 @@
         <span class="material-symbols-outlined">delete_sweep</span>
         Clear
       </button>
+    </div>
+  </div>
+
+  <!-- In-App Modal: Insert Link -->
+  <div class="modal-overlay" id="linkModal" onclick="if(event.target===this) closeModals()">
+    <div class="modal-card">
+      <h3 style="margin:0; font-size:15px; color:var(--text-main); display:flex; align-items:center; gap:6px;">
+        <span class="material-symbols-outlined" style="color:var(--primary-blue);">link</span>
+        Insert Link
+      </h3>
+      <div class="modal-input-group">
+        <label>Link Text</label>
+        <input type="text" id="inpLinkText" placeholder="e.g. Documentation" value="Click here">
+      </div>
+      <div class="modal-input-group">
+        <label>Destination URL</label>
+        <input type="text" id="inpLinkUrl" placeholder="https://..." value="https://">
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:4px;">
+        <button class="btn-secondary" onclick="closeModals()">Cancel</button>
+        <button class="btn-primary" onclick="confirmInsertLink()">Insert Link</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- In-App Modal: Insert Image -->
+  <div class="modal-overlay" id="imageModal" onclick="if(event.target===this) closeModals()">
+    <div class="modal-card">
+      <h3 style="margin:0; font-size:15px; color:var(--text-main); display:flex; align-items:center; gap:6px;">
+        <span class="material-symbols-outlined" style="color:var(--primary-blue);">image</span>
+        Insert Image
+      </h3>
+      <div class="modal-input-group">
+        <label>Alt Text / Caption</label>
+        <input type="text" id="inpImgAlt" placeholder="e.g. Architecture Diagram" value="Screenshot">
+      </div>
+      <div class="modal-input-group">
+        <label>Image URL</label>
+        <input type="text" id="inpImgUrl" placeholder="https://..." value="https://images.unsplash.com/photo-1555066931-4365d14bab8c">
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:4px;">
+        <button class="btn-secondary" onclick="closeModals()">Cancel</button>
+        <button class="btn-primary" onclick="confirmInsertImage()">Insert Image</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- In-App Modal: Insert Table -->
+  <div class="modal-overlay" id="tableModal" onclick="if(event.target===this) closeModals()">
+    <div class="modal-card">
+      <h3 style="margin:0; font-size:15px; color:var(--text-main); display:flex; align-items:center; gap:6px;">
+        <span class="material-symbols-outlined" style="color:var(--primary-blue);">table</span>
+        Insert Table
+      </h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+        <div class="modal-input-group">
+          <label>Columns</label>
+          <input type="number" id="inpTableCols" min="1" max="10" value="3">
+        </div>
+        <div class="modal-input-group">
+          <label>Rows</label>
+          <input type="number" id="inpTableRows" min="1" max="20" value="3">
+        </div>
+      </div>
+      <div class="modal-input-group">
+        <label>Text Alignment</label>
+        <select id="inpTableAlign">
+          <option value="left">Left Aligned</option>
+          <option value="center">Centered</option>
+          <option value="right">Right Aligned</option>
+        </select>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:4px;">
+        <button class="btn-secondary" onclick="closeModals()">Cancel</button>
+        <button class="btn-primary" onclick="confirmInsertTable()">Insert Table</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- In-App Modal: Insert Code Block -->
+  <div class="modal-overlay" id="codeModal" onclick="if(event.target===this) closeModals()">
+    <div class="modal-card">
+      <h3 style="margin:0; font-size:15px; color:var(--text-main); display:flex; align-items:center; gap:6px;">
+        <span class="material-symbols-outlined" style="color:var(--primary-blue);">data_object</span>
+        Insert Code Block
+      </h3>
+      <div class="modal-input-group">
+        <label>Language Syntax</label>
+        <select id="inpCodeLang">
+          <option value="javascript">JavaScript / TypeScript</option>
+          <option value="python">Python</option>
+          <option value="bash">Bash / Shell</option>
+          <option value="html">HTML / XML</option>
+          <option value="css">CSS</option>
+          <option value="json">JSON</option>
+          <option value="sql">SQL</option>
+          <option value="go">Go</option>
+          <option value="yaml">YAML</option>
+          <option value="markdown">Markdown</option>
+        </select>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:4px;">
+        <button class="btn-secondary" onclick="closeModals()">Cancel</button>
+        <button class="btn-primary" onclick="confirmInsertCodeBlock()">Insert Code Block</button>
+      </div>
     </div>
   </div>
 
@@ -1200,24 +1358,100 @@ Start writing your markdown here...
       }
     }
 
+    /* Template Switcher (Instant & Reliable) */
     function applyTemplate(tplKey) {
       if (templates[tplKey]) {
-        if (confirm('Load template? This will replace your current editor contents.')) {
-          document.getElementById('mdInput').value = templates[tplKey];
-          
-          let fname = 'SKILL.md';
-          if (tplKey === 'readme') fname = 'README.md';
-          else if (tplKey === 'rfc') fname = 'architecture_rfc.md';
-          else if (tplKey === 'api') fname = 'api_reference.md';
-          else if (tplKey === 'changelog') fname = 'CHANGELOG.md';
-          else if (tplKey === 'meeting') fname = 'meeting_notes.md';
-          else if (tplKey === 'blank') fname = 'document.md';
-          
-          document.getElementById('inpFilename').value = fname;
-          handleEditorInput();
-          showStatus(`Loaded "${tplKey.toUpperCase()}" template.`, 'success');
-        }
+        document.getElementById('mdInput').value = templates[tplKey];
+        
+        let fname = 'SKILL.md';
+        if (tplKey === 'readme') fname = 'README.md';
+        else if (tplKey === 'rfc') fname = 'architecture_rfc.md';
+        else if (tplKey === 'api') fname = 'api_reference.md';
+        else if (tplKey === 'changelog') fname = 'CHANGELOG.md';
+        else if (tplKey === 'meeting') fname = 'meeting_notes.md';
+        else if (tplKey === 'blank') fname = 'document.md';
+        
+        document.getElementById('inpFilename').value = fname;
+        handleEditorInput();
+        showStatus(`Loaded "${tplKey.toUpperCase()}" template.`, 'success');
       }
+    }
+
+    /* In-App Modals for Formatting Actions */
+    function openLinkModal() {
+      const textarea = document.getElementById('mdInput');
+      const selected = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
+      if (selected) document.getElementById('inpLinkText').value = selected;
+      document.getElementById('linkModal').classList.add('open');
+    }
+
+    function confirmInsertLink() {
+      const text = document.getElementById('inpLinkText').value.trim() || 'Link';
+      const url = document.getElementById('inpLinkUrl').value.trim() || 'https://';
+      wrapSelection(`[${text}](`, `${url})`);
+      closeModals();
+    }
+
+    function openImageModal() {
+      const textarea = document.getElementById('mdInput');
+      const selected = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
+      if (selected) document.getElementById('inpImgAlt').value = selected;
+      document.getElementById('imageModal').classList.add('open');
+    }
+
+    function confirmInsertImage() {
+      const alt = document.getElementById('inpImgAlt').value.trim() || 'Image';
+      const url = document.getElementById('inpImgUrl').value.trim() || 'https://';
+      wrapSelection(`![${alt}](`, `${url})`);
+      closeModals();
+    }
+
+    function openTableModal() {
+      document.getElementById('tableModal').classList.add('open');
+    }
+
+    function confirmInsertTable() {
+      const cols = parseInt(document.getElementById('inpTableCols').value, 10) || 3;
+      const rows = parseInt(document.getElementById('inpTableRows').value, 10) || 3;
+      const align = document.getElementById('inpTableAlign').value;
+
+      let alignMarker = ':---';
+      if (align === 'center') alignMarker = ':---:';
+      else if (align === 'right') alignMarker = '---:';
+
+      let headers = [];
+      let aligns = [];
+      for (let c = 1; c <= cols; c++) {
+        headers.push(`Column ${c}`);
+        aligns.push(alignMarker);
+      }
+
+      let tableMd = `\n| ${headers.join(' | ')} |\n| ${aligns.join(' | ')} |\n`;
+
+      for (let r = 1; r <= rows; r++) {
+        let rowCells = [];
+        for (let c = 1; c <= cols; c++) {
+          rowCells.push(`Row ${r} Data`);
+        }
+        tableMd += `| ${rowCells.join(' | ')} |\n`;
+      }
+
+      wrapSelection(tableMd, '');
+      closeModals();
+    }
+
+    function openCodeBlockModal() {
+      document.getElementById('codeModal').classList.add('open');
+    }
+
+    function confirmInsertCodeBlock() {
+      const lang = document.getElementById('inpCodeLang').value;
+      wrapSelection(`\n\`\`\`${lang}\n`, `\n\`\`\`\n`);
+      closeModals();
+    }
+
+    function closeModals() {
+      document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
     }
 
     /* Toolbar Helper Functions */
@@ -1260,36 +1494,8 @@ Start writing your markdown here...
       wrapSelection('\n- [ ] ', '\n- [ ] Task 2\n- [x] Completed task\n');
     }
 
-    function insertCodeBlock() {
-      wrapSelection('\n```javascript\n', '\n```\n');
-    }
-
     function insertAlert(type) {
       wrapSelection(`\n> [!${type}]\n> `, `\n`);
-    }
-
-    function insertLinkDialog() {
-      const url = prompt('Enter destination URL:', 'https://');
-      if (url) {
-        const title = prompt('Enter link text:', 'Click here') || 'link';
-        wrapSelection(`[${title}](`, `${url})`);
-      }
-    }
-
-    function insertImageDialog() {
-      const url = prompt('Enter Image URL:', 'https://images.unsplash.com/photo-1555066931-4365d14bab8c');
-      if (url) {
-        const alt = prompt('Enter Image Alt Text / Caption:', 'Image description') || 'image';
-        wrapSelection(`![${alt}](`, `${url})`);
-      }
-    }
-
-    function insertTableDialog() {
-      const table = `\n| Column 1 | Column 2 | Column 3 |
-| :--- | :---: | ---: |
-| Row 1 Item | Centered | $100.00 |
-| Row 2 Item | Centered | $250.00 |\n`;
-      wrapSelection(table, '');
     }
 
     function insertTOC() {
@@ -1424,11 +1630,9 @@ ${renderedHtml}
     }
 
     function clearEditor() {
-      if (confirm('Clear editor? This will reset all text.')) {
-        document.getElementById('mdInput').value = '';
-        handleEditorInput();
-        showStatus('Editor cleared.', 'success');
-      }
+      document.getElementById('mdInput').value = '';
+      handleEditorInput();
+      showStatus('Editor cleared.', 'success');
     }
 
     function triggerSuccessButton(iconId, textId, successText) {
