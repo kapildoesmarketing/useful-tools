@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Compressor & Resolution Scaler</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+    }
+
+    h1, h2, h3, h4, .btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Standard Header Bar with Action Chips */
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .header-title-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-title-box h2 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .action-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-family: 'Roboto', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid var(--border-color);
+      background-color: #ffffff;
+      color: var(--text-main);
+    }
+
+    .action-chip .material-symbols-outlined {
+      font-size: 16px;
+    }
+
+    .action-chip:hover {
+      background-color: var(--bg-color);
+      border-color: #c6c9ce;
+      transform: translateY(-1px);
+    }
+
+    .chip-bug:hover {
+      color: var(--danger-text);
+      border-color: #fad2cf;
+      background-color: var(--danger-bg);
+    }
+
+    .chip-feature:hover {
+      color: #b06000;
+      border-color: #feefc3;
+      background-color: #fef7e0;
+    }
+
+    .chip-creator:hover {
+      color: var(--primary-blue);
+      border-color: #d2e3fc;
+      background-color: #e8f0fe;
+    }
+
+    /* Drop Zone */
+    .drop-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 24px 16px;
+      text-align: center;
+      background-color: var(--bg-color);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: var(--primary-blue);
+      background-color: #f1f6fd;
+    }
+
+    .drop-zone-icon {
+      font-size: 38px;
+      color: var(--primary-blue);
+      margin-bottom: 4px;
+    }
+
+    .drop-zone p {
+      margin: 4px 0 0 0;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* Main Grid */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Cards */
+    .card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 1px 3px rgba(60,64,67,0.06);
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+      margin: 0;
+    }
+
+    .video-preview-box {
+      background: #000000;
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 220px;
+      max-height: 320px;
+      position: relative;
+    }
+
+    .video-preview-box video {
+      max-width: 100%;
+      max-height: 320px;
+      display: block;
+    }
+
+    .preview-placeholder {
+      color: #9aa0a6;
+      font-size: 12.5px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Stats Chips */
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .stat-chip {
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    .stat-chip strong {
+      color: var(--text-main);
+    }
+
+    .stat-badge-savings {
+      background: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Controls Panel */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 500px) {
+      .controls-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .control-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .control-label {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .control-input, .control-select {
+      font-family: 'Roboto', sans-serif;
+      font-size: 12.5px;
+      padding: 6px 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background: #ffffff;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .control-input:focus, .control-select:focus {
+      border-color: var(--primary-blue);
+    }
+
+    /* Preset Buttons */
+    .presets-box {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .preset-btn {
+      flex: 1;
+      min-width: 90px;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .preset-btn:hover {
+      background: #f1f6fd;
+      border-color: #aecbfa;
+    }
+
+    .preset-btn.active {
+      background: #e8f0fe;
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+      font-weight: 700;
+    }
+
+    .preset-desc {
+      font-size: 10px;
+      color: var(--text-secondary);
+      display: block;
+      margin-top: 2px;
+      font-weight: normal;
+    }
+
+    /* Sliders */
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .slider-row input[type="range"] {
+      flex: 1;
+      accent-color: var(--primary-blue);
+      cursor: pointer;
+    }
+
+    .slider-val {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 12px;
+      font-weight: bold;
+      color: var(--primary-blue);
+      min-width: 60px;
+      text-align: right;
+    }
+
+    /* Progress Box */
+    .progress-box {
+      display: none;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 4px;
+    }
+
+    .progress-bar-track {
+      background: #e0e0e0;
+      border-radius: 6px;
+      height: 10px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .progress-bar-fill {
+      background: var(--primary-blue);
+      height: 100%;
+      width: 0%;
+      transition: width 0.15s linear;
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    /* Action Buttons */
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 18px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.96);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 170px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+
+    .spinner {
+      border: 2.5px solid rgba(255, 255, 255, 0.3);
+      border-top: 2.5px solid #ffffff;
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Header Bar with Standard Action Chips -->
+    <div class="header-bar">
+      <div class="header-title-box">
+        <span class="material-symbols-outlined" style="font-size: 24px; color: var(--primary-blue);">video_file</span>
+        <h2>Video Compressor & Resolution Scaler</h2>
+      </div>
+
+      <div class="header-actions">
+        <a href="mailto:hikapil@google.com?cc=useful-tools@google.com&amp;subject=%5BUser%20Feedback%5D%20%7C%20Bug%20Found%20on%20go%2Fusefultools&amp;body=Hi%20Kapil%2C%0A%0AI%E2%80%99m%20reaching%20out%20to%20report%20a%20bug.%20Here%20are%20the%20relevant%20details%3A%0A%0ABug%20Description%3A%20%5BPlease%20provide%20a%20description%20of%20the%20issue%20here%5D"
+          target="_blank" rel="noopener noreferrer" class="action-chip chip-bug" title="Report a Bug">
+          <span class="material-symbols-outlined">bug_report</span>
+          <span>Report Bug</span>
+        </a>
+
+        <a href="mailto:hikapil@google.com?cc=useful-tools@google.com&amp;subject=%5BUser%20Feedback%5D%20%7C%20New%20Tool%2FFeature%20Request%20for%20go%2Fusefultools&amp;body=Hi%20Kapil%2C%0A%0AI%E2%80%99m%20reaching%20out%20to%20request%20a%20new%20feature.%20Here%20are%20the%20relevant%20details%3A%0A%0AFeature%20Request%3A%20%5BPlease%20provide%20a%20description%20of%20the%20feature%20you&#39;d%20like%20to%20see%5D"
+          target="_blank" rel="noopener noreferrer" class="action-chip chip-feature" title="Request a New Feature">
+          <span class="material-symbols-outlined">lightbulb</span>
+          <span>Request Feature</span>
+        </a>
+
+        <a href="https://moma.corp.google.com/person/hikapil"
+          target="_blank" rel="noopener noreferrer" class="action-chip chip-creator" title="Meet the Creator on Moma">
+          <span class="material-symbols-outlined">person</span>
+          <span>Meet the Creator</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Drop Zone -->
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <span class="material-symbols-outlined drop-zone-icon">cloud_upload</span>
+      <p id="dropZoneText"><strong>Click to upload</strong> or drag and drop your video file here (MP4, WebM, MOV, MKV)</p>
+      <input type="file" id="fileInput" accept="video/*" style="display: none;" onchange="handleFileSelect(event)">
+    </div>
+
+    <!-- Main Workspace Grid -->
+    <div class="main-grid">
+      <!-- Left Column: Source Video & Compression Controls -->
+      <div class="card">
+        <h3 class="card-title">
+          <span>1. Compression Settings & Bitrate</span>
+          <span id="origSizeBadge" class="stat-chip">No Video Loaded</span>
+        </h3>
+
+        <!-- Preset Selection -->
+        <div class="control-item">
+          <div class="control-label">Compression Preset</div>
+          <div class="presets-box">
+            <div class="preset-btn active" onclick="setPreset('balanced')" id="preset-balanced">
+              ⚖️ Balanced
+              <span class="preset-desc">720p • 1.5 Mbps</span>
+            </div>
+            <div class="preset-btn" onclick="setPreset('maximum')" id="preset-maximum">
+              🪶 Max Savings
+              <span class="preset-desc">480p • 600 kbps</span>
+            </div>
+            <div class="preset-btn" onclick="setPreset('high')" id="preset-high">
+              💎 High Quality
+              <span class="preset-desc">1080p • 3.5 Mbps</span>
+            </div>
+            <div class="preset-btn" onclick="setPreset('custom')" id="preset-custom">
+              ⚙️ Custom
+              <span class="preset-desc">Manual control</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls Grid -->
+        <div class="controls-grid">
+          <!-- Resolution Scale -->
+          <div class="control-item">
+            <div class="control-label">
+              <span>Target Resolution</span>
+            </div>
+            <select id="selResolution" class="control-select" onchange="onCustomSettingChange()">
+              <option value="original">Original (100%)</option>
+              <option value="1080">1080p (Full HD)</option>
+              <option value="720" selected>720p (HD)</option>
+              <option value="480">480p (SD)</option>
+              <option value="360">360p (Compact)</option>
+            </select>
+          </div>
+
+          <!-- Target Frame Rate -->
+          <div class="control-item">
+            <div class="control-label">Frame Rate (FPS)</div>
+            <select id="selFps" class="control-select" onchange="onCustomSettingChange()">
+              <option value="original">Keep Original</option>
+              <option value="60">60 FPS (Ultra Smooth)</option>
+              <option value="30" selected>30 FPS (Standard)</option>
+              <option value="24">24 FPS (Cinematic)</option>
+              <option value="15">15 FPS (Slide Deck / Screen)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Video Bitrate Slider -->
+        <div class="control-item">
+          <div class="control-label">
+            <span>Video Bitrate</span>
+            <span id="valBitrate" class="slider-val">1,500 kbps</span>
+          </div>
+          <div class="slider-row">
+            <input type="range" id="rngBitrate" min="200" max="8000" step="100" value="1500" oninput="onBitrateInput(this.value)">
+          </div>
+        </div>
+
+        <!-- Audio Settings & Output Codec -->
+        <div class="controls-grid">
+          <div class="control-item">
+            <div class="control-label">Audio Track</div>
+            <select id="selAudio" class="control-select" onchange="updateEstimatedSize()">
+              <option value="128" selected>Include Audio (128 kbps)</option>
+              <option value="64">Compress Audio (64 kbps)</option>
+              <option value="mute">Mute / Remove Audio</option>
+            </select>
+          </div>
+
+          <div class="control-item">
+            <div class="control-label">Video Format</div>
+            <select id="selCodec" class="control-select">
+              <option value="webm_vp9" selected>WebM (VP9 - Best Quality)</option>
+              <option value="webm_vp8">WebM (VP8 - Fast)</option>
+              <option value="mp4_avc">MP4 (H.264 / AVC)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Estimated Target File Size Info Box -->
+        <div style="background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px 12px; font-size: 12px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <span style="color: var(--text-secondary);">Estimated Output Size:</span>
+            <strong id="lblEstimatedSize" style="color: var(--primary-blue); font-family: 'Roboto Mono', monospace; margin-left: 4px;">--</strong>
+          </div>
+          <div id="lblEstimatedSavings" style="font-size: 11.5px; color: var(--success-text); font-weight: 700;"></div>
+        </div>
+
+        <!-- Original Video Player Box -->
+        <div class="video-preview-box">
+          <div id="origPlaceholder" class="preview-placeholder">
+            <span class="material-symbols-outlined" style="font-size: 32px;">play_circle</span>
+            <span>Upload video to preview original</span>
+          </div>
+          <video id="origVideo" controls style="display: none;" playsinline></video>
+        </div>
+
+        <div id="origStats" class="stats-row" style="display: none;">
+          <span class="stat-chip">Resolution: <strong id="statOrigRes">--</strong></span>
+          <span class="stat-chip">Duration: <strong id="statOrigDur">--</strong></span>
+          <span class="stat-chip">File Size: <strong id="statOrigSize">--</strong></span>
+        </div>
+      </div>
+
+      <!-- Right Column: Compressed Output & Real-Time Progress -->
+      <div class="card">
+        <h3 class="card-title">
+          <span>2. Compressed Output & Comparison</span>
+          <span id="savingsBadge" class="stat-badge-savings" style="display: none;">
+            <span class="material-symbols-outlined" style="font-size: 15px;">trending_down</span>
+            <span id="savingsText">0% Smaller</span>
+          </span>
+        </h3>
+
+        <!-- Output Video Player Box -->
+        <div class="video-preview-box">
+          <div id="compPlaceholder" class="preview-placeholder">
+            <span class="material-symbols-outlined" style="font-size: 32px;">auto_fix_high</span>
+            <span>Compressed video will appear here</span>
+          </div>
+          <video id="compVideo" controls style="display: none;" playsinline></video>
+          <canvas id="renderCanvas" style="display: none;"></canvas>
+        </div>
+
+        <!-- Compressed Stats Strip -->
+        <div id="compStats" class="stats-row" style="display: none;">
+          <span class="stat-chip">Output Resolution: <strong id="statCompRes">--</strong></span>
+          <span class="stat-chip">New File Size: <strong id="statCompSize" style="color: var(--success-text);">--</strong></span>
+          <span class="stat-chip">Saved: <strong id="statCompSaved">--</strong></span>
+        </div>
+
+        <!-- Real-time Compression Progress Box -->
+        <div id="progressBox" class="progress-box">
+          <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 500;">
+            <span id="progressStatus">Compressing video frames...</span>
+            <span id="progressPct" style="font-family: 'Roboto Mono', monospace;">0%</span>
+          </div>
+          <div class="progress-bar-track">
+            <div id="progressFill" class="progress-bar-fill"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+            <span id="progressTime">Elapsed: 0s</span>
+            <span id="progressRemaining">Remaining: --</span>
+          </div>
+        </div>
+
+        <!-- Status Message -->
+        <div id="statusBox" class="status-box"></div>
+
+        <!-- Action Buttons -->
+        <div class="toolbar" style="margin-top: auto; padding-top: 8px;">
+          <button id="btnCompress" class="btn-primary" onclick="startCompression()" disabled>
+            <span class="material-symbols-outlined" id="compressIcon">compress</span>
+            <span id="compressText">Compress Video</span>
+          </button>
+
+          <button id="btnDownload" class="btn-secondary" onclick="downloadCompressedVideo()" disabled>
+            <span class="material-symbols-outlined" id="dlIcon">download</span>
+            <span id="dlText">Download Video</span>
+          </button>
+
+          <button class="btn-secondary" onclick="resetAll()">
+            <span class="material-symbols-outlined">restart_alt</span>
+            Reset
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let rawFile = null;
+    let rawVideoUrl = null;
+    let compressedBlob = null;
+    let compressedUrl = null;
+    let videoDuration = 0;
+    let videoWidth = 0;
+    let videoHeight = 0;
+    let isCompressing = false;
+    let mediaRecorder = null;
+    let animationFrameId = null;
+
+    // Presets
+    const presets = {
+      balanced: { resolution: '720', fps: '30', bitrate: 1500 },
+      maximum: { resolution: '480', fps: '24', bitrate: 600 },
+      high: { resolution: '1080', fps: '30', bitrate: 3500 },
+      custom: {}
+    };
+
+    let currentPreset = 'balanced';
+
+    function setPreset(presetKey) {
+      currentPreset = presetKey;
+      document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`preset-${presetKey}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      if (presetKey !== 'custom') {
+        const config = presets[presetKey];
+        document.getElementById('selResolution').value = config.resolution;
+        document.getElementById('selFps').value = config.fps;
+        document.getElementById('rngBitrate').value = config.bitrate;
+        onBitrateInput(config.bitrate);
+      }
+      updateEstimatedSize();
+    }
+
+    function onCustomSettingChange() {
+      currentPreset = 'custom';
+      document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById('preset-custom').classList.add('active');
+      updateEstimatedSize();
+    }
+
+    function onBitrateInput(val) {
+      document.getElementById('valBitrate').textContent = `${parseInt(val).toLocaleString()} kbps`;
+      updateEstimatedSize();
+    }
+
+    function updateEstimatedSize() {
+      if (!rawFile || !videoDuration) {
+        document.getElementById('lblEstimatedSize').textContent = '--';
+        document.getElementById('lblEstimatedSavings').textContent = '';
+        return;
+      }
+
+      const videoBitrateKbps = parseInt(document.getElementById('rngBitrate').value, 10);
+      const audioMode = document.getElementById('selAudio').value;
+      const audioBitrateKbps = audioMode === 'mute' ? 0 : parseInt(audioMode, 10);
+
+      const totalBitrateKbps = videoBitrateKbps + audioBitrateKbps;
+      const estimatedBytes = (totalBitrateKbps * 1000 / 8) * videoDuration;
+
+      document.getElementById('lblEstimatedSize').textContent = `~${formatFileSize(estimatedBytes)}`;
+
+      const originalBytes = rawFile.size;
+      if (originalBytes > 0) {
+        const savedPct = Math.round(((originalBytes - estimatedBytes) / originalBytes) * 100);
+        if (savedPct > 0) {
+          document.getElementById('lblEstimatedSavings').textContent = `(~${savedPct}% reduction)`;
+        } else {
+          document.getElementById('lblEstimatedSavings').textContent = `(larger than original)`;
+        }
+      }
+    }
+
+    // Drag and Drop
+    const dropZone = document.getElementById('dropZone');
+    ['dragenter', 'dragover'].forEach(name => {
+      dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.add('dragover'); }, false);
+    });
+    ['dragleave', 'drop'].forEach(name => {
+      dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); }, false);
+    });
+    dropZone.addEventListener('drop', (e) => {
+      const files = e.dataTransfer.files;
+      if (files.length > 0) loadVideoFile(files[0]);
+    });
+
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (file) loadVideoFile(file);
+    }
+
+    function loadVideoFile(file) {
+      if (!file.type.startsWith('video/')) {
+        showStatus('Please upload a valid video file (MP4, WebM, MOV, etc.).', 'error');
+        return;
+      }
+
+      rawFile = file;
+      if (rawVideoUrl) URL.revokeObjectURL(rawVideoUrl);
+      rawVideoUrl = URL.createObjectURL(file);
+
+      const origVideo = document.getElementById('origVideo');
+      origVideo.src = rawVideoUrl;
+      origVideo.style.display = 'block';
+      document.getElementById('origPlaceholder').style.display = 'none';
+
+      document.getElementById('origSizeBadge').textContent = formatFileSize(file.size);
+      document.getElementById('dropZoneText').innerHTML = `Loaded: <strong>${escapeHtml(file.name)}</strong> (${formatFileSize(file.size)})`;
+
+      origVideo.onloadedmetadata = () => {
+        videoDuration = origVideo.duration;
+        videoWidth = origVideo.videoWidth;
+        videoHeight = origVideo.videoHeight;
+
+        document.getElementById('statOrigRes').textContent = `${videoWidth} × ${videoHeight}`;
+        document.getElementById('statOrigDur').textContent = formatTime(videoDuration);
+        document.getElementById('statOrigSize').textContent = formatFileSize(file.size);
+        document.getElementById('origStats').style.display = 'flex';
+
+        document.getElementById('btnCompress').disabled = false;
+        updateEstimatedSize();
+        showStatus(`Video loaded successfully: ${videoWidth}×${videoHeight}, ${formatTime(videoDuration)}.`, 'success');
+      };
+    }
+
+    async function startCompression() {
+      if (!rawFile || isCompressing) return;
+
+      isCompressing = true;
+      const btnCompress = document.getElementById('btnCompress');
+      const compressIcon = document.getElementById('compressIcon');
+      const compressText = document.getElementById('compressText');
+      const progressBox = document.getElementById('progressBox');
+      const progressFill = document.getElementById('progressFill');
+      const progressPct = document.getElementById('progressPct');
+      const progressStatus = document.getElementById('progressStatus');
+      const progressTime = document.getElementById('progressTime');
+      const progressRemaining = document.getElementById('progressRemaining');
+
+      btnCompress.disabled = true;
+      document.getElementById('btnDownload').disabled = true;
+      compressIcon.style.display = 'none';
+      compressText.innerHTML = '<span class="spinner"></span> Compressing...';
+      progressBox.style.display = 'block';
+      progressFill.style.width = '0%';
+      progressPct.textContent = '0%';
+
+      const startTime = Date.now();
+
+      // Compute Target Dimensions
+      const resVal = document.getElementById('selResolution').value;
+      let targetW = videoWidth;
+      let targetH = videoHeight;
+
+      if (resVal !== 'original') {
+        const targetMaxDim = parseInt(resVal, 10);
+        if (videoWidth >= videoHeight) {
+          // Landscape
+          if (videoHeight > targetMaxDim) {
+            targetH = targetMaxDim;
+            targetW = Math.round((videoWidth * targetMaxDim) / videoHeight);
+          }
+        } else {
+          // Portrait
+          if (videoWidth > targetMaxDim) {
+            targetW = targetMaxDim;
+            targetH = Math.round((videoHeight * targetMaxDim) / videoWidth);
+          }
+        }
+      }
+
+      // Ensure even dimensions
+      targetW = Math.floor(targetW / 2) * 2;
+      targetH = Math.floor(targetH / 2) * 2;
+
+      // Target FPS & Bitrate
+      const fpsVal = document.getElementById('selFps').value;
+      const targetFps = fpsVal === 'original' ? 30 : parseInt(fpsVal, 10);
+      const videoBitrate = parseInt(document.getElementById('rngBitrate').value, 10) * 1000;
+      const audioMode = document.getElementById('selAudio').value;
+      const audioBitrate = audioMode === 'mute' ? 0 : parseInt(audioMode, 10) * 1000;
+
+      // Codec selection
+      const codecChoice = document.getElementById('selCodec').value;
+      let mimeType = 'video/webm;codecs=vp9';
+      if (codecChoice === 'webm_vp8') mimeType = 'video/webm;codecs=vp8';
+      else if (codecChoice === 'mp4_avc' && MediaRecorder.isTypeSupported('video/mp4;codecs=avc1')) mimeType = 'video/mp4;codecs=avc1';
+
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'video/webm';
+      }
+
+      // Setup Canvas
+      const canvas = document.getElementById('renderCanvas');
+      canvas.width = targetW;
+      canvas.height = targetH;
+      const ctx = canvas.getContext('2d');
+
+      // Video Source Element for Playback Rendering
+      const playbackVideo = document.createElement('video');
+      playbackVideo.src = rawVideoUrl;
+      playbackVideo.crossOrigin = 'anonymous';
+      playbackVideo.muted = (audioMode === 'mute');
+      playbackVideo.playsInline = true;
+
+      await new Promise(res => { playbackVideo.onloadeddata = res; });
+
+      // Create Canvas Stream
+      const canvasStream = canvas.captureStream(targetFps);
+
+      // Create Audio Context if audio enabled
+      let audioStream = null;
+      let audioCtx = null;
+      if (audioMode !== 'mute') {
+        try {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const source = audioCtx.createMediaElementSource(playbackVideo);
+          const dest = audioCtx.createMediaStreamDestination();
+          source.connect(dest);
+          source.connect(audioCtx.destination);
+          audioStream = dest.stream;
+
+          audioStream.getAudioTracks().forEach(track => canvasStream.addTrack(track));
+        } catch (e) {
+          console.warn('Audio capture exception:', e);
+        }
+      }
+
+      const recorderOptions = {
+        mimeType: mimeType,
+        videoBitsPerSecond: videoBitrate
+      };
+      if (audioBitrate > 0) {
+        recorderOptions.audioBitsPerSecond = audioBitrate;
+      }
+
+      try {
+        mediaRecorder = new MediaRecorder(canvasStream, recorderOptions);
+      } catch (err) {
+        mediaRecorder = new MediaRecorder(canvasStream);
+      }
+
+      const recordedChunks = [];
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        if (audioCtx) audioCtx.close();
+
+        compressedBlob = new Blob(recordedChunks, { type: mimeType });
+        if (compressedUrl) URL.revokeObjectURL(compressedUrl);
+        compressedUrl = URL.createObjectURL(compressedBlob);
+
+        const compVideo = document.getElementById('compVideo');
+        compVideo.src = compressedUrl;
+        compVideo.style.display = 'block';
+        document.getElementById('compPlaceholder').style.display = 'none';
+
+        // Stats comparison
+        const origBytes = rawFile.size;
+        const compBytes = compressedBlob.size;
+        const savedBytes = origBytes - compBytes;
+        const savedPct = Math.round((savedBytes / origBytes) * 100);
+
+        document.getElementById('statCompRes').textContent = `${targetW} × ${targetH}`;
+        document.getElementById('statCompSize').textContent = formatFileSize(compBytes);
+        document.getElementById('statCompSaved').textContent = savedBytes > 0 ? `${formatFileSize(savedBytes)} (${savedPct}%)` : 'None';
+        document.getElementById('compStats').style.display = 'flex';
+
+        const savingsBadge = document.getElementById('savingsBadge');
+        if (savedPct > 0) {
+          savingsBadge.style.display = 'inline-flex';
+          document.getElementById('savingsText').textContent = `${savedPct}% Smaller!`;
+        } else {
+          savingsBadge.style.display = 'none';
+        }
+
+        btnCompress.disabled = false;
+        document.getElementById('btnDownload').disabled = false;
+        compressIcon.style.display = 'inline-block';
+        compressText.textContent = 'Compress Again';
+        isCompressing = false;
+
+        progressStatus.textContent = 'Compression Complete!';
+        progressFill.style.width = '100%';
+        progressPct.textContent = '100%';
+
+        showStatus(`Video compressed successfully! New size: ${formatFileSize(compBytes)} (Saved ${savedPct}%).`, 'success');
+
+        if (typeof confetti === 'function') {
+          confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
+        }
+      };
+
+      // Start Recording
+      mediaRecorder.start(200);
+      playbackVideo.currentTime = 0;
+      await playbackVideo.play();
+
+      function drawFrame() {
+        if (playbackVideo.paused || playbackVideo.ended) return;
+
+        ctx.drawImage(playbackVideo, 0, 0, targetW, targetH);
+
+        const currentSec = playbackVideo.currentTime;
+        const pct = Math.min(99, Math.round((currentSec / videoDuration) * 100));
+        progressFill.style.width = `${pct}%`;
+        progressPct.textContent = `${pct}%`;
+
+        const elapsedSec = Math.round((Date.now() - startTime) / 1000);
+        progressTime.textContent = `Elapsed: ${elapsedSec}s`;
+
+        if (currentSec > 0.5) {
+          const estimatedTotalSec = (elapsedSec / currentSec) * videoDuration;
+          const remainingSec = Math.max(0, Math.round(estimatedTotalSec - elapsedSec));
+          progressRemaining.textContent = `Remaining: ~${remainingSec}s`;
+        }
+
+        animationFrameId = requestAnimationFrame(drawFrame);
+      }
+
+      drawFrame();
+
+      playbackVideo.onended = () => {
+        setTimeout(() => {
+          if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+          }
+        }, 300);
+      };
+    }
+
+    function downloadCompressedVideo() {
+      if (!compressedBlob || !compressedUrl) return;
+
+      const baseName = rawFile.name.substring(0, rawFile.name.lastIndexOf('.')) || 'video';
+      const ext = compressedBlob.type.includes('mp4') ? 'mp4' : 'webm';
+      const a = document.createElement('a');
+      a.href = compressedUrl;
+      a.download = `${baseName}_compressed.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      triggerSuccessButton('dlIcon', 'dlText', 'Saved Video!');
+    }
+
+    function resetAll() {
+      if (rawVideoUrl) URL.revokeObjectURL(rawVideoUrl);
+      if (compressedUrl) URL.revokeObjectURL(compressedUrl);
+      rawFile = null;
+      rawVideoUrl = null;
+      compressedBlob = null;
+      compressedUrl = null;
+      videoDuration = 0;
+      isCompressing = false;
+
+      document.getElementById('fileInput').value = '';
+      document.getElementById('origVideo').style.display = 'none';
+      document.getElementById('origPlaceholder').style.display = 'flex';
+      document.getElementById('compVideo').style.display = 'none';
+      document.getElementById('compPlaceholder').style.display = 'flex';
+
+      document.getElementById('origStats').style.display = 'none';
+      document.getElementById('compStats').style.display = 'none';
+      document.getElementById('savingsBadge').style.display = 'none';
+      document.getElementById('progressBox').style.display = 'none';
+
+      document.getElementById('origSizeBadge').textContent = 'No Video Loaded';
+      document.getElementById('dropZoneText').innerHTML = '<strong>Click to upload</strong> or drag and drop your video file here (MP4, WebM, MOV, MKV)';
+
+      document.getElementById('btnCompress').disabled = true;
+      document.getElementById('btnDownload').disabled = true;
+
+      setPreset('balanced');
+      hideStatus();
+    }
+
+    function triggerSuccessButton(iconId, textId, successText) {
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+      if (!icon || !text) return;
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2500);
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+      setTimeout(() => {
+        statusBox.className = 'status-box';
+        statusBox.textContent = '';
+      }, 5000);
+    }
+
+    function hideStatus() {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = 'status-box';
+      statusBox.textContent = '';
+    }
+
+    function formatTime(seconds) {
+      if (isNaN(seconds)) return '00:00';
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+  </script>
+</body>
+
+</html>
