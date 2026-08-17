@@ -171,7 +171,7 @@
     /* Studio Two-Column Grid */
     .main-grid {
       display: grid;
-      grid-template-columns: 1.1fr 1.25fr;
+      grid-template-columns: 1.15fr 1.25fr;
       gap: 16px;
       align-items: start;
     }
@@ -310,6 +310,17 @@
       color: var(--text-main);
     }
 
+    /* Images List */
+    .image-item-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
     /* Dynamic Custom Links List */
     .links-list {
       display: flex;
@@ -386,6 +397,25 @@
       box-shadow: 0 1px 3px rgba(60,64,67,0.08);
       position: sticky;
       top: 16px;
+    }
+
+    .preview-toolbar-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .quick-size-control {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 2px 6px;
+      font-size: 11px;
     }
 
     .gmail-mockup {
@@ -652,7 +682,7 @@
           </button>
           <button class="tab-btn" onclick="switchTab('images', this)">
             <span class="material-symbols-outlined" style="font-size: 14px;">image</span>
-            Images & Logo
+            Images & Logos
           </button>
           <button class="tab-btn" onclick="switchTab('contact', this)">
             <span class="material-symbols-outlined" style="font-size: 14px;">call</span>
@@ -674,7 +704,7 @@
             <div class="field-row">
               <div class="input-group">
                 <label>Full Name *</label>
-                <input type="text" id="inpName" value="Kapil Sharma" placeholder="e.g. Alex Johnson" oninput="updateSignature()">
+                <input type="text" id="inpName" value="Kapil Pidhwani" placeholder="e.g. Alex Johnson" oninput="updateSignature()">
               </div>
               <div class="input-group">
                 <label>Pronouns</label>
@@ -684,100 +714,35 @@
 
             <div class="field-row">
               <div class="input-group">
-                <label>Job Title</label>
-                <input type="text" id="inpTitle" value="Product Lead & Developer" placeholder="e.g. Software Engineer" oninput="updateSignature()">
+                <label>Job Title / Role</label>
+                <input type="text" id="inpTitle" value="Apprentice" placeholder="e.g. Apprentice, Software Engineer" oninput="updateSignature()">
               </div>
               <div class="input-group">
-                <label>Department</label>
-                <input type="text" id="inpDept" value="Useful Tools & Operations" placeholder="e.g. Marketing" oninput="updateSignature()">
+                <label>Department / Team</label>
+                <input type="text" id="inpDept" value="SSG IN, GCS" placeholder="e.g. SSG IN, GCS" oninput="updateSignature()">
               </div>
             </div>
 
             <div class="input-group">
               <label>Company / Organization</label>
-              <input type="text" id="inpCompany" value="Google LLC" placeholder="e.g. Google" oninput="updateSignature()">
+              <input type="text" id="inpCompany" value="Google India" placeholder="e.g. Google India" oninput="updateSignature()">
             </div>
           </div>
 
-          <!-- Tab 2: Images & Logo -->
+          <!-- Tab 2: Combined Flexible Images & Logos -->
           <div class="tab-pane" id="tab-images">
-            <!-- Profile Photo Section -->
-            <div class="sub-card">
-              <div class="sub-card-header">
-                <span>👤 1. Profile Photo / Headshot</span>
-                <label style="font-size: 10px; font-weight: normal; cursor: pointer;">
-                  <input type="checkbox" id="chkPhoto" checked onchange="updateSignature()"> Show Photo
-                </label>
-              </div>
-
-              <div style="display: flex; gap: 6px; align-items: center;">
-                <input type="text" id="inpPhotoUrl" value="https://lh3.googleusercontent.com/a/default-user" placeholder="Paste Image URL or upload..." style="flex: 1;" oninput="updateSignature()">
-                <label class="btn-secondary" style="margin: 0; cursor: pointer; padding: 5px 8px; font-size: 11px;">
-                  <span class="material-symbols-outlined" style="font-size: 14px;">upload</span>
-                  Upload
-                  <input type="file" accept="image/*" style="display: none;" onchange="handleImageUpload(event, 'photo')">
-                </label>
-              </div>
-
-              <div class="field-row">
-                <div class="input-group">
-                  <label>Photo Shape / Ratio</label>
-                  <select id="selectPhotoShape" onchange="updateSignature()">
-                    <option value="circle">Circle (1:1)</option>
-                    <option value="rounded">Rounded Square (1:1)</option>
-                    <option value="square">Square (1:1)</option>
-                  </select>
-                </div>
-                <div class="input-group">
-                  <label>Photo Size</label>
-                  <select id="selectPhotoSize" onchange="updateSignature()">
-                    <option value="48">48 px (Compact)</option>
-                    <option value="58" selected>58 px (Standard Gmail)</option>
-                    <option value="70">70 px (Medium)</option>
-                  </select>
-                </div>
-              </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">
+                Custom Images & Logos (Photos, Logos, Badges)
+              </span>
+              <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="addNewImageItem()">
+                <span class="material-symbols-outlined" style="font-size: 14px;">add_photo_alternate</span>
+                + Add Image
+              </button>
             </div>
 
-            <!-- Company Logo / Custom Image Section -->
-            <div class="sub-card">
-              <div class="sub-card-header">
-                <span>🏢 2. Company Logo / Custom Image</span>
-                <label style="font-size: 10px; font-weight: normal; cursor: pointer;">
-                  <input type="checkbox" id="chkLogo" onchange="updateSignature()"> Show Logo
-                </label>
-              </div>
-
-              <div style="display: flex; gap: 6px; align-items: center;">
-                <input type="text" id="inpLogoUrl" placeholder="Paste Logo URL or upload..." style="flex: 1;" oninput="updateSignature()">
-                <label class="btn-secondary" style="margin: 0; cursor: pointer; padding: 5px 8px; font-size: 11px;">
-                  <span class="material-symbols-outlined" style="font-size: 14px;">upload</span>
-                  Upload
-                  <input type="file" accept="image/*" style="display: none;" onchange="handleImageUpload(event, 'logo')">
-                </label>
-              </div>
-
-              <div class="field-row">
-                <div class="input-group">
-                  <label>Logo Shape / Ratio</label>
-                  <select id="selectLogoShape" onchange="updateSignature()">
-                    <option value="auto">Original Aspect Ratio</option>
-                    <option value="rect">Wide Rectangle (3:1)</option>
-                    <option value="rounded">Rounded Rect</option>
-                    <option value="circle">Circle (1:1)</option>
-                    <option value="square">Square (1:1)</option>
-                  </select>
-                </div>
-                <div class="input-group">
-                  <label>Logo Width</label>
-                  <select id="selectLogoWidth" onchange="updateSignature()">
-                    <option value="60">60 px (Small)</option>
-                    <option value="85" selected>85 px (Standard)</option>
-                    <option value="110">110 px (Medium)</option>
-                    <option value="140">140 px (Wide)</option>
-                  </select>
-                </div>
-              </div>
+            <div id="imagesContainer" style="display: flex; flex-direction: column; gap: 8px;">
+              <!-- Rendered via JS -->
             </div>
           </div>
 
@@ -786,28 +751,17 @@
             <div class="field-row">
               <div class="input-group">
                 <label>Email Address</label>
-                <input type="email" id="inpEmail" value="hikapil@google.com" placeholder="name@company.com" oninput="updateSignature()">
+                <input type="email" id="inpEmail" value="hikapil@google.com" placeholder="name@google.com" oninput="updateSignature()">
               </div>
               <div class="input-group">
-                <label>Phone / Work</label>
-                <input type="tel" id="inpPhone" value="+1 (650) 253-0000" placeholder="+1 (555) 000-0000" oninput="updateSignature()">
-              </div>
-            </div>
-
-            <div class="field-row">
-              <div class="input-group">
-                <label>Website URL</label>
-                <input type="url" id="inpWebsite" value="https://moma.corp.google.com/person/hikapil" placeholder="https://example.com" oninput="updateSignature()">
-              </div>
-              <div class="input-group">
-                <label>Office Location / City</label>
-                <input type="text" id="inpAddress" value="Google HQ, Mountain View, CA" placeholder="City, State / Office" oninput="updateSignature()">
+                <label>Phone / Mobile</label>
+                <input type="tel" id="inpPhone" value="+918329870799" placeholder="+91..." oninput="updateSignature()">
               </div>
             </div>
 
             <div class="input-group">
-              <label>Calendar Booking URL</label>
-              <input type="url" id="inpCalendar" value="https://calendar.google.com" placeholder="e.g. Google Calendar link" oninput="updateSignature()">
+              <label>Office Location / City</label>
+              <input type="text" id="inpAddress" value="Google Gurgaon, Haryana, India" placeholder="City, Office Location" oninput="updateSignature()">
             </div>
           </div>
 
@@ -815,7 +769,7 @@
           <div class="tab-pane" id="tab-links">
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">
-                Custom Social & Work Links
+                Custom Links (Internal go/ links auto-convert to goto2)
               </span>
               <button class="btn-secondary" style="padding: 3px 8px; font-size: 11px;" onclick="addCustomLink('', '')">
                 <span class="material-symbols-outlined" style="font-size: 14px;">add</span>
@@ -825,12 +779,11 @@
 
             <!-- Quick Preset Chips -->
             <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-              <button class="btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="addCustomLink('LinkedIn', 'https://linkedin.com')">+ LinkedIn</button>
-              <button class="btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="addCustomLink('GitHub', 'https://github.com/kapildoesmarketing')">+ GitHub</button>
-              <button class="btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="addCustomLink('Portfolio', 'https://moma.corp.google.com/person/hikapil')">+ Portfolio</button>
+              <button class="btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="addCustomLink('LinkedIn', 'https://linkedin.com/in/kapilpidhwani')">+ LinkedIn</button>
+              <button class="btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="addCustomLink('gResume', 'https://goto2.corp.google.com/hikapil-gresume')">+ gResume</button>
+              <button class="btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="addCustomLink('View My Toolkit', 'https://goto2.corp.google.com/usefultools')">+ Toolkit</button>
               <button class="btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="addCustomLink('Calendar', 'https://calendar.google.com')">+ Calendar</button>
-              <button class="btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="addCustomLink('Docs', 'https://docs.google.com')">+ Docs</button>
-              <button class="btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="addCustomLink('X', 'https://x.com')">+ X</button>
+              <button class="btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="addCustomLink('GitHub', 'https://github.com/kapildoesmarketing')">+ GitHub</button>
             </div>
 
             <div class="links-list" id="customLinksContainer">
@@ -877,11 +830,6 @@
             </div>
 
             <div class="input-group">
-              <label>Call-to-Action Button Text</label>
-              <input type="text" id="inpCtaText" value="📅 Schedule a Quick Meeting" placeholder="e.g. 📅 Book a Call" oninput="updateSignature()">
-            </div>
-
-            <div class="input-group">
               <label>Confidentiality / Green Disclaimer</label>
               <textarea id="inpDisclaimer" style="height: 46px; font-size: 11px;" placeholder="Optional disclaimer..." oninput="updateSignature()">This email may contain confidential information. If received in error, please notify sender.</textarea>
             </div>
@@ -891,19 +839,33 @@
 
       <!-- Right Column: Live Gmail Preview & Actions -->
       <div class="preview-panel">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+        <div class="preview-toolbar-top">
           <div style="display: flex; align-items: center; gap: 6px;">
             <span class="material-symbols-outlined" style="font-size: 18px; color: var(--primary-blue);">mark_email_read</span>
             <span style="font-size: 13px; font-weight: 700; color: var(--text-main);">Live Gmail Preview</span>
           </div>
+
           <div style="display: flex; gap: 6px; align-items: center;">
+            <!-- Quick Image Size Control in Preview -->
+            <div class="quick-size-control" title="Adjust primary image size">
+              <span style="color: var(--text-secondary);">Image:</span>
+              <button class="btn-icon" onclick="adjustFirstImageSize(-6)" title="Shrink Image">
+                <span class="material-symbols-outlined" style="font-size: 14px;">remove</span>
+              </button>
+              <span id="previewImgSizeText" style="font-weight: 700; font-family: 'Roboto Mono', monospace;">52px</span>
+              <button class="btn-icon" onclick="adjustFirstImageSize(6)" title="Enlarge Image">
+                <span class="material-symbols-outlined" style="font-size: 14px;">add</span>
+              </button>
+            </div>
+
             <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="toggleDarkModePreview()">
               <span class="material-symbols-outlined" id="darkToggleIcon" style="font-size: 14px;">dark_mode</span>
-              <span id="darkToggleText">Dark Mode</span>
+              <span id="darkToggleText">Dark</span>
             </button>
+
             <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="openGuideModal()">
               <span class="material-symbols-outlined" style="font-size: 14px;">help</span>
-              Gmail Guide
+              Guide
             </button>
           </div>
         </div>
@@ -945,7 +907,7 @@
 
           <button class="btn-secondary" onclick="loadSampleData()">
             <span class="material-symbols-outlined">replay</span>
-            Sample Data
+            Reset Sample
           </button>
         </div>
       </div>
@@ -967,7 +929,7 @@
 
       <div class="guide-step">
         <div class="step-num">1</div>
-        <div>Click the blue <strong>"Copy for Gmail"</strong> button below to copy the formatted signature directly to your clipboard.</div>
+        <div>Click the blue <strong>"Copy for Gmail"</strong> button to copy the formatted signature directly to your clipboard.</div>
       </div>
 
       <div class="guide-step">
@@ -982,7 +944,7 @@
 
       <div class="guide-step">
         <div class="step-num">4</div>
-        <div>Click <strong>+ Create new</strong>, name your signature (e.g. <em>Work 2026</em>), click inside the signature text area, and press <strong>Ctrl + V</strong> (or <strong>Cmd + V</strong> on Mac) to paste.</div>
+        <div>Click <strong>+ Create new</strong>, name your signature (e.g. <em>Kapil Google</em>), click inside the signature box, and press <strong>Ctrl + V</strong> (or <strong>Cmd + V</strong> on Mac) to paste.</div>
       </div>
 
       <div class="guide-step">
@@ -1035,14 +997,26 @@
     let currentAccentColor = '#1a73e8';
     let isDarkModePreview = false;
 
+    // Flexible Images Array: [{ id, url, shape: 'circle'|'rounded'|'square'|'rect'|'auto', size: 52, position: 'left'|'bottom'|'top' }]
+    let signatureImages = [
+      {
+        id: '1',
+        url: 'https://lh3.googleusercontent.com/a/default-user',
+        shape: 'circle',
+        size: 52,
+        position: 'left'
+      }
+    ];
+
     // Custom Links list: [{ label: 'LinkedIn', url: '...' }]
     let customLinks = [
-      { label: 'LinkedIn', url: 'https://linkedin.com' },
-      { label: 'GitHub', url: 'https://github.com/kapildoesmarketing' },
-      { label: 'Portfolio', url: 'https://moma.corp.google.com/person/hikapil' }
+      { label: 'LinkedIn', url: 'https://linkedin.com/in/kapilpidhwani' },
+      { label: 'gResume', url: 'https://go/hikapil-gResume' },
+      { label: 'View My Toolkit', url: 'https://go/usefultools' }
     ];
 
     window.addEventListener('DOMContentLoaded', () => {
+      renderImagesManager();
       renderCustomLinks();
       updateSignature();
     });
@@ -1080,34 +1054,119 @@
       if (isDarkModePreview) {
         container.classList.add('dark-mode');
         icon.textContent = 'light_mode';
-        text.textContent = 'Light Mode';
+        text.textContent = 'Light';
       } else {
         container.classList.remove('dark-mode');
         icon.textContent = 'dark_mode';
-        text.textContent = 'Dark Mode';
+        text.textContent = 'Dark';
       }
     }
 
-    function handleImageUpload(e, target) {
-      const file = e.target.files[0];
-      if (!file) return;
+    /* Images Manager */
+    function renderImagesManager() {
+      const container = document.getElementById('imagesContainer');
+      container.innerHTML = '';
 
-      if (!file.type.startsWith('image/')) {
-        showStatus('Please select a valid image file.', 'error');
+      if (signatureImages.length === 0) {
+        container.innerHTML = '<div style="font-size:11px; color:#888; text-align:center; padding:10px; background:#f8f9fa; border-radius:6px;">No images added. Click "+ Add Image" above.</div>';
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = function (evt) {
-        if (target === 'photo') {
-          document.getElementById('inpPhotoUrl').value = evt.target.result;
-          document.getElementById('chkPhoto').checked = true;
-        } else {
-          document.getElementById('inpLogoUrl').value = evt.target.result;
-          document.getElementById('chkLogo').checked = true;
+      signatureImages.forEach((img, idx) => {
+        const card = document.createElement('div');
+        card.className = 'image-item-card';
+
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:11px; font-weight:700; color:var(--text-main);">Image #${idx + 1}</span>
+            <button class="btn-icon" onclick="removeImageItem(${idx})" title="Remove Image">
+              <span class="material-symbols-outlined" style="font-size:15px;">delete</span>
+            </button>
+          </div>
+
+          <div style="display:flex; gap:6px; align-items:center;">
+            <input type="text" value="${escapeHtml(img.url)}" placeholder="Image URL or upload..." style="flex:1; font-size:11px; padding:4px 6px;" oninput="updateImageItem(${idx}, 'url', this.value)">
+            <label class="btn-secondary" style="margin:0; cursor:pointer; padding:4px 7px; font-size:10.5px;">
+              <span class="material-symbols-outlined" style="font-size:13px;">upload</span>
+              Upload
+              <input type="file" accept="image/*" style="display:none;" onchange="handleMultipleImageUpload(event, ${idx})">
+            </label>
+          </div>
+
+          <div class="field-row" style="margin-top:2px;">
+            <div class="input-group">
+              <label>Shape / Ratio</label>
+              <select style="font-size:11px; padding:4px 6px;" onchange="updateImageItem(${idx}, 'shape', this.value)">
+                <option value="circle" ${img.shape === 'circle' ? 'selected' : ''}>Circle (1:1)</option>
+                <option value="rounded" ${img.shape === 'rounded' ? 'selected' : ''}>Rounded Square (1:1)</option>
+                <option value="square" ${img.shape === 'square' ? 'selected' : ''}>Square (1:1)</option>
+                <option value="rect" ${img.shape === 'rect' ? 'selected' : ''}>Wide Rectangle (3:1)</option>
+                <option value="auto" ${img.shape === 'auto' ? 'selected' : ''}>Original / Auto</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Size: ${img.size}px</label>
+              <input type="range" min="30" max="140" step="2" value="${img.size}" oninput="updateImageItem(${idx}, 'size', parseInt(this.value, 10))">
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      if (signatureImages.length > 0) {
+        document.getElementById('previewImgSizeText').textContent = `${signatureImages[0].size}px`;
+      }
+    }
+
+    function addNewImageItem() {
+      signatureImages.push({
+        id: Date.now() + '',
+        url: 'https://lh3.googleusercontent.com/a/default-user',
+        shape: 'circle',
+        size: 52,
+        position: 'left'
+      });
+      renderImagesManager();
+      updateSignature();
+    }
+
+    function removeImageItem(idx) {
+      signatureImages.splice(idx, 1);
+      renderImagesManager();
+      updateSignature();
+    }
+
+    function updateImageItem(idx, field, val) {
+      if (signatureImages[idx]) {
+        signatureImages[idx][field] = val;
+        if (field === 'size' && idx === 0) {
+          document.getElementById('previewImgSizeText').textContent = `${val}px`;
         }
         updateSignature();
-        showStatus('Image uploaded and applied.', 'success');
+      }
+    }
+
+    function adjustFirstImageSize(delta) {
+      if (signatureImages.length > 0) {
+        const newSize = Math.max(28, Math.min(150, signatureImages[0].size + delta));
+        signatureImages[0].size = newSize;
+        renderImagesManager();
+        updateSignature();
+      }
+    }
+
+    function handleMultipleImageUpload(e, idx) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (evt) {
+        if (signatureImages[idx]) {
+          signatureImages[idx].url = evt.target.result;
+          renderImagesManager();
+          updateSignature();
+          showStatus('Image uploaded.', 'success');
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -1118,7 +1177,7 @@
       container.innerHTML = '';
 
       if (customLinks.length === 0) {
-        container.innerHTML = '<div style="font-size:11px; color:#888; text-align:center; padding:8px;">No custom links added yet. Click "+ Add Link" above.</div>';
+        container.innerHTML = '<div style="font-size:11px; color:#888; text-align:center; padding:8px;">No custom links. Click "+ Add Link" above.</div>';
         return;
       }
 
@@ -1126,8 +1185,8 @@
         const row = document.createElement('div');
         row.className = 'link-item-row';
         row.innerHTML = `
-          <input type="text" value="${escapeHtml(link.label)}" placeholder="Label (e.g. GitHub)" style="font-size:11px; padding:4px 6px;" oninput="updateLinkItem(${idx}, 'label', this.value)">
-          <input type="url" value="${escapeHtml(link.url)}" placeholder="https://..." style="font-size:11px; padding:4px 6px;" oninput="updateLinkItem(${idx}, 'url', this.value)">
+          <input type="text" value="${escapeHtml(link.label)}" placeholder="Label (e.g. gResume)" style="font-size:11px; padding:4px 6px;" oninput="updateLinkItem(${idx}, 'label', this.value)">
+          <input type="text" value="${escapeHtml(link.url)}" placeholder="URL or go/ link..." style="font-size:11px; padding:4px 6px;" oninput="updateLinkItem(${idx}, 'url', this.value)">
           <button class="btn-icon" onclick="removeCustomLink(${idx})" title="Remove Link">
             <span class="material-symbols-outlined" style="font-size:15px;">delete</span>
           </button>
@@ -1137,7 +1196,7 @@
     }
 
     function addCustomLink(label = '', url = '') {
-      customLinks.push({ label: label || 'Website', url: url || 'https://' });
+      customLinks.push({ label: label || 'Link', url: url || 'https://' });
       renderCustomLinks();
       updateSignature();
     }
@@ -1155,94 +1214,100 @@
       updateSignature();
     }
 
-    /* Generator Logic: Scaled, Compact, Table-Based Inline HTML for 100% Gmail Compatibility */
+    /* Smart Link URL Transformer (Handles go/ links -> goto2.corp.google.com and https:// normalization) */
+    function normalizeHref(url) {
+      if (!url) return '';
+      url = url.trim();
+
+      // Check if it is a Google go/ link (e.g. "go/hikapil-gresume", "https://go/hikapil-gresume", "http://go/...")
+      const goMatch = url.match(/^(?:https?:\/\/)?go\/([a-zA-Z0-9_\-\.\/]+)$/i);
+      if (goMatch) {
+        return `https://goto2.corp.google.com/${goMatch[1]}`;
+      }
+
+      // Check if it is already a goto2 link
+      if (url.match(/^(?:https?:\/\/)?goto2\.corp\.google\.com\//i)) {
+        if (!url.startsWith('https://') && !url.startsWith('http://')) {
+          return `https://${url}`;
+        }
+        return url;
+      }
+
+      // Prepend https:// if protocol is missing
+      if (!url.match(/^https?:\/\//i) && !url.startsWith('mailto:') && !url.startsWith('tel:')) {
+        return `https://${url}`;
+      }
+
+      return url;
+    }
+
+    /* Generator Logic: Clean, Compact, Table-Based Inline HTML */
     function generateSignatureHTML() {
-      const name = document.getElementById('inpName').value.trim() || 'Alex Johnson';
+      const name = document.getElementById('inpName').value.trim() || 'Kapil Pidhwani';
       const pronouns = document.getElementById('inpPronouns').value.trim();
       const title = document.getElementById('inpTitle').value.trim();
       const dept = document.getElementById('inpDept').value.trim();
       const company = document.getElementById('inpCompany').value.trim();
 
-      // Profile Photo
-      const showPhoto = document.getElementById('chkPhoto').checked;
-      const photoUrl = document.getElementById('inpPhotoUrl').value.trim();
-      const photoShape = document.getElementById('selectPhotoShape').value;
-      const photoSize = parseInt(document.getElementById('selectPhotoSize').value, 10) || 58;
-
-      // Logo
-      const showLogo = document.getElementById('chkLogo').checked;
-      const logoUrl = document.getElementById('inpLogoUrl').value.trim();
-      const logoShape = document.getElementById('selectLogoShape').value;
-      const logoWidth = parseInt(document.getElementById('selectLogoWidth').value, 10) || 85;
-
       const email = document.getElementById('inpEmail').value.trim();
       const phone = document.getElementById('inpPhone').value.trim();
-      const website = document.getElementById('inpWebsite').value.trim();
       const address = document.getElementById('inpAddress').value.trim();
-      const calendar = document.getElementById('inpCalendar').value.trim();
 
       const font = document.getElementById('selectFont').value || 'Arial, sans-serif';
-      const ctaText = document.getElementById('inpCtaText').value.trim();
       const disclaimer = document.getElementById('inpDisclaimer').value.trim();
       const scale = document.getElementById('selectScale').value;
       const color = currentAccentColor;
 
       // Font size scale mapping (Standard is proportional to normal Gmail text)
-      let nameFontSize = '14px';
+      let nameFontSize = '13.5px';
       let titleFontSize = '11px';
-      let bodyFontSize = '11px';
-      let subFontSize = '10px';
+      let bodyFontSize = '10.5px';
+      let subFontSize = '9.5px';
 
       if (scale === 'compact') {
-        nameFontSize = '13px';
-        titleFontSize = '10.5px';
-        bodyFontSize = '10px';
-        subFontSize = '9.5px';
+        nameFontSize = '12.5px';
+        titleFontSize = '10px';
+        bodyFontSize = '9.5px';
+        subFontSize = '9px';
       } else if (scale === 'comfortable') {
-        nameFontSize = '15px';
-        titleFontSize = '12px';
-        bodyFontSize = '11.5px';
-        subFontSize = '10.5px';
+        nameFontSize = '14.5px';
+        titleFontSize = '11.5px';
+        bodyFontSize = '11px';
+        subFontSize = '10px';
       }
 
-      // Format Photo HTML
-      let photoRadius = '50%';
-      if (photoShape === 'rounded') photoRadius = '6px';
-      else if (photoShape === 'square') photoRadius = '0px';
+      // Render Left/Primary Images HTML
+      const leftImagesHtml = signatureImages.map(img => {
+        if (!img.url) return '';
+        let radius = '0px';
+        let width = img.size;
+        let height = img.size;
 
-      const photoImgHtml = (showPhoto && photoUrl) ? `
-        <img src="${escapeHtml(photoUrl)}" alt="${escapeHtml(name)}" width="${photoSize}" height="${photoSize}" style="width:${photoSize}px; height:${photoSize}px; border-radius:${photoRadius}; object-fit:cover; display:block; border:0;" />
-      ` : '';
+        if (img.shape === 'circle') radius = '50%';
+        else if (img.shape === 'rounded') radius = '6px';
+        else if (img.shape === 'rect') {
+          radius = '3px';
+          height = Math.round(img.size * 0.45);
+        } else if (img.shape === 'auto') {
+          return `<img src="${escapeHtml(img.url)}" alt="Logo" width="${width}" style="width:${width}px; height:auto; max-width:140px; display:block; border:0; margin-bottom:4px;" />`;
+        }
 
-      // Format Logo HTML
-      let logoRadius = '0px';
-      let logoHeightStyle = 'auto';
-      if (logoShape === 'circle') logoRadius = '50%';
-      else if (logoShape === 'rounded') logoRadius = '4px';
-
-      const logoImgHtml = (showLogo && logoUrl) ? `
-        <img src="${escapeHtml(logoUrl)}" alt="Logo" width="${logoWidth}" style="width:${logoWidth}px; height:${logoHeightStyle}; border-radius:${logoRadius}; object-fit:contain; display:block; border:0;" />
-      ` : '';
+        return `<img src="${escapeHtml(img.url)}" alt="Profile" width="${width}" height="${height}" style="width:${width}px; height:${height}px; border-radius:${radius}; object-fit:cover; display:block; border:0; margin-bottom:4px;" />`;
+      }).join('');
 
       // Format Dynamic Custom Links HTML
       const linksHtmlArray = customLinks
         .filter(l => l.label && l.url)
-        .map(l => `<a href="${escapeHtml(l.url)}" target="_blank" style="display:inline-block; margin-right:8px; text-decoration:none; color:${color}; font-size:${bodyFontSize}; font-weight:bold;">${escapeHtml(l.label)}</a>`);
+        .map(l => {
+          const href = normalizeHref(l.url);
+          return `<a href="${escapeHtml(href)}" target="_blank" style="display:inline-block; margin-right:8px; text-decoration:none; color:${color}; font-size:${bodyFontSize}; font-weight:bold;">${escapeHtml(l.label)}</a>`;
+        });
 
-      const linksHtml = linksHtmlArray.length > 0 ? `<div style="margin-top:5px; line-height:1.2;">${linksHtmlArray.join('')}</div>` : '';
-
-      // CTA Button HTML
-      const ctaHtml = (ctaText && calendar) ? `
-        <div style="margin-top:7px;">
-          <a href="${escapeHtml(calendar)}" target="_blank" style="display:inline-block; background-color:${color}; color:#ffffff; font-family:${font}; font-size:${subFontSize}; font-weight:bold; padding:4px 10px; border-radius:12px; text-decoration:none;">
-            ${escapeHtml(ctaText)}
-          </a>
-        </div>
-      ` : '';
+      const linksHtml = linksHtmlArray.length > 0 ? `<div style="margin-top:4px; line-height:1.3;">${linksHtmlArray.join('')}</div>` : '';
 
       // Disclaimer HTML
       const disclaimerHtml = disclaimer ? `
-        <div style="margin-top:8px; font-family:${font}; font-size:${subFontSize}; color:#888888; line-height:1.3; border-top:1px dashed #e0e0e0; padding-top:4px; max-width:440px;">
+        <div style="margin-top:7px; font-family:${font}; font-size:${subFontSize}; color:#888888; line-height:1.3; border-top:1px dashed #e0e0e0; padding-top:4px; max-width:440px;">
           ${escapeHtml(disclaimer)}
         </div>
       ` : '';
@@ -1254,12 +1319,12 @@
         return `
           <table cellpadding="0" cellspacing="0" border="0" style="font-family:${font}; font-size:${bodyFontSize}; line-height:1.35; color:#333333; margin:0; padding:0;">
             <tr>
-              ${photoImgHtml ? `<td style="vertical-align:top; padding-right:10px; margin:0;">${photoImgHtml}</td>` : ''}
+              ${leftImagesHtml ? `<td style="vertical-align:top; padding-right:10px; margin:0;">${leftImagesHtml}</td>` : ''}
               <td style="border-left:2.5px solid ${color}; padding-left:10px; vertical-align:top;">
                 <div style="font-size:${nameFontSize}; font-weight:bold; color:#111111; margin-bottom:1px; line-height:1.2;">
                   ${escapeHtml(name)} ${pronouns ? `<span style="font-size:${subFontSize}; font-weight:normal; color:#666666;">(${escapeHtml(pronouns)})</span>` : ''}
                 </div>
-                ${titleDeptCompany ? `<div style="font-size:${titleFontSize}; color:${color}; font-weight:bold; margin-bottom:4px;">${escapeHtml(titleDeptCompany)}</div>` : ''}
+                ${titleDeptCompany ? `<div style="font-size:${titleFontSize}; color:${color}; font-weight:bold; margin-bottom:3px;">${escapeHtml(titleDeptCompany)}</div>` : ''}
                 
                 <table cellpadding="0" cellspacing="0" border="0" style="font-size:${bodyFontSize}; color:#555555; margin-top:2px;">
                   ${email ? `<tr><td style="padding:1px 0;">✉️ <a href="mailto:${escapeHtml(email)}" style="color:#333333; text-decoration:none;">${escapeHtml(email)}</a></td></tr>` : ''}
@@ -1268,8 +1333,6 @@
                 </table>
 
                 ${linksHtml}
-                ${ctaHtml}
-                ${logoImgHtml ? `<div style="margin-top:6px;">${logoImgHtml}</div>` : ''}
               </td>
             </tr>
             ${disclaimerHtml ? `<tr><td colspan="2">${disclaimerHtml}</td></tr>` : ''}
@@ -1282,23 +1345,21 @@
         return `
           <table cellpadding="0" cellspacing="0" border="0" style="font-family:${font}; font-size:${bodyFontSize}; line-height:1.35; color:#333333; margin:0; padding:0;">
             <tr>
-              ${photoImgHtml ? `<td style="vertical-align:middle; padding-right:12px; border-right:1px solid #e0e0e0;">${photoImgHtml}</td>` : ''}
-              <td style="padding-left:${photoImgHtml ? '12px' : '0'}; vertical-align:middle;">
+              ${leftImagesHtml ? `<td style="vertical-align:middle; padding-right:12px; border-right:1px solid #e0e0e0;">${leftImagesHtml}</td>` : ''}
+              <td style="padding-left:${leftImagesHtml ? '12px' : '0'}; vertical-align:middle;">
                 <div style="font-size:${nameFontSize}; font-weight:bold; color:#202124; line-height:1.2;">
                   ${escapeHtml(name)} ${pronouns ? `<span style="font-size:${subFontSize}; font-weight:normal; color:#70757a;">(${escapeHtml(pronouns)})</span>` : ''}
                 </div>
                 <div style="font-size:${titleFontSize}; font-weight:bold; color:${color}; margin-top:1px;">${escapeHtml(title || 'Professional')}</div>
                 <div style="font-size:${subFontSize}; color:#5f6368;">${escapeHtml([dept, company].filter(Boolean).join(' • '))}</div>
                 
-                <div style="margin-top:4px; font-size:${bodyFontSize}; color:#444444;">
+                <div style="margin-top:3px; font-size:${bodyFontSize}; color:#444444;">
                   ${email ? `<span><a href="mailto:${escapeHtml(email)}" style="color:${color}; text-decoration:none;">${escapeHtml(email)}</a></span>` : ''}
                   ${phone ? ` • <span>${escapeHtml(phone)}</span>` : ''}
                   ${address ? `<br><span>${escapeHtml(address)}</span>` : ''}
                 </div>
 
                 ${linksHtml}
-                ${ctaHtml}
-                ${logoImgHtml ? `<div style="margin-top:6px;">${logoImgHtml}</div>` : ''}
               </td>
             </tr>
             ${disclaimerHtml ? `<tr><td colspan="2">${disclaimerHtml}</td></tr>` : ''}
@@ -1309,23 +1370,21 @@
       // Template 3: Tech & Dev
       if (currentTemplate === 'tech') {
         return `
-          <table cellpadding="0" cellspacing="0" border="0" style="font-family:${font}; font-size:${bodyFontSize}; line-height:1.35; color:#24292f; background:#f6f8fa; border:1px solid #d0d7de; border-radius:5px; padding:8px 12px;">
+          <table cellpadding="0" cellspacing="0" border="0" style="font-family:${font}; font-size:${bodyFontSize}; line-height:1.35; color:#24292f; background:#f6f8fa; border:1px solid #d0d7de; border-radius:5px; padding:7px 11px;">
             <tr>
-              ${photoImgHtml ? `<td style="vertical-align:top; padding-right:10px;">${photoImgHtml}</td>` : ''}
+              ${leftImagesHtml ? `<td style="vertical-align:top; padding-right:9px;">${leftImagesHtml}</td>` : ''}
               <td style="vertical-align:top;">
                 <div style="font-size:${nameFontSize}; font-weight:bold; color:#0969da; line-height:1.2;">
-                  ${escapeHtml(name)} <span style="font-family:'Roboto Mono', monospace; font-size:${subFontSize}; background:#ddf4ff; color:#0969da; padding:1px 5px; border-radius:8px; font-weight:normal;">${escapeHtml(title || 'Dev')}</span>
+                  ${escapeHtml(name)} <span style="font-family:'Roboto Mono', monospace; font-size:${subFontSize}; background:#ddf4ff; color:#0969da; padding:1px 5px; border-radius:8px; font-weight:normal;">${escapeHtml(title || 'Apprentice')}</span>
                 </div>
                 <div style="font-size:${subFontSize}; color:#57606a; margin-top:1px;">${escapeHtml([dept, company].filter(Boolean).join(' | '))}</div>
 
-                <div style="margin-top:4px; font-family:'Roboto Mono', monospace; font-size:${bodyFontSize}; color:#24292f;">
+                <div style="margin-top:3px; font-family:'Roboto Mono', monospace; font-size:${bodyFontSize}; color:#24292f;">
                   ${email ? `<div>&gt; email: <a href="mailto:${escapeHtml(email)}" style="color:${color}; text-decoration:none;">${escapeHtml(email)}</a></div>` : ''}
                   ${phone ? `<div>&gt; phone: ${escapeHtml(phone)}</div>` : ''}
                 </div>
 
                 ${linksHtml}
-                ${ctaHtml}
-                ${logoImgHtml ? `<div style="margin-top:5px;">${logoImgHtml}</div>` : ''}
               </td>
             </tr>
             ${disclaimerHtml ? `<tr><td colspan="2">${disclaimerHtml}</td></tr>` : ''}
@@ -1336,7 +1395,7 @@
       // Template 4: Clean Minimalist (Compact horizontal)
       if (currentTemplate === 'minimal') {
         return `
-          <div style="font-family:${font}; font-size:${bodyFontSize}; line-height:1.4; color:#333333; border-top:2px solid ${color}; padding-top:6px; max-width:440px;">
+          <div style="font-family:${font}; font-size:${bodyFontSize}; line-height:1.4; color:#333333; border-top:2px solid ${color}; padding-top:5px; max-width:440px;">
             <div style="font-size:${nameFontSize}; font-weight:bold; color:#111111; line-height:1.2;">
               ${escapeHtml(name)} ${pronouns ? `<span style="font-size:${subFontSize}; font-weight:normal; color:#777777;">(${escapeHtml(pronouns)})</span>` : ''}
               <span style="font-weight:normal; color:#666666; font-size:${titleFontSize};"> | ${escapeHtml([title, company].filter(Boolean).join(', '))}</span>
@@ -1344,11 +1403,9 @@
             <div style="font-size:${bodyFontSize}; color:#555555; margin-top:2px;">
               ${email ? `<a href="mailto:${escapeHtml(email)}" style="color:${color}; text-decoration:none;">${escapeHtml(email)}</a>` : ''}
               ${phone ? ` • ${escapeHtml(phone)}` : ''}
-              ${website ? ` • <a href="${escapeHtml(website)}" style="color:${color}; text-decoration:none;">${escapeHtml(website)}</a>` : ''}
+              ${address ? ` • ${escapeHtml(address)}` : ''}
             </div>
             ${linksHtml}
-            ${ctaHtml}
-            ${logoImgHtml ? `<div style="margin-top:5px;">${logoImgHtml}</div>` : ''}
             ${disclaimerHtml}
           </div>
         `;
@@ -1365,10 +1422,10 @@
               </td>
             </tr>
             <tr>
-              <td style="border:1px solid #dadce0; border-top:none; border-radius:0 0 5px 5px; padding:8px 10px; background:#ffffff;">
+              <td style="border:1px solid #dadce0; border-top:none; border-radius:0 0 5px 5px; padding:7px 10px; background:#ffffff;">
                 <table cellpadding="0" cellspacing="0" border="0">
                   <tr>
-                    ${photoImgHtml ? `<td style="vertical-align:top; padding-right:10px;">${photoImgHtml}</td>` : ''}
+                    ${leftImagesHtml ? `<td style="vertical-align:top; padding-right:10px;">${leftImagesHtml}</td>` : ''}
                     <td style="vertical-align:top;">
                       <div style="font-size:${bodyFontSize}; color:#555555;">
                         ${email ? `<div>✉️ <a href="mailto:${escapeHtml(email)}" style="color:${color}; text-decoration:none;">${escapeHtml(email)}</a></div>` : ''}
@@ -1376,8 +1433,6 @@
                         ${address ? `<div>🏢 ${escapeHtml(address)}</div>` : ''}
                       </div>
                       ${linksHtml}
-                      ${ctaHtml}
-                      ${logoImgHtml ? `<div style="margin-top:5px;">${logoImgHtml}</div>` : ''}
                     </td>
                   </tr>
                 </table>
@@ -1392,16 +1447,15 @@
       return `
         <table cellpadding="0" cellspacing="0" border="0" style="font-family:${font}; font-size:${bodyFontSize}; line-height:1.35; color:#333333; margin:0; padding:0;">
           <tr>
-            ${photoImgHtml ? `<td style="vertical-align:middle; padding-right:8px;">${photoImgHtml}</td>` : ''}
+            ${leftImagesHtml ? `<td style="vertical-align:middle; padding-right:8px;">${leftImagesHtml}</td>` : ''}
             <td style="vertical-align:middle;">
               <div style="font-size:${nameFontSize}; font-weight:bold; color:#111111; line-height:1.2;">${escapeHtml(name)}</div>
               <div style="color:${color}; font-size:${titleFontSize}; font-weight:bold;">${escapeHtml([title, company].filter(Boolean).join(' • '))}</div>
-              <div style="color:#666666; font-size:${bodyFontSize}; margin-top:2px;">
+              <div style="color:#666666; font-size:${bodyFontSize}; margin-top:1px;">
                 ${email ? `<a href="mailto:${escapeHtml(email)}" style="color:#555555; text-decoration:none;">${escapeHtml(email)}</a>` : ''}
                 ${phone ? ` • ${escapeHtml(phone)}` : ''}
               </div>
               ${linksHtml}
-              ${logoImgHtml ? `<div style="margin-top:4px;">${logoImgHtml}</div>` : ''}
             </td>
           </tr>
           ${disclaimerHtml ? `<tr><td colspan="2">${disclaimerHtml}</td></tr>` : ''}
@@ -1490,27 +1544,36 @@
     }
 
     function loadSampleData() {
-      document.getElementById('inpName').value = 'Kapil Sharma';
+      document.getElementById('inpName').value = 'Kapil Pidhwani';
       document.getElementById('inpPronouns').value = 'he/him';
-      document.getElementById('inpTitle').value = 'Product Lead & Developer';
-      document.getElementById('inpDept').value = 'Marketing & Useful Tools';
-      document.getElementById('inpCompany').value = 'Google LLC';
-      document.getElementById('inpPhotoUrl').value = 'https://lh3.googleusercontent.com/a/default-user';
-      document.getElementById('chkPhoto').checked = true;
+      document.getElementById('inpTitle').value = 'Apprentice';
+      document.getElementById('inpDept').value = 'SSG IN, GCS';
+      document.getElementById('inpCompany').value = 'Google India';
       document.getElementById('inpEmail').value = 'hikapil@google.com';
-      document.getElementById('inpPhone').value = '+1 (650) 253-0000';
-      document.getElementById('inpWebsite').value = 'https://moma.corp.google.com/person/hikapil';
-      document.getElementById('inpAddress').value = 'Google HQ, Mountain View, CA';
-      document.getElementById('inpCalendar').value = 'https://calendar.google.com';
-      document.getElementById('inpCtaText').value = '📅 Schedule a Quick Meeting';
-      customLinks = [
-        { label: 'LinkedIn', url: 'https://linkedin.com' },
-        { label: 'GitHub', url: 'https://github.com/kapildoesmarketing' },
-        { label: 'Portfolio', url: 'https://moma.corp.google.com/person/hikapil' }
+      document.getElementById('inpPhone').value = '+918329870799';
+      document.getElementById('inpAddress').value = 'Google Gurgaon, Haryana, India';
+      document.getElementById('inpDisclaimer').value = 'This email may contain confidential information. If received in error, please notify sender.';
+
+      signatureImages = [
+        {
+          id: '1',
+          url: 'https://lh3.googleusercontent.com/a/default-user',
+          shape: 'circle',
+          size: 52,
+          position: 'left'
+        }
       ];
+
+      customLinks = [
+        { label: 'LinkedIn', url: 'https://linkedin.com/in/kapilpidhwani' },
+        { label: 'gResume', url: 'https://go/hikapil-gResume' },
+        { label: 'View My Toolkit', url: 'https://go/usefultools' }
+      ];
+
+      renderImagesManager();
       renderCustomLinks();
       updateSignature();
-      showStatus('Sample profile loaded.', 'success');
+      showStatus('Kapil\'s profile data loaded.', 'success');
     }
 
     function triggerSuccessButton(iconId, textId, successText) {
