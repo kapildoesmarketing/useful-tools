@@ -1,64 +1,112 @@
 ================================================================================
-💡 USEFUL TOOLS - COMPREHENSIVE EXPANSION ROADMAP & TOOL ARSENAL
+💡 USEFUL TOOLS - ULTIMATE COMPREHENSIVE ROADMAP & TOOL ARSENAL
 ================================================================================
 
-A categorized, client-side tool backlog tailored for go/usefultools.
-All tools are designed to be 100% client-side (zero backend dependencies,
-confidential data stays in browser memory), instant-loading, and embeddable
-into Google Sites with standard header chips, tactile buttons, and clean UI.
+A master catalog of 160+ creative, practical, and high-impact tool ideas
+across 8 categories. All tools are strictly 100% client-side (no server
+dependencies, private internal data never leaves browser memory), instant-loading,
+and tailored for Google Sites embedding with standard header action chips.
 
 ================================================================================
-TABLE OF CONTENTS
+TABLE OF CONTENTS (20+ Tools per Category)
 ================================================================================
-1. 📄 PDF Tools
-2. 🛠️ Developer & Code Tools
-3. 🖼️ Image & Design Tools
-4. 🔊 Audio & Speech Tools
-5. 🎬 Video & Animation Tools
-6. 📝 Text, Data & Format Tools
-7. 🧰 General Utility & Productivity Tools
-8. 🎮 Fun, Interactive & Team Tools
+1. 📄 PDF Tools (20 Ideas)
+2. 🛠️ Developer & Code Tools (20 Ideas)
+3. 🖼️ Image & Design Tools (20 Ideas)
+4. 🔊 Audio & Speech Tools (20 Ideas)
+5. 🎬 Video & Animation Tools (20 Ideas)
+6. 📝 Text, Data & Format Tools (20 Ideas)
+7. 🧰 General Utility & Productivity Tools (20 Ideas)
+8. 🎮 Fun, Interactive & Team Tools (20 Ideas)
 
 ================================================================================
 1. 📄 PDF TOOLS
 ================================================================================
 
-1.1. PDF Watermark & Page Numbering Tool
-     - Text Watermark: add customizable text ("CONFIDENTIAL", "DRAFT", "COPY") with opacity, rotation angle, font size, and color controls.
-     - Image Watermark: stamp transparent PNG logos, company badges, or seals onto pages.
-     - Page Numbering: add headers/footers with dynamic formats ("Page X of Y", "X", "- X -"), position selectors (Top/Bottom, Left/Center/Right), and page range exclusions (e.g. skip cover page).
+1.1. PDF Watermark & Stamp Studio
+     - Text Watermark: custom text ("CONFIDENTIAL", "DRAFT", "INTERNAL USE ONLY") with opacity, rotation angle (45°, -45°), font size, and color.
+     - Image Watermark: stamp transparent PNG logos, company seals, or department badges onto pages.
+     - Position grid (Center, Top-Left, Bottom-Right, Tile across page) and page range selection.
 
-1.2. PDF Signature, Stamp & Annotation Studio
-     - Draw a digital signature on canvas, type signature with cursive fonts, or upload a signature image.
+1.2. PDF Page Numbering & Header/Footer Tool
+     - Add dynamic page numbers with formats: "Page X of Y", "X", "- X -", "Page X".
+     - Customizable position (Top/Bottom, Left/Center/Right) with margin offsets and font size.
+     - Exclude specific pages (e.g. skip cover page, skip table of contents).
+
+1.3. PDF Signature & Date Stamp Studio
+     - Draw a digital signature on canvas, type signature with cursive calligraphy fonts, or upload a signature image.
      - Position, scale, and place signatures, date stamps, and "APPROVED" / "PAID" / "CONFIDENTIAL" badges on any page.
-     - Add text notes, highlight boxes, and rectangular markup.
      - Flatten and export signed documents client-side without quality loss.
 
-1.3. PDF Redactor & Sanitizer (Permanent Text/Area Blackout)
-     - Securely redact sensitive personal info, credit cards, SSNs, or proprietary data by drawing blackout rectangles over pages.
+1.4. PDF Redactor & Sanitizer (Permanent Text/Area Blackout)
+     - Securely redact sensitive personal info, credit cards, employee IDs, or proprietary data by drawing blackout rectangles over pages.
      - True client-side flattening/rasterization of redacted sections to guarantee text underneath cannot be copied or recovered.
-     - Built-in keyword search & redact helper.
+     - Built-in keyword search & auto-redact helper.
 
-1.4. PDF OCR & Searchable Text Extractor
+1.5. PDF OCR & Searchable Text Extractor
      - Extract selectable digital text from PDF documents.
      - Scanned Document OCR: run 100% in-browser OCR (via Tesseract.js) to recognize text from scanned paper PDFs or photos without uploading files to any external server.
      - Export recognized text as TXT, Markdown, or Searchable PDF.
 
-1.5. PDF Grayscale & Print Ink Saver
+1.6. PDF Grayscale & Print Ink Saver
      - Convert color PDFs into clean monochrome or high-contrast grayscale to save printer ink and toner.
      - Brightness, contrast, and threshold adjustment sliders for enhancing faint scanned receipts or documents.
 
-1.6. PDF N-Up & Booklet Layout Creator (2-Up, 4-Up, Handouts)
+1.7. PDF N-Up & Booklet Layout Creator (2-Up, 4-Up, Handouts)
      - Combine multiple PDF pages into a single sheet (2 pages per sheet, 4 pages per sheet, or presentation handout style).
      - Booklet imposition mode: rearranges pages into printable double-sided folded booklet sequence.
 
-1.7. PDF Form Filler & Data Exporter
+1.8. PDF Form Filler & Data Exporter
      - View and fill interactive AcroForm fields (text fields, checkboxes, radio buttons, dropdowns) directly in the browser.
      - Export completed PDF or extract all form field data into JSON/CSV spreadsheets.
 
-1.8. PDF Bookmark & Table of Contents Editor
+1.9. PDF Bookmark & Table of Contents Editor
      - View, add, edit, and organize hierarchical PDF document outlines and clickable bookmarks.
      - Auto-generate bookmarks from page titles or document headings.
+
+1.10. PDF Page Margin & Padding Adjuster
+      - Add extra margins/padding to PDF pages to allow room for hole punching, binding, or handwritten notes.
+      - Scale down page content proportionally to fit inside new printable borders.
+
+1.11. PDF Page Dimension Resizer & Standardizer
+      - Convert mixed page size PDFs into uniform standard dimensions (Letter to A4, A4 to Letter, Legal, Tabloid).
+      - Scale or center content with white border filling.
+
+1.12. PDF Color Inverter & Dark Mode Generator
+      - Invert document colors (black background, white text) for comfortable nighttime reading or high-contrast accessibility.
+      - Preserves image contrast while transforming text and vector line art.
+
+1.13. PDF Attachment Extractor & Embedder
+      - Inspect, extract, and download files embedded inside PDF container streams.
+      - Attach auxiliary files (spreadsheets, source code, images) into a PDF document client-side.
+
+1.14. PDF Blank Page Detector & Remover
+      - Automatically scan multi-page PDFs to detect blank or nearly blank pages (from double-sided scanning).
+      - Review flagged blank pages in a thumbnail preview and delete them in 1 click.
+
+1.15. PDF Layer & Optional Content Group (OCG) Inspector
+      - View, toggle visibility, and flatten architectural or design PDF layers (CAD drawings, multilingual layers).
+      - Export layer-flattened PDFs for standard viewers.
+
+1.16. PDF Font Inspector & Text Glyph Analyzer
+      - Analyze embedded fonts within a PDF (TrueType, Type 1, OpenType, Subsets).
+      - Check whether fonts are fully embedded or substituted by the viewer.
+
+1.17. PDF Bates Numbering & Legal Document Stamper
+      - Add sequential Bates stamping for legal discovery and audit documents (e.g. "CASE-001245", "EXHIBIT-A-001").
+      - Configurable prefix, suffix, digit padding (e.g. 6 digits), and placement coordinates.
+
+1.18. PDF Visual Diff & Side-by-Side Page Compare
+      - Compare two revisions of a PDF side-by-side or with an overlaid pixel difference slider.
+      - Highlights modified paragraphs, shifted graphics, and deleted elements in red/green.
+
+1.19. PDF Link & Annotation Verifier
+      - Scan all hyperlinks inside a PDF document to verify URL syntax and anchor targets.
+      - Edit or fix broken URLs and internal page jump links.
+
+1.20. PDF Presentation & Kiosk Slideshow Viewer
+      - Fullscreen presentation mode for PDF slide decks with keyboard slide navigation (Arrow keys, Space).
+      - Built-in laser pointer effect, slide notes panel, and timer overlay.
 
 ================================================================================
 2. 🛠️ DEVELOPER & CODE TOOLS
@@ -112,6 +160,46 @@ TABLE OF CONTENTS
       - Live side-by-side converter between GitHub Flavored Markdown and clean semantic HTML.
       - Handles tables, code blocks with syntax highlighting, blockquotes, task lists, and footnotes.
 
+2.11. CSS Grid & Flexbox Layout Sandbox
+      - Interactive playground to visualize CSS Grid areas, gap, justify-content, align-items, flex-grow, and flex-shrink.
+      - Visual drag handles to resize grid tracks and generate production-ready CSS.
+
+2.12. RegExp Visualizer & Railroad Diagram Generator
+      - Input any Regular Expression to generate an intuitive visual railroad diagram explaining matching logic, capture groups, and character classes.
+      - Test matching strings against regex with live color highlights.
+
+2.13. HTML Entity & Special Character Encoder/Decoder
+      - Convert special characters, accents, and symbols into HTML entities (`&amp;`, `&lt;`, `&#x2F;`, `&copy;`).
+      - Searchable reference table of common typographic and mathematical entities.
+
+2.14. CSS Triangle, Tooltip & Shape Generator
+      - Create pure CSS geometric shapes (triangles, speech bubble pointers, trapezoids, ribbons) using CSS borders and clip-paths.
+      - Live visual preview with copy-ready CSS.
+
+2.15. Unix Timestamp & Epoch Date Converter
+      - Bidirectional converter between Unix timestamps (seconds & milliseconds) and human-readable UTC/local date strings.
+      - Relative time calculator ("3 days ago", "in 2 hours") with timezone selector.
+
+2.16. SemVer (Semantic Versioning) Calculator & Range Tester
+      - Test npm/pip semver ranges (`^1.2.0`, `~2.0.1`, `>=3.0.0 <4.0.0`) against version numbers.
+      - Compute next Major, Minor, Patch, and Pre-release version increments.
+
+2.17. CSS Clamp() & Fluid Typography Calculator
+      - Generate responsive `font-size: clamp(min, preferred, max)` CSS for smooth viewport-based scaling.
+      - Interactive viewport width slider to visualize typography scaling across mobile, tablet, and desktop.
+
+2.18. URL Slug & Query String Parameter Builder
+      - Construct and parse complex URLs with query parameters, path variables, and hash fragments.
+      - Encode/decode URI components with clean formatting.
+
+2.19. Dockerfile & Shell Script Linter / Formatter
+      - Basic syntax validation, common antipattern checks, and clean formatting for Dockerfiles and Bash scripts.
+      - Explanations for common shell traps and security best practices.
+
+2.20. Git Command & Commit Message Builder
+      - Interactive UI to construct complex Git commands (interactive rebase, cherry-pick, sparse checkout, submodule update).
+      - Conventional Commits template builder (`feat(scope): ...`, `fix(scope): ...`).
+
 ================================================================================
 3. 🖼️ IMAGE & DESIGN TOOLS
 ================================================================================
@@ -149,6 +237,59 @@ TABLE OF CONTENTS
      - Stamp company logos, transparent PNG watermarks, or custom copyright text across single or multiple images.
      - Fine-tune watermark position (9-point anchor grid), opacity, rotation, and margin spacing.
 
+3.8. Favicon & App Icon Pack Generator
+     - Upload a single high-resolution square logo (PNG/SVG).
+     - Automatically generates a complete package: `favicon.ico`, `favicon-16x16.png`, `favicon-32x32.png`, `apple-touch-icon.png`, `android-chrome-192x192.png`, and `site.webmanifest`.
+     - Download all icons in a structured ZIP archive with HTML `<link>` snippet.
+
+3.9. Image Color Inverter & Solarizer
+     - Invert colors of diagrams, floor plans, and dark mode screenshots into clean white-background printables.
+     - Solarization and threshold filters for high-contrast artistic effects.
+
+3.10. ASCII Art & Text Banner Generator
+      - Convert uploaded photos into detailed text-based ASCII art with adjustable character density and contrast.
+      - Copy ASCII art as plain text, HTML with colored spans, or PNG graphic.
+
+3.11. Image Blur & Sensitive Data Pixelator
+      - Draw blur or pixelation rectangles over passwords, API keys, faces, or license plates in screenshots.
+      - Adjustable blur radius and mosaic pixel size with instant PNG export.
+
+3.12. Image Comparison Slider (Before / After)
+      - Interactive split-view curtain slider to compare two images (e.g. design mockup vs implemented UI, before/after retouched photo).
+      - Export animated side-by-side GIF or high-res comparison screenshot.
+
+3.13. SVG to PNG/JPEG/WebP Batch Exporter
+      - Convert vector SVGs to raster images with custom target resolution multipliers (1x, 2x, 4x for Retina displays).
+      - Set background transparency or custom solid background color.
+
+3.14. Image Aspect Ratio Fitter & Letterboxer
+      - Fit non-standard photos into standard aspect ratios (16:9, 1:1, 4:3) by adding blurred background padding or solid color bars.
+      - Prevents cropping important content for presentation slides and social banners.
+
+3.15. Gradient Wallpaper & Social Banner Maker
+      - Design beautiful multi-stop linear and radial gradients with noise grain textures.
+      - Presets for popular modern color schemes (Sunset, Cosmic, Cyberpunk, Aurora).
+      - Export high-resolution 4K wallpapers and banner dimensions.
+
+3.16. Photo Collage & Split-Screen Maker
+      - Arrange 2, 3, 4, or 6 photos into clean grid collage templates (side-by-side, quad, asymmetric).
+      - Customize border width, corner roundness, and gap spacing.
+
+3.17. Image Color Replacer & Tint Tool
+      - Pick any color in an image and swap it with a new target hue (e.g. change blue shirt to red).
+      - Adjustable tolerance slider to match color shades smoothly.
+
+3.18. Pattern & Texture Tile Generator
+      - Create seamless repeating background patterns (geometric dots, stripes, herringbone, isometric cubes).
+      - Export seamless tileable PNG and CSS `background-image` code.
+
+3.19. Photo Perspective & Skew Correction Tool
+      - Correct distorted photos of whiteboards, document papers, or presentation screens taken from an angle.
+      - 4-point corner pin perspective warp to straighten documents into flat rectangular images.
+
+3.20. Image File Size & Format Comparison Studio
+      - Load an image and preview simultaneous compression outputs (JPEG, WebP, PNG, AVIF) with side-by-side visual quality and byte size stats.
+
 ================================================================================
 4. 🔊 AUDIO & SPEECH TOOLS
 ================================================================================
@@ -181,6 +322,62 @@ TABLE OF CONTENTS
      - Detect and automatically trim silent gaps and dead air from voice recordings, presentations, or podcast interviews.
      - Adjustable decibel threshold and minimum silence duration sliders.
 
+4.7. Metronome & BPM Tap Tempo Finder
+     - Precise musical metronome with customizable BPM (20 - 300), time signatures (4/4, 3/4, 6/8), and accent clicks.
+     - Tap Tempo button: tap any key to rhythmic music to detect exact BPM.
+
+4.8. Audio Equalizer & 10-Band Graphic EQ
+     - 10-band audio frequency equalizer (32Hz to 16kHz) with presets (Bass Boost, Vocal Clarity, Podcast Enhance, Treble Boost).
+     - Live spectrum analyzer visualizer during playback and download.
+
+4.9. Audio Fade In & Fade Out Editor
+     - Add smooth linear or exponential audio fade-ins and fade-outs to avoid abrupt start/end clicks in audio tracks.
+     - Visual waveform slider to configure fade duration in seconds.
+
+4.10. Audio Stereo Channel Splitter & Inverter
+      - Split stereo audio into isolated Left channel and Right channel mono tracks.
+      - Phase inverter tool for vocal cancellation/karaoke experiments.
+
+4.11. Audio Volume Booster & Gain Controller
+      - Boost quiet recordings and audio files by up to +20dB with built-in limiter to prevent clipping and distortion.
+      - Live peak VU meter and instant download.
+
+4.12. Text-to-Speech (TTS) Voice Synthesizer
+      - Convert written text into spoken audio using browser-native speech synthesis voices.
+      - Customize pitch, rate, volume, and voice accents (US, UK, Australia, India, etc.).
+      - Record synthesized speech to WAV file.
+
+4.13. Audio Morse Code Transmitter & Decoder
+      - Convert text into audible Morse code beeps (with adjustable WPM speed and frequency pitch).
+      - Visual light flash and sound playback with audio file export.
+
+4.14. White, Pink & Brown Noise Generator
+      - Generate soothing ambient noise variants (White noise for masking, Pink noise for focus, Brown noise for deep relaxation).
+      - Sleep timer and mix controls.
+
+4.15. Audio Pitch & Key Transposer
+      - Transpose musical key of audio tracks up or down by semitones without changing tempo/speed.
+      - Ideal for singers adjusting backing tracks to their vocal range.
+
+4.16. Audio Bitcrusher & Lo-Fi Vinyl Effect
+      - Add vintage vinyl crackle, tape hiss, and 8-bit/12-bit lo-fi digital downsampling to modern recordings.
+      - Warm analog saturation and flutter controls.
+
+4.17. Audio Dual Track Mixer & Crossfader
+      - Load two audio tracks simultaneously with DJ-style crossfader slider, volume faders, and synchronized playback.
+      - Export merged mixdown to audio file.
+
+4.18. Sound Effect Soundboard Studio
+      - Customizable 16-pad soundboard: assign audio files to keyboard hotkeys (1-9, Q-W-E-R).
+      - Low-latency playback for live presentations, podcasts, and team demos.
+
+4.19. Audio BPM & Beat Stutter Looper
+      - Create 1/2-beat, 1/4-beat, and 1/8-beat stutter and roll loop effects on loaded audio tracks in real time.
+      - Great for electronic music transitions.
+
+4.20. Audio Vocal Remover & Center-Channel Extractor
+      - Attenuate center-panned lead vocals using phase subtraction to create instrumental backing tracks.
+
 ================================================================================
 5. 🎬 VIDEO & ANIMATION TOOLS
 ================================================================================
@@ -206,6 +403,64 @@ TABLE OF CONTENTS
 
 5.5. Video Rotator & Flipper
      - Fix smartphone videos recorded in wrong orientation: 90° Clockwise, 90° Counter-Clockwise, 180°, and Horizontal Flip (Mirror).
+
+5.6. Video Muter & Audio Stripper
+     - Remove background audio, wind noise, or sensitive conversations from video clips in 1 click.
+     - Fast client-side export without re-encoding video stream when possible.
+
+5.7. Video Reverse & Backwards Playback Creator
+     - Reverse video frames to create fun boomerang and backwards motion effects.
+     - Download reversed video as MP4 or GIF.
+
+5.8. Video Watermark & Overlay Stamper
+     - Add persistent company logo, channel bug, or timestamp overlay in video corners.
+     - Adjust opacity, padding, and size.
+
+5.9. Screen & Webcam Recorder Studio
+     - Record entire screen, specific application window, or browser tab with optional webcam picture-in-picture circle.
+     - Include microphone narration and system audio.
+     - Instant in-browser preview and WebM/MP4 download without any third-party software installation.
+
+5.10. Video Loop & Boomerang Creator
+      - Select a 1-5 second segment from a video to loop forward and backward seamlessly.
+      - Export as loopable video or animated GIF.
+
+5.11. Video Color Filters & Brightness Adjuster
+      - Apply real-time visual filters to video: Brightness, Contrast, Saturation, Vintage Film, Grayscale, and Sepia.
+      - Export color-graded video clip.
+
+5.12. Video Thumbnail & Cover Image Chooser
+      - Scrub video to pick the most representative frame for video cover thumbnails.
+      - Add overlay title text and badges, and export as 1280x720 JPEG thumbnail.
+
+5.13. Video Aspect Ratio Letterbox / Pillarbox Tool
+      - Fit vertical videos onto standard 16:9 displays by adding blurred background sidebars.
+      - Eliminates ugly black bars with aesthetic ambient blur.
+
+5.14. Video Volume Normalizer & Audio Booster
+      - Boost quiet video audio tracks or normalize audio levels across multiple recorded clips.
+
+5.15. Video Metadata & Codec Stream Inspector
+      - Inspect video container details: Codec (H.264, VP9, AV1), Bitrate, Framerate (FPS), Color space, Audio sample rate, and Duration.
+
+5.16. Stop-Motion & Image Sequence to Video Maker
+      - Upload a batch of sequential photos to assemble into a smooth stop-motion animation video.
+      - Configure framerate (1 to 60 FPS) and resolution.
+
+5.17. Video Green Screen / Chroma Key Compositor
+      - Replace solid green or blue backgrounds in webcam or video clips with custom image/video backgrounds.
+      - Tolerance and smoothness sliders.
+
+5.18. Video Splitter & Chapter Segmenter
+      - Split long videos into smaller 30-second or 60-second clips for presentations or social stories.
+      - Download all clips in a single ZIP.
+
+5.19. Teleprompter & Video Presentation Studio
+      - Smoothly scrolling teleprompter script overlaid next to your webcam feed for recording presentations and pitches.
+      - Adjustable scroll speed, font size, and mirror mode.
+
+5.20. Video GIF Memer & Caption Overlay
+      - Convert video clip to GIF with classic top/bottom impact meme caption banners.
 
 ================================================================================
 6. 📝 TEXT, DATA & FORMAT TOOLS
@@ -237,8 +492,51 @@ TABLE OF CONTENTS
      - Copy and paste cells directly from Google Sheets or Microsoft Excel.
      - Generates clean, semantic HTML `<table>` code with optional CSS styling classes and header rows.
 
-6.7. Text Case & Formatting Powerhouse
+6.7. Comprehensive Text Case & Formatting Powerhouse
      - Comprehensive batch case converter: Sentence case, Title Case (AP Style & Chicago Manual), UPPERCASE, lowercase, camelCase, PascalCase, snake_case, kebab-case, CONSTANT_CASE, and Alternating CaSe.
+
+6.8. Numbered List & Batch Prefix/Suffix Appender
+     - Add line numbers (1., 2., 3., Roman numerals), custom prefixes (e.g. `const `, `https://`), and suffixes (e.g. `;`, `",`) to thousands of lines in 1 click.
+
+6.9. Text Anonymizer & PII Data Masker
+     - Automatically detect and mask Personally Identifiable Information (PII) in text logs: Email addresses, IP addresses, Phone numbers, Credit cards, and SSNs.
+     - Replace with synthetic placeholders (`[EMAIL_REDACTED]`, `[IP_1]`).
+
+6.10. Markdown Table Generator & Cell Formatter
+      - Interactive visual grid editor (like a mini spreadsheet) to create and format clean Markdown tables with column alignments (Left, Center, Right).
+      - Copy markdown code or HTML.
+
+6.11. Whitespace, Line Break & Indentation Sanitizer
+      - Strip trailing spaces, convert tabs to spaces (or spaces to tabs), remove double line breaks, and normalize Windows (CRLF) vs Unix (LF) line endings.
+
+6.12. Text Frequency & Keyword Density Analyzer
+      - Analyze most frequent words, 2-word phrases (bigrams), character counts, reading time, and readability score (Flesch-Kincaid grade).
+
+6.13. RegEx Text Search & Replace Studio
+      - Perform complex pattern-based search and replace operations across multi-line text with capture group replacement (`$1`, `$2`).
+      - Real-time highlight of all matched occurrences.
+
+6.14. Character & Unicode Symbol Explorer
+      - Search and copy special unicode symbols, arrows (→, ↳, ⚡), math symbols (∑, √, π), currency, and typography glyphs.
+
+6.15. Text Difference & Merge Comparison Tool (Side-by-Side)
+      - Visual diff engine highlighting added, removed, and modified lines/words between two text documents.
+
+6.16. Random String & Test Data Generator
+      - Generate realistic fake test data: Names, Email addresses, Phone numbers, Dates, Addresses, and Lorem Ipsum paragraphs for UI mockups.
+
+6.17. Roman Numeral & Number to Words Converter
+      - Convert numbers to Roman numerals (e.g. 2026 -> MMXXVI) and numbers to English words (e.g. $1,450.50 -> "One thousand four hundred fifty dollars and fifty cents").
+
+6.18. URL Parameter & Query String Parser
+      - Paste complex URLs to parse all query parameters into an editable key-value table.
+      - Edit values and reconstruct the updated URL with automatic URL encoding.
+
+6.19. String Byte Size & Encoding Inspector
+      - Inspect exact byte size of text across UTF-8, UTF-16, ASCII, and ISO-8859-1 encodings.
+
+6.20. Columnar Data Transposer (Rows to Columns)
+      - Transpose CSV or TSV grid data: swap rows into columns and columns into rows.
 
 ================================================================================
 7. 🧰 GENERAL UTILITY & PRODUCTIVITY TOOLS
@@ -282,6 +580,46 @@ TABLE OF CONTENTS
 7.7. Decision Matrix & Weighted Scoring Tool
      - Enter choices and criteria with custom weight percentages (e.g. Cost, Ease of Use, Speed).
      - Score each option from 1-10 to automatically calculate the highest-ranked winner with a visual bar chart breakdown.
+
+7.8. Interactive Calculator & Currency Math
+     - Scientific & financial calculator with calculation history log and keyboard input support.
+
+7.9. Sticky Notes & Scratchpad Board
+     - Clean, colorful draggable sticky notes canvas with auto-saving to local storage.
+     - Color tags, markdown formatting, and export notes as TXT.
+
+7.10. Habit Tracker & Daily Streak Counter
+      - Lightweight daily habit checklist with visual streak counters and completion heatmaps saved locally in browser memory.
+
+7.11. Password Strength Checker & Entropy Meter
+      - Real-time password vulnerability analyzer: checks character entropy, dictionary words, common substitutions, and estimated crack time without sending passwords over network.
+
+7.12. Kanban Board & Task Sprint Planner
+      - Drag-and-drop Kanban columns (To Do, In Progress, Review, Done) with task cards, tags, and local storage persistence.
+
+7.13. Tip & Bill Splitter with Custom Shares
+      - Split restaurant bills, calculate tip percentages (15%, 18%, 20%), and calculate unequal itemized shares among group members.
+
+7.14. BMI & Caloric Energy Calculator
+      - Body Mass Index (BMI) and Basal Metabolic Rate (BMR) health metrics calculator with metric and imperial units.
+
+7.15. Loan & Mortgage Amortization Schedule Calculator
+      - Compute monthly loan payments, total interest paid, and full month-by-month amortization schedule with interactive chart.
+
+7.16. Event Countdown & Milestone Clock
+      - Fullscreen animated countdown clocks for project launches, holidays, birthdays, or company offsites.
+
+7.17. Fuel & Trip Cost Calculator
+      - Estimate gasoline/fuel consumption and travel cost based on distance, vehicle MPG/efficiency, and gas price.
+
+7.18. Age & Milestone Date Difference Calculator
+      - Calculate exact age in years, months, days, hours, and minutes, plus upcoming milestone birthdays (e.g. 10,000th day alive).
+
+7.19. Simple Barcode Generator (Code 128, EAN, UPC)
+      - Generate scannable 1D barcodes for inventory, asset tagging, and serial numbers with PNG/SVG export.
+
+7.20. Clipboard History & Snippet Vault
+      - Local in-browser snippet library to save and 1-click copy frequently used email replies, links, code snippets, and templates.
 
 ================================================================================
 8. 🎮 FUN, INTERACTIVE & TEAM TOOLS
@@ -345,5 +683,39 @@ TABLE OF CONTENTS
 8.12. Fake Hacker Terminal & Sci-Fi Matrix Typer
       - Fun novelty tool: smash random keys on your keyboard to output realistic hacker code on screen.
       - "ACCESS GRANTED" flashing alarms, radar animations, and matrix digital rain.
+
+8.13. Tic-Tac-Toe & Connect Four (AI + Local 2-Player)
+      - Play against an unbeatable/smart Minimax AI or play with a colleague locally on the same screen.
+      - Custom board themes, score counters, and sound effects.
+
+8.14. Reaction Time & Aim Precision Trainer
+      - Measure visual reaction speed in milliseconds (click when screen turns green).
+      - Target clicking aim trainer with moving targets to test mouse precision.
+      - Statistics chart comparing your speed against global benchmarks.
+
+8.15. Meme Generator & Poster Studio
+      - Pick popular meme templates or upload your own image.
+      - Add draggable/resizable impact text with customizable outlines, stickers, and emoji overlays.
+      - Instant watermark-free PNG download.
+
+8.16. Magic 8-Ball & Fortune Cookie
+      - 3D floating 8-ball with mystical floating answers and fortune cookie cracker.
+      - Custom answers mode: enter your own secret funny responses for team inside jokes.
+
+8.17. Typing Speed Test & Syntax Code Racer
+      - Test words-per-minute (WPM) and accuracy on English prose or code syntax (JavaScript, Python, C++, HTML).
+      - Live speed graphs and error heatmaps.
+
+8.18. Sudoku Puzzle Generator & Solver
+      - Generate playable Sudoku puzzles across Easy, Medium, Hard, and Expert levels.
+      - Built-in pencil notes, conflict highlighter, and step-by-step solver engine.
+
+8.19. Memory Card Flip Matching Game
+      - Classic memory card matching game with custom card themes (Tech Logos, Emojis, Cute Animals, Country Flags).
+      - Move counter, stopwatch, and star ratings.
+
+8.20. Soundboard & Instant Sound Effects Studio
+      - Interactive grid of funny workplace & pop culture sound effects (Airhorn, Rimshot, Sad Trombone, Applause, Correct Chime, Buzzer).
+      - Keyboard hotkey triggers for video calls and team presentations.
 
 ================================================================================
