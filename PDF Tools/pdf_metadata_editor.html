@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Metadata & Document Properties Editor</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+  <!-- PDF.js library via cdnjs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <!-- pdf-lib library via cdnjs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+    }
+
+    h1, h2, h3, h4, .btn, .stat-value, .card-title {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Standard Header Bar with Action Chips */
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .header-title-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-title-box h2 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .action-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-family: 'Roboto', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid var(--border-color);
+      background-color: #ffffff;
+      color: var(--text-main);
+    }
+
+    .action-chip .material-symbols-outlined {
+      font-size: 16px;
+    }
+
+    .action-chip:hover {
+      background-color: var(--bg-color);
+      border-color: #c6c9ce;
+      transform: translateY(-1px);
+    }
+
+    .chip-bug:hover {
+      color: var(--danger-text);
+      border-color: #fad2cf;
+      background-color: var(--danger-bg);
+    }
+
+    .chip-feature:hover {
+      color: #b06000;
+      border-color: #feefc3;
+      background-color: #fef7e0;
+    }
+
+    .chip-creator:hover {
+      color: var(--primary-blue);
+      border-color: #d2e3fc;
+      background-color: #e8f0fe;
+    }
+
+    /* Drag & Drop Upload Stage */
+    .drop-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: 10px;
+      padding: 22px 20px;
+      text-align: center;
+      background-color: var(--bg-color);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    .drop-icon {
+      font-size: 38px;
+      color: var(--primary-blue);
+    }
+
+    /* Document Summary Bar */
+    .doc-summary-bar {
+      display: none;
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 14px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .doc-info-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Studio Main Grid */
+    .main-grid {
+      display: none;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel-card {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 1px 3px rgba(60,64,67,0.08);
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 500px) {
+      .field-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    input[type="text"], input[type="datetime-local"], textarea, select {
+      font-family: 'Roboto', sans-serif;
+      font-size: 13px;
+      padding: 7px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    input[type="text"]:focus, input[type="datetime-local"]:focus, textarea:focus, select:focus {
+      border-color: var(--primary-blue);
+    }
+
+    /* Technical Properties List */
+    .tech-props-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .tech-props-table td {
+      padding: 6px 4px;
+      border-bottom: 1px solid #f1f3f4;
+    }
+
+    .tech-props-table td:first-child {
+      color: var(--text-secondary);
+      font-weight: 500;
+      width: 42%;
+    }
+
+    .tech-props-table td:last-child {
+      color: var(--text-main);
+      font-family: 'Roboto Mono', monospace;
+      font-weight: 500;
+      word-break: break-all;
+    }
+
+    /* Quick Keywords Chip Box */
+    .keywords-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .kw-chip {
+      background: #e8f0fe;
+      color: var(--primary-blue);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .kw-chip .btn-del-kw {
+      background: none;
+      border: none;
+      color: var(--primary-blue);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Sanitize Privacy Banner */
+    .privacy-banner {
+      background: #fef7e0;
+      border: 1px solid #feefc3;
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 12px;
+      color: #7a4f01;
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    /* Bottom Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 7px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.96);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 17px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 170px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+
+    .btn-danger {
+      background-color: #ffffff;
+      color: var(--danger-text);
+      border-color: #f5c6cb;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background-color: var(--danger-bg);
+      border-color: var(--danger-text);
+    }
+
+    .btn-success,
+    .btn-success:hover {
+      background-color: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border-color: var(--success-bg) !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Header Bar with Action Chips -->
+    <div class="header-bar">
+      <div class="header-title-box">
+        <span class="material-symbols-outlined" style="font-size: 24px; color: var(--primary-blue);">description</span>
+        <h2>PDF Metadata & Document Properties Editor</h2>
+      </div>
+
+      <div class="header-actions">
+        <a href="mailto:hikapil@google.com?cc=useful-tools@google.com&amp;subject=%5BUser%20Feedback%5D%20%7C%20Bug%20Found%20on%20go%2Fusefultools&amp;body=Hi%20Kapil%2C%0A%0AI%E2%80%99m%20reaching%20out%20to%20report%20a%20bug.%20Here%20are%20the%20relevant%20details%3A%0A%0ABug%20Description%3A%20%5BPlease%20provide%20a%20description%20of%20the%20issue%20here%5D"
+          target="_blank" rel="noopener noreferrer" class="action-chip chip-bug" title="Report a Bug">
+          <span class="material-symbols-outlined">bug_report</span>
+          <span>Report Bug</span>
+        </a>
+
+        <a href="mailto:hikapil@google.com?cc=useful-tools@google.com&amp;subject=%5BUser%20Feedback%5D%20%7C%20New%20Tool%2FFeature%20Request%20for%20go%2Fusefultools&amp;body=Hi%20Kapil%2C%0A%0AI%E2%80%99m%20reaching%20out%20to%20request%20a%20new%20feature.%20Here%20are%20the%20relevant%20details%3A%0A%0AFeature%20Request%3A%20%5BPlease%20provide%20a%20description%20of%20the%20feature%20you&#39;d%20like%20to%20see%5D"
+          target="_blank" rel="noopener noreferrer" class="action-chip chip-feature" title="Request a New Feature">
+          <span class="material-symbols-outlined">lightbulb</span>
+          <span>Request Feature</span>
+        </a>
+
+        <a href="https://moma.corp.google.com/person/hikapil"
+          target="_blank" rel="noopener noreferrer" class="action-chip chip-creator" title="Meet the Creator on Moma">
+          <span class="material-symbols-outlined">person</span>
+          <span>Meet the Creator</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Drag & Drop Upload Zone -->
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <span class="material-symbols-outlined drop-icon">assignment_ind</span>
+      <div style="font-size: 14px; font-weight: 500; color: var(--text-main);">
+        Drag & Drop your PDF here, or <span style="color: var(--primary-blue); text-decoration: underline;">browse files</span>
+      </div>
+      <div style="font-size: 11px; color: var(--text-secondary);">
+        100% Client-Side • View, edit title/author/keywords, or 1-click strip metadata
+      </div>
+      <input type="file" id="fileInput" accept="application/pdf" style="display: none;" onchange="handleFileSelected(event)">
+    </div>
+
+    <!-- Loaded Document Summary Bar -->
+    <div class="doc-summary-bar" id="docSummaryBar">
+      <div class="doc-info-left">
+        <span class="material-symbols-outlined" style="font-size: 24px; color: #d93025;">picture_as_pdf</span>
+        <div>
+          <strong id="docName" style="font-size: 13px; color: var(--text-main);">document.pdf</strong>
+          <span style="font-size: 11.5px; color: var(--text-secondary); margin-left: 6px;" id="docQuickStats">
+            (0 pages • 0 KB)
+          </span>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 6px; align-items: center;">
+        <button class="btn-secondary" style="padding: 4px 10px; font-size: 11.5px;" onclick="resetAll()">
+          <span class="material-symbols-outlined" style="font-size: 15px;">change_circle</span>
+          Change PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Studio Main Grid -->
+    <div class="main-grid" id="mainGrid">
+      <!-- Left Column: Editable Metadata Fields -->
+      <div class="panel-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3 class="card-title">
+            <span class="material-symbols-outlined" style="font-size: 18px; color: var(--primary-blue);">edit_note</span>
+            Document Metadata
+          </h3>
+          <button class="btn-secondary" style="padding: 3px 8px; font-size: 11px;" onclick="setNowDate()">
+            <span class="material-symbols-outlined" style="font-size: 14px;">today</span>
+            Set Today's Date
+          </button>
+        </div>
+
+        <div class="input-group">
+          <label>Document Title</label>
+          <input type="text" id="metaTitle" placeholder="e.g. Q3 Business Performance & Roadmap">
+        </div>
+
+        <div class="field-row">
+          <div class="input-group">
+            <label>Author / Creator Name</label>
+            <input type="text" id="metaAuthor" placeholder="e.g. Kapil Sharma">
+          </div>
+          <div class="input-group">
+            <label>Subject / Topic</label>
+            <input type="text" id="metaSubject" placeholder="e.g. Quarterly Review">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label>Keywords / Tags (Comma Separated)</label>
+          <input type="text" id="metaKeywords" placeholder="e.g. google, report, quarterly, finance" oninput="updateKeywordsChips()">
+          <div class="keywords-chips" id="keywordsChips"></div>
+        </div>
+
+        <div class="field-row">
+          <div class="input-group">
+            <label>Creator Application</label>
+            <input type="text" id="metaCreator" placeholder="e.g. Google Docs / Chrome">
+          </div>
+          <div class="input-group">
+            <label>PDF Producer</label>
+            <input type="text" id="metaProducer" placeholder="e.g. pdf-lib / Skia / Quartz">
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="input-group">
+            <label>Creation Date</label>
+            <input type="datetime-local" id="metaCreationDate">
+          </div>
+          <div class="input-group">
+            <label>Modification Date</label>
+            <input type="datetime-local" id="metaModDate">
+          </div>
+        </div>
+
+        <!-- Privacy Notice / Sanitize Warning -->
+        <div class="privacy-banner">
+          <span class="material-symbols-outlined" style="font-size: 18px; color: #b06000;">shield</span>
+          <div>
+            <strong>Sharing publicly?</strong> Use <strong>"Sanitize & Strip All Metadata"</strong> to remove author names, software versions, and creation timestamps before publishing.
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Technical Document Properties -->
+      <div class="panel-card">
+        <h3 class="card-title">
+          <span class="material-symbols-outlined" style="font-size: 18px; color: #188038;">analytics</span>
+          Technical File Properties
+        </h3>
+
+        <table class="tech-props-table">
+          <tr>
+            <td>File Name:</td>
+            <td id="propFileName">-</td>
+          </tr>
+          <tr>
+            <td>File Size:</td>
+            <td id="propFileSize">-</td>
+          </tr>
+          <tr>
+            <td>Total Pages:</td>
+            <td id="propPageCount">-</td>
+          </tr>
+          <tr>
+            <td>Page Dimensions:</td>
+            <td id="propDimensions">-</td>
+          </tr>
+          <tr>
+            <td>PDF Version:</td>
+            <td id="propPdfVersion">PDF 1.7 (Standard)</td>
+          </tr>
+          <tr>
+            <td>Security / Encryption:</td>
+            <td id="propEncryption" style="color: var(--success-text);">No Password (Unlocked)</td>
+          </tr>
+          <tr>
+            <td>Embedded Forms:</td>
+            <td id="propFormFields">None</td>
+          </tr>
+          <tr>
+            <td>Original Author:</td>
+            <td id="propRawAuthor">-</td>
+          </tr>
+          <tr>
+            <td>Original Created:</td>
+            <td id="propRawCreated">-</td>
+          </tr>
+        </table>
+
+        <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px;">
+          <button class="btn-danger" style="width: 100%;" onclick="sanitizeAndStripAll()">
+            <span class="material-symbols-outlined">cleaning_services</span>
+            Sanitize & Strip All Metadata
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="status-box"></div>
+
+    <!-- Bottom Toolbar -->
+    <div class="toolbar">
+      <button class="btn-primary" id="savePdfBtn" onclick="saveAndDownloadPDF()" disabled>
+        <span class="material-symbols-outlined" id="saveIcon">download</span>
+        <span id="saveText">Save & Download PDF</span>
+      </button>
+
+      <button class="btn-secondary" onclick="loadSamplePDF()">
+        <span class="material-symbols-outlined">description</span>
+        Load Sample PDF
+      </button>
+
+      <button class="btn-secondary" onclick="resetAll()">
+        <span class="material-symbols-outlined">delete_sweep</span>
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // State
+    let originalArrayBuffer = null;
+    let pdfLibDoc = null;
+    let pdfJsDoc = null;
+    let originalFileName = 'document.pdf';
+    let originalFileSize = 0;
+
+    // Drag and Drop Listeners
+    const dropZone = document.getElementById('dropZone');
+    ['dragenter', 'dragover'].forEach(name => {
+      dropZone.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(name => {
+      dropZone.addEventListener(name, (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+      });
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        processPDFFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    function handleFileSelected(e) {
+      if (e.target.files && e.target.files.length > 0) {
+        processPDFFile(e.target.files[0]);
+      }
+    }
+
+    async function processPDFFile(file) {
+      if (!file || file.type !== 'application/pdf') {
+        showStatus('Please upload a valid PDF document.', 'error');
+        return;
+      }
+
+      originalFileName = file.name;
+      originalFileSize = file.size;
+      showStatus('Reading PDF metadata...', 'success');
+
+      try {
+        originalArrayBuffer = await file.arrayBuffer();
+
+        // Load with pdf-lib & PDF.js
+        pdfLibDoc = await PDFLib.PDFDocument.load(originalArrayBuffer);
+        pdfJsDoc = await pdfjsLib.getDocument({ data: originalArrayBuffer.slice(0) }).promise;
+
+        await populateMetadataAndProperties();
+
+        document.getElementById('dropZone').style.display = 'none';
+        document.getElementById('docSummaryBar').style.display = 'flex';
+        document.getElementById('mainGrid').style.display = 'grid';
+        document.getElementById('savePdfBtn').disabled = false;
+
+        document.getElementById('docName').textContent = originalFileName;
+        document.getElementById('docQuickStats').textContent = `(${pdfJsDoc.numPages} pages • ${formatBytes(originalFileSize)})`;
+
+        showStatus('PDF metadata loaded successfully.', 'success');
+      } catch (err) {
+        console.error(err);
+        showStatus('Failed to load PDF: ' + err.message, 'error');
+      }
+    }
+
+    async function populateMetadataAndProperties() {
+      // 1. Read metadata from pdf-lib
+      const title = pdfLibDoc.getTitle() || '';
+      const author = pdfLibDoc.getAuthor() || '';
+      const subject = pdfLibDoc.getSubject() || '';
+      const keywords = (pdfLibDoc.getKeywords() || []).join(', ');
+      const creator = pdfLibDoc.getCreator() || '';
+      const producer = pdfLibDoc.getProducer() || '';
+      const creationDate = pdfLibDoc.getCreationDate();
+      const modDate = pdfLibDoc.getModificationDate();
+
+      document.getElementById('metaTitle').value = title;
+      document.getElementById('metaAuthor').value = author;
+      document.getElementById('metaSubject').value = subject;
+      document.getElementById('metaKeywords').value = keywords;
+      document.getElementById('metaCreator').value = creator;
+      document.getElementById('metaProducer').value = producer;
+
+      if (creationDate) {
+        document.getElementById('metaCreationDate').value = toDatetimeLocalString(creationDate);
+      } else {
+        document.getElementById('metaCreationDate').value = '';
+      }
+
+      if (modDate) {
+        document.getElementById('metaModDate').value = toDatetimeLocalString(modDate);
+      } else {
+        document.getElementById('metaModDate').value = '';
+      }
+
+      updateKeywordsChips();
+
+      // 2. Technical Properties
+      document.getElementById('propFileName').textContent = originalFileName;
+      document.getElementById('propFileSize').textContent = formatBytes(originalFileSize);
+      document.getElementById('propPageCount').textContent = pdfJsDoc.numPages;
+
+      // Page dimensions
+      const page1 = await pdfJsDoc.getPage(1);
+      const viewport = page1.getViewport({ scale: 1.0 });
+      const widthPt = Math.round(viewport.width);
+      const heightPt = Math.round(viewport.height);
+      const isA4 = Math.abs(widthPt - 595) < 10 && Math.abs(heightPt - 842) < 10;
+      const isLetter = Math.abs(widthPt - 612) < 10 && Math.abs(heightPt - 792) < 10;
+      let dimLabel = `${widthPt} × ${heightPt} pt`;
+      if (isA4) dimLabel += ' (A4)';
+      else if (isLetter) dimLabel += ' (US Letter)';
+      document.getElementById('propDimensions').textContent = dimLabel;
+
+      // Check AcroForm
+      const form = pdfLibDoc.getForm();
+      const fields = form ? form.getFields() : [];
+      document.getElementById('propFormFields').textContent = fields.length > 0 ? `${fields.length} interactive fields` : 'None';
+
+      document.getElementById('propRawAuthor').textContent = author || '(None)';
+      document.getElementById('propRawCreated').textContent = creationDate ? creationDate.toLocaleDateString() : '(None)';
+    }
+
+    function updateKeywordsChips() {
+      const container = document.getElementById('keywordsChips');
+      const val = document.getElementById('metaKeywords').value;
+      container.innerHTML = '';
+
+      if (!val.trim()) return;
+
+      const tags = val.split(',').map(s => s.trim()).filter(Boolean);
+      tags.forEach((tag, idx) => {
+        const chip = document.createElement('span');
+        chip.className = 'kw-chip';
+        chip.innerHTML = `
+          <span>#${escapeHtml(tag)}</span>
+          <button class="btn-del-kw" onclick="removeKeywordTag(${idx})" title="Remove Tag">✕</button>
+        `;
+        container.appendChild(chip);
+      });
+    }
+
+    function removeKeywordTag(idx) {
+      const val = document.getElementById('metaKeywords').value;
+      const tags = val.split(',').map(s => s.trim()).filter(Boolean);
+      tags.splice(idx, 1);
+      document.getElementById('metaKeywords').value = tags.join(', ');
+      updateKeywordsChips();
+    }
+
+    function setNowDate() {
+      const now = new Date();
+      const dtStr = toDatetimeLocalString(now);
+      document.getElementById('metaCreationDate').value = dtStr;
+      document.getElementById('metaModDate').value = dtStr;
+      showStatus("Set creation and modification timestamps to now.", 'success');
+    }
+
+    function sanitizeAndStripAll() {
+      if (confirm('Strip ALL metadata? This will remove Author, Title, Creator, Producer, Keywords, and Timestamps for complete privacy.')) {
+        document.getElementById('metaTitle').value = '';
+        document.getElementById('metaAuthor').value = '';
+        document.getElementById('metaSubject').value = '';
+        document.getElementById('metaKeywords').value = '';
+        document.getElementById('metaCreator').value = '';
+        document.getElementById('metaProducer').value = '';
+        document.getElementById('metaCreationDate').value = '';
+        document.getElementById('metaModDate').value = '';
+        updateKeywordsChips();
+        showStatus('All metadata fields cleared. Click "Save & Download PDF" to export sanitized file.', 'success');
+      }
+    }
+
+    async function saveAndDownloadPDF() {
+      if (!pdfLibDoc) return;
+
+      const saveBtn = document.getElementById('savePdfBtn');
+      saveBtn.disabled = true;
+      showStatus('Applying metadata and assembling PDF...', 'success');
+
+      try {
+        // Apply values to pdf-lib doc
+        const title = document.getElementById('metaTitle').value.trim();
+        const author = document.getElementById('metaAuthor').value.trim();
+        const subject = document.getElementById('metaSubject').value.trim();
+        const keywordsStr = document.getElementById('metaKeywords').value.trim();
+        const creator = document.getElementById('metaCreator').value.trim();
+        const producer = document.getElementById('metaProducer').value.trim();
+        const creationDateVal = document.getElementById('metaCreationDate').value;
+        const modDateVal = document.getElementById('metaModDate').value;
+
+        pdfLibDoc.setTitle(title);
+        pdfLibDoc.setAuthor(author);
+        pdfLibDoc.setSubject(subject);
+
+        const keywordsArray = keywordsStr ? keywordsStr.split(',').map(s => s.trim()).filter(Boolean) : [];
+        pdfLibDoc.setKeywords(keywordsArray);
+
+        pdfLibDoc.setCreator(creator);
+        pdfLibDoc.setProducer(producer);
+
+        if (creationDateVal) {
+          pdfLibDoc.setCreationDate(new Date(creationDateVal));
+        }
+        if (modDateVal) {
+          pdfLibDoc.setModificationDate(new Date(modDateVal));
+        }
+
+        const pdfBytes = await pdfLibDoc.save();
+
+        // Download file
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const baseName = originalFileName.replace(/\.[^/.]+$/, '');
+        a.download = `${baseName}_updated.pdf`;
+        a.href = url;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        triggerSuccessButton('saveIcon', 'saveText', 'Updated PDF Downloaded!');
+        showStatus('Updated PDF saved and downloaded successfully.', 'success');
+
+        if (typeof confetti === 'function') {
+          confetti({
+            particleCount: 60,
+            spread: 55,
+            origin: { y: 0.6 }
+          });
+        }
+      } catch (err) {
+        console.error('Save error:', err);
+        showStatus('Failed to save PDF: ' + err.message, 'error');
+      } finally {
+        saveBtn.disabled = false;
+      }
+    }
+
+    /* Built-in Sample PDF Generator for Instant Demo */
+    async function loadSamplePDF() {
+      showStatus('Generating sample PDF with metadata...', 'success');
+      try {
+        const doc = await PDFLib.PDFDocument.create();
+        doc.setTitle('Q3 Business Strategy & Performance Metrics');
+        doc.setAuthor('Kapil Sharma');
+        doc.setSubject('Executive Overview & Product Roadmap');
+        doc.setKeywords(['google', 'strategy', 'q3', 'useful-tools', 'confidential']);
+        doc.setCreator('Google Docs');
+        doc.setProducer('pdf-lib engine');
+        doc.setCreationDate(new Date('2026-07-15T09:30:00'));
+        doc.setModificationDate(new Date('2026-08-10T14:15:00'));
+
+        const page = doc.addPage([595.28, 841.89]);
+        page.drawText('Sample Document: Metadata & Properties Editor', { x: 50, y: 780, size: 18 });
+        page.drawText('This sample PDF contains pre-configured author, title, and keyword metadata.', { x: 50, y: 740, size: 12 });
+        page.drawText('Use this tool to edit metadata or 1-click strip all properties for privacy.', { x: 50, y: 710, size: 11 });
+
+        const bytes = await doc.save();
+        originalFileName = 'sample_strategy_report.pdf';
+        originalFileSize = bytes.byteLength;
+        originalArrayBuffer = bytes.buffer;
+
+        pdfLibDoc = await PDFLib.PDFDocument.load(originalArrayBuffer);
+        pdfJsDoc = await pdfjsLib.getDocument({ data: originalArrayBuffer.slice(0) }).promise;
+
+        await populateMetadataAndProperties();
+
+        document.getElementById('dropZone').style.display = 'none';
+        document.getElementById('docSummaryBar').style.display = 'flex';
+        document.getElementById('mainGrid').style.display = 'grid';
+        document.getElementById('savePdfBtn').disabled = false;
+
+        document.getElementById('docName').textContent = originalFileName;
+        document.getElementById('docQuickStats').textContent = `(${pdfJsDoc.numPages} pages • ${formatBytes(originalFileSize)})`;
+
+        showStatus('Sample PDF loaded with metadata.', 'success');
+      } catch (err) {
+        console.error(err);
+        showStatus('Failed to generate sample PDF: ' + err.message, 'error');
+      }
+    }
+
+    function resetAll() {
+      originalArrayBuffer = null;
+      pdfLibDoc = null;
+      pdfJsDoc = null;
+      document.getElementById('fileInput').value = '';
+      document.getElementById('dropZone').style.display = 'flex';
+      document.getElementById('docSummaryBar').style.display = 'none';
+      document.getElementById('mainGrid').style.display = 'none';
+      document.getElementById('savePdfBtn').disabled = true;
+      showStatus('Reset completed. Upload a new PDF.', 'success');
+    }
+
+    function toDatetimeLocalString(date) {
+      if (!date || isNaN(date.getTime())) return '';
+      const pad = (n) => String(n).padStart(2, '0');
+      const y = date.getFullYear();
+      const m = pad(date.getMonth() + 1);
+      const d = pad(date.getDate());
+      const h = pad(date.getHours());
+      const min = pad(date.getMinutes());
+      return `${y}-${m}-${d}T${h}:${min}`;
+    }
+
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function triggerSuccessButton(iconId, textId, successText) {
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+      if (!icon || !text) return;
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2500);
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+      setTimeout(() => {
+        statusBox.className = 'status-box';
+        statusBox.textContent = '';
+      }, 4000);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+  </script>
+</body>
+
+</html>
