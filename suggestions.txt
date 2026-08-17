@@ -148,11 +148,7 @@ PART 2: 📄 PDF TOOLS SECTION EXPANSION IDEAS
      - Combine multiple PDF pages into a single sheet (2 pages per sheet, 4 pages per sheet, or presentation handout style).
      - Booklet imposition mode: rearranges pages into printable double-sided folded booklet sequence.
 
-6.4. PDF Metadata & Document Properties Editor
-     - View and modify document metadata: Title, Author, Subject, Keywords, Creator, and Creation Date.
-     - 1-click "Sanitize & Strip All Metadata" for privacy and anonymization before publishing documents publicly.
-
-6.5. PDF Form Filler & Data Exporter
+6.4. PDF Form Filler & Data Exporter
      - View and fill interactive AcroForm fields (text fields, checkboxes, radio buttons, dropdowns) directly in the browser.
      - Export completed PDF or extract all form field data into JSON/CSV spreadsheets.
 
