@@ -133,54 +133,41 @@
       background-color: #e8f0fe;
     }
 
-    /* Drag & Drop Upload Stage */
-    .drop-zone {
-      border: 2px dashed var(--border-color);
-      border-radius: 10px;
-      padding: 24px 20px;
-      text-align: center;
-      background-color: var(--bg-color);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .drop-zone:hover, .drop-zone.dragover {
-      border-color: var(--primary-blue);
-      background-color: #e8f0fe;
-    }
-
-    .drop-icon {
-      font-size: 40px;
-      color: var(--primary-blue);
-    }
-
-    /* Document Summary Bar */
-    .doc-summary-bar {
-      display: none;
-      background-color: var(--bg-color);
-      border: 1px solid var(--border-color);
+    /* Compact Top Upload & Document Status Bar */
+    .top-upload-bar {
+      border: 1.5px dashed var(--border-color);
       border-radius: 8px;
       padding: 10px 14px;
+      background-color: var(--bg-color);
+      display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 10px;
+      transition: all 0.2s ease;
+      cursor: pointer;
     }
 
-    .doc-info-left {
+    .top-upload-bar:hover, .top-upload-bar.dragover {
+      border-color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    .upload-info-left {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
 
-    /* Studio Main Grid */
+    .upload-actions-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Studio Main Grid (Always Visible) */
     .main-grid {
-      display: none;
+      display: grid;
       grid-template-columns: 1.35fr 1fr;
       gap: 16px;
       align-items: start;
@@ -533,39 +520,35 @@
       </div>
     </div>
 
-    <!-- Drag & Drop Upload Zone -->
-    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
-      <span class="material-symbols-outlined drop-icon">assignment_ind</span>
-      <div style="font-size: 14px; font-weight: 500; color: var(--text-main);">
-        Drag & Drop your PDF here, or <span style="color: var(--primary-blue); text-decoration: underline;">browse files</span>
+    <!-- Top Upload Bar (Always Visible) -->
+    <div class="top-upload-bar" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <div class="upload-info-left">
+        <span class="material-symbols-outlined" style="font-size: 26px; color: #d93025;" id="docIcon">picture_as_pdf</span>
+        <div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <strong id="docName" style="font-size: 13px; color: var(--text-main);">sample_strategy_report.pdf</strong>
+            <span style="font-size: 11px; background: #e8f0fe; color: var(--primary-blue); padding: 1px 6px; border-radius: 10px; font-weight: 500;" id="docStatusBadge">Sample PDF Loaded</span>
+          </div>
+          <div style="font-size: 11.5px; color: var(--text-secondary);" id="docQuickStats">
+            Click to upload your own PDF or drag & drop anywhere • (1 page • 18.5 KB)
+          </div>
+        </div>
       </div>
-      <div style="font-size: 11px; color: var(--text-secondary);">
-        100% Client-Side • View, edit title/author/keywords, or 1-click strip metadata
+
+      <div class="upload-actions-right" onclick="event.stopPropagation()">
+        <button class="btn-secondary" style="padding: 4px 10px; font-size: 11.5px;" onclick="document.getElementById('fileInput').click()">
+          <span class="material-symbols-outlined" style="font-size: 15px;">upload_file</span>
+          Upload PDF
+        </button>
+        <button class="btn-secondary" style="padding: 4px 10px; font-size: 11.5px;" onclick="loadSamplePDF()">
+          <span class="material-symbols-outlined" style="font-size: 15px;">replay</span>
+          Reload Sample
+        </button>
       </div>
       <input type="file" id="fileInput" accept="application/pdf" style="display: none;" onchange="handleFileSelected(event)">
     </div>
 
-    <!-- Loaded Document Summary Bar -->
-    <div class="doc-summary-bar" id="docSummaryBar">
-      <div class="doc-info-left">
-        <span class="material-symbols-outlined" style="font-size: 24px; color: #d93025;">picture_as_pdf</span>
-        <div>
-          <strong id="docName" style="font-size: 13px; color: var(--text-main);">document.pdf</strong>
-          <span style="font-size: 11.5px; color: var(--text-secondary); margin-left: 6px;" id="docQuickStats">
-            (0 pages • 0 KB)
-          </span>
-        </div>
-      </div>
-
-      <div style="display: flex; gap: 6px; align-items: center;">
-        <button class="btn-secondary" style="padding: 4px 10px; font-size: 11.5px;" onclick="resetAll()">
-          <span class="material-symbols-outlined" style="font-size: 15px;">change_circle</span>
-          Change PDF
-        </button>
-      </div>
-    </div>
-
-    <!-- Studio Main Grid -->
+    <!-- Studio Main Grid (Always Visible in Preview) -->
     <div class="main-grid" id="mainGrid">
       <!-- Left Column: Editable Metadata Fields -->
       <div class="panel-card">
@@ -608,24 +591,24 @@
 
         <div class="input-group">
           <label>Document Title</label>
-          <input type="text" id="metaTitle" placeholder="e.g. Q3 Business Performance & Roadmap" oninput="renderDiffTable()">
+          <input type="text" id="metaTitle" value="Q3 Business Strategy & Performance Metrics" placeholder="e.g. Q3 Business Performance & Roadmap" oninput="renderDiffTable()">
         </div>
 
         <div class="field-row">
           <div class="input-group">
             <label>Author / Creator Name</label>
-            <input type="text" id="metaAuthor" placeholder="e.g. Kapil Sharma" oninput="renderDiffTable()">
+            <input type="text" id="metaAuthor" value="Kapil Sharma" placeholder="e.g. Kapil Sharma" oninput="renderDiffTable()">
           </div>
           <div class="input-group">
             <label>Subject / Description</label>
-            <input type="text" id="metaSubject" placeholder="e.g. Quarterly Review" oninput="renderDiffTable()">
+            <input type="text" id="metaSubject" value="Executive Overview & Product Roadmap" placeholder="e.g. Quarterly Review" oninput="renderDiffTable()">
           </div>
         </div>
 
         <div class="input-group">
           <label>Keywords / Tags (Press Enter or Comma to add)</label>
           <div style="display: flex; gap: 6px;">
-            <input type="text" id="metaKeywords" placeholder="Type tags: google, report, roadmap..." style="flex: 1;" onkeydown="handleKeywordKeydown(event)" oninput="updateKeywordsChips(); renderDiffTable();">
+            <input type="text" id="metaKeywords" value="google, strategy, q3, useful-tools, confidential" placeholder="Type tags: google, report, roadmap..." style="flex: 1;" onkeydown="handleKeywordKeydown(event)" oninput="updateKeywordsChips(); renderDiffTable();">
             <button class="btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="addKeywordFromInput()">+ Tag</button>
           </div>
           <div class="keywords-chips" id="keywordsChips"></div>
@@ -634,11 +617,11 @@
         <div class="field-row">
           <div class="input-group">
             <label>Creator Application</label>
-            <input type="text" id="metaCreator" placeholder="e.g. Google Docs / Chrome" oninput="renderDiffTable()">
+            <input type="text" id="metaCreator" value="Google Docs" placeholder="e.g. Google Docs / Chrome" oninput="renderDiffTable()">
           </div>
           <div class="input-group">
             <label>PDF Producer</label>
-            <input type="text" id="metaProducer" placeholder="e.g. Skia / pdf-lib" oninput="renderDiffTable()">
+            <input type="text" id="metaProducer" value="pdf-lib / Google Skia" placeholder="e.g. Skia / pdf-lib" oninput="renderDiffTable()">
           </div>
         </div>
 
@@ -672,19 +655,19 @@
         <table class="tech-props-table">
           <tr>
             <td>File Name:</td>
-            <td id="propFileName">-</td>
+            <td id="propFileName">sample_strategy_report.pdf</td>
           </tr>
           <tr>
             <td>File Size:</td>
-            <td id="propFileSize">-</td>
+            <td id="propFileSize">18.5 KB</td>
           </tr>
           <tr>
             <td>Total Pages:</td>
-            <td id="propPageCount">-</td>
+            <td id="propPageCount">1 page(s)</td>
           </tr>
           <tr>
             <td>Page Dimensions:</td>
-            <td id="propDimensions">-</td>
+            <td id="propDimensions">595 × 842 pt (A4)</td>
           </tr>
           <tr>
             <td>PDF Version:</td>
@@ -726,19 +709,19 @@
 
     <!-- Bottom Toolbar -->
     <div class="toolbar">
-      <button class="btn-primary" id="savePdfBtn" onclick="saveAndDownloadPDF()" disabled>
+      <button class="btn-primary" id="savePdfBtn" onclick="saveAndDownloadPDF()">
         <span class="material-symbols-outlined" id="saveIcon">download</span>
         <span id="saveText">Save & Download PDF</span>
       </button>
 
       <button class="btn-secondary" onclick="loadSamplePDF()">
         <span class="material-symbols-outlined">description</span>
-        Load Sample PDF
+        Reload Sample PDF
       </button>
 
       <button class="btn-secondary" onclick="resetAll()">
         <span class="material-symbols-outlined">delete_sweep</span>
-        Reset
+        Clear All
       </button>
     </div>
   </div>
@@ -751,36 +734,41 @@
 
     // State Variables
     let originalArrayBuffer = null;
-    let originalFileName = 'document.pdf';
-    let originalFileSize = 0;
+    let originalFileName = 'sample_strategy_report.pdf';
+    let originalFileSize = 18940;
     let originalMetadata = {
-      title: '',
-      author: '',
-      subject: '',
-      keywords: '',
-      creator: '',
-      producer: '',
-      creationDate: '',
-      modDate: ''
+      title: 'Q3 Business Strategy & Performance Metrics',
+      author: 'Kapil Sharma',
+      subject: 'Executive Overview & Product Roadmap',
+      keywords: 'google, strategy, q3, useful-tools, confidential',
+      creator: 'Google Docs',
+      producer: 'pdf-lib / Google Skia',
+      creationDate: '2026-07-15T09:30',
+      modDate: '2026-08-10T14:15'
     };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // Auto-initialize with sample PDF so the full UI is instantly interactive
+      loadSamplePDF();
+    });
 
     // Drag and Drop Listeners
     const dropZone = document.getElementById('dropZone');
     ['dragenter', 'dragover'].forEach(name => {
-      dropZone.addEventListener(name, (e) => {
+      window.addEventListener(name, (e) => {
         e.preventDefault();
         dropZone.classList.add('dragover');
       });
     });
 
     ['dragleave', 'drop'].forEach(name => {
-      dropZone.addEventListener(name, (e) => {
+      window.addEventListener(name, (e) => {
         e.preventDefault();
         dropZone.classList.remove('dragover');
       });
     });
 
-    dropZone.addEventListener('drop', (e) => {
+    window.addEventListener('drop', (e) => {
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
         processPDFFile(e.dataTransfer.files[0]);
       }
@@ -804,7 +792,7 @@
 
       try {
         originalArrayBuffer = await file.arrayBuffer();
-        await loadPdfData(originalArrayBuffer, file.name, file.size);
+        await loadPdfData(originalArrayBuffer, file.name, file.size, false);
         showStatus('PDF loaded successfully. You can now edit properties or sanitize metadata.', 'success');
       } catch (err) {
         console.error(err);
@@ -812,14 +800,15 @@
       }
     }
 
-    async function loadPdfData(arrayBuffer, fileName, fileSize) {
+    async function loadPdfData(arrayBuffer, fileName, fileSize, isSample = false) {
       // 1. Load with pdf-lib
       const pdfLibDoc = await PDFLib.PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
 
       // 2. Load with PDF.js for technical rendering
-      const pdfJsDoc = await pdfjsLib.getDocument({ data: arrayBuffer.slice(0) }).promise;
+      let pdfJsDoc = null;
       let pdfJsMeta = null;
       try {
+        pdfJsDoc = await pdfjsLib.getDocument({ data: arrayBuffer.slice(0) }).promise;
         pdfJsMeta = await pdfJsDoc.getMetadata();
       } catch (e) {
         console.warn('PDF.js metadata extraction warning:', e);
@@ -864,22 +853,25 @@
       // Populate Technical Properties
       document.getElementById('propFileName').textContent = fileName;
       document.getElementById('propFileSize').textContent = formatBytes(fileSize);
-      document.getElementById('propPageCount').textContent = `${pdfJsDoc.numPages} page(s)`;
+      const numPages = pdfJsDoc ? pdfJsDoc.numPages : pdfLibDoc.getPageCount();
+      document.getElementById('propPageCount').textContent = `${numPages} page(s)`;
 
       // Page dimensions
-      try {
-        const page1 = await pdfJsDoc.getPage(1);
-        const viewport = page1.getViewport({ scale: 1.0 });
-        const widthPt = Math.round(viewport.width);
-        const heightPt = Math.round(viewport.height);
-        const isA4 = Math.abs(widthPt - 595) < 10 && Math.abs(heightPt - 842) < 10;
-        const isLetter = Math.abs(widthPt - 612) < 10 && Math.abs(heightPt - 792) < 10;
-        let dimLabel = `${widthPt} × ${heightPt} pt`;
-        if (isA4) dimLabel += ' (A4)';
-        else if (isLetter) dimLabel += ' (US Letter)';
-        document.getElementById('propDimensions').textContent = dimLabel;
-      } catch (e) {
-        document.getElementById('propDimensions').textContent = 'Standard';
+      if (pdfJsDoc) {
+        try {
+          const page1 = await pdfJsDoc.getPage(1);
+          const viewport = page1.getViewport({ scale: 1.0 });
+          const widthPt = Math.round(viewport.width);
+          const heightPt = Math.round(viewport.height);
+          const isA4 = Math.abs(widthPt - 595) < 10 && Math.abs(heightPt - 842) < 10;
+          const isLetter = Math.abs(widthPt - 612) < 10 && Math.abs(heightPt - 792) < 10;
+          let dimLabel = `${widthPt} × ${heightPt} pt`;
+          if (isA4) dimLabel += ' (A4)';
+          else if (isLetter) dimLabel += ' (US Letter)';
+          document.getElementById('propDimensions').textContent = dimLabel;
+        } catch (e) {
+          document.getElementById('propDimensions').textContent = '595 × 842 pt (A4)';
+        }
       }
 
       // Check AcroForm
@@ -891,14 +883,13 @@
         document.getElementById('propFormFields').textContent = 'None';
       }
 
-      // Update UI View
-      document.getElementById('dropZone').style.display = 'none';
-      document.getElementById('docSummaryBar').style.display = 'flex';
-      document.getElementById('mainGrid').style.display = 'grid';
-      document.getElementById('savePdfBtn').disabled = false;
-
+      // Update Top Status Bar
       document.getElementById('docName').textContent = fileName;
-      document.getElementById('docQuickStats').textContent = `(${pdfJsDoc.numPages} pages • ${formatBytes(fileSize)})`;
+      document.getElementById('docStatusBadge').textContent = isSample ? 'Sample PDF Active' : 'User PDF Loaded';
+      document.getElementById('docStatusBadge').style.backgroundColor = isSample ? '#e8f0fe' : '#e6f4ea';
+      document.getElementById('docStatusBadge').style.color = isSample ? 'var(--primary-blue)' : 'var(--success-text)';
+      document.getElementById('docQuickStats').textContent = `(${numPages} page${numPages > 1 ? 's' : ''} • ${formatBytes(fileSize)}) • Drag a new PDF or edit properties below`;
+      document.getElementById('savePdfBtn').disabled = false;
 
       renderDiffTable();
     }
@@ -1046,8 +1037,8 @@
     /* Save & Export PDF */
     async function saveAndDownloadPDF() {
       if (!originalArrayBuffer) {
-        showStatus('No PDF loaded.', 'error');
-        return;
+        showStatus('Generating PDF from current settings...', 'success');
+        await loadSamplePDF();
       }
 
       const saveBtn = document.getElementById('savePdfBtn');
@@ -1128,7 +1119,6 @@
 
     /* Built-in Sample PDF Generator for Instant Demo */
     async function loadSamplePDF() {
-      showStatus('Generating sample PDF with metadata...', 'success');
       try {
         const doc = await PDFLib.PDFDocument.create();
         doc.setTitle('Q3 Business Strategy & Performance Metrics');
@@ -1136,7 +1126,7 @@
         doc.setSubject('Executive Overview & Product Roadmap');
         doc.setKeywords(['google', 'strategy', 'q3', 'useful-tools', 'confidential']);
         doc.setCreator('Google Docs');
-        doc.setProducer('pdf-lib engine');
+        doc.setProducer('pdf-lib / Google Skia');
         doc.setCreationDate(new Date('2026-07-15T09:30:00'));
         doc.setModificationDate(new Date('2026-08-10T14:15:00'));
 
@@ -1150,29 +1140,30 @@
         originalFileSize = bytes.byteLength;
         originalArrayBuffer = bytes.buffer;
 
-        await loadPdfData(originalArrayBuffer, originalFileName, originalFileSize);
-        showStatus('Sample PDF loaded with pre-configured metadata.', 'success');
+        await loadPdfData(originalArrayBuffer, originalFileName, originalFileSize, true);
       } catch (err) {
         console.error(err);
-        showStatus('Failed to generate sample PDF: ' + err.message, 'error');
       }
     }
 
     function resetAll() {
-      originalArrayBuffer = null;
-      document.getElementById('fileInput').value = '';
-      document.getElementById('dropZone').style.display = 'flex';
-      document.getElementById('docSummaryBar').style.display = 'none';
-      document.getElementById('mainGrid').style.display = 'none';
-      document.getElementById('savePdfBtn').disabled = true;
-      showStatus('Reset completed. Ready for a new PDF.', 'success');
+      document.getElementById('metaTitle').value = '';
+      document.getElementById('metaAuthor').value = '';
+      document.getElementById('metaSubject').value = '';
+      document.getElementById('metaKeywords').value = '';
+      document.getElementById('metaCreator').value = '';
+      document.getElementById('metaProducer').value = '';
+      document.getElementById('metaCreationDate').value = '';
+      document.getElementById('metaModDate').value = '';
+      updateKeywordsChips();
+      renderDiffTable();
+      showStatus('Fields cleared. Upload your PDF or click Reload Sample.', 'success');
     }
 
     function parsePdfDate(pdfDateStr) {
       if (!pdfDateStr) return null;
       if (pdfDateStr instanceof Date) return pdfDateStr;
       if (typeof pdfDateStr === 'string') {
-        // Handle PDF format: "D:YYYYMMDDHHmmSSOHH'mm'"
         const clean = pdfDateStr.replace(/^D:/, '');
         if (clean.length >= 8) {
           const year = parseInt(clean.substr(0, 4), 10);
