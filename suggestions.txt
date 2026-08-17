@@ -115,24 +115,18 @@ PART 2: 📄 PDF TOOLS SECTION EXPANSION IDEAS
 5. 📑 PDF EDITING, ANNOTATION & PAGE MANAGEMENT
 --------------------------------------------------------------------------------
 
-5.1. PDF Page Organizer, Reorder & Rotator (Drag & Drop)
-     - Visual grid of PDF page thumbnails with smooth drag-and-drop reordering.
-     - Rotate individual pages or all pages (90° clockwise, 90° counter-clockwise, 180°).
-     - Delete unwanted pages or duplicate specific pages with 1 click.
-     - Instant client-side re-bundling and PDF download using pdf-lib.
-
-5.2. PDF Watermark & Page Numbering Tool
+5.1. PDF Watermark & Page Numbering Tool
      - Text Watermark: add customizable text ("CONFIDENTIAL", "DRAFT", "COPY") with opacity, rotation angle, font size, and color controls.
      - Image Watermark: stamp transparent PNG logos, company badges, or seals onto pages.
      - Page Numbering: add headers/footers with dynamic formats ("Page X of Y", "X", "- X -"), position selectors (Top/Bottom, Left/Center/Right), and page range exclusions (e.g. skip cover page).
 
-5.3. PDF Signature, Stamp & Annotation Studio
+5.2. PDF Signature, Stamp & Annotation Studio
      - Draw a digital signature on canvas, type signature with cursive fonts, or upload a signature image.
      - Position, scale, and place signatures, date stamps, and "APPROVED" / "PAID" / "CONFIDENTIAL" badges on any page.
      - Add text notes, highlight boxes, and rectangular markup.
      - Flatten and export signed documents client-side without quality loss.
 
-5.4. PDF Redactor & Sanitizer (Permanent Text/Area Blackout)
+5.3. PDF Redactor & Sanitizer (Permanent Text/Area Blackout)
      - Securely redact sensitive personal info, credit cards, SSNs, or proprietary data by drawing blackout rectangles over pages.
      - True client-side flattening/rasterization of redacted sections to guarantee text underneath cannot be copied or recovered.
      - Built-in keyword search & redact helper.
