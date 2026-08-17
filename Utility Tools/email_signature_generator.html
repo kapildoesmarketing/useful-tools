@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Professional Email Signature Generator for Gmail</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <!-- Google Material Symbols -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,500,0,0" />
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --border-color: #dadce0;
+      --primary-blue: #1a73e8;
+      --primary-hover: #174ea6;
+      --success-bg: #e6f4ea;
+      --success-text: #137333;
+      --danger-bg: #fce8e6;
+      --danger-text: #c5221f;
+      --text-main: #202124;
+      --text-secondary: #5f6368;
+      --accent-color: #1a73e8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #ffffff;
+      color: var(--text-main);
+    }
+
+    h1, h2, h3, h4, .btn, .template-card-title, .tab-btn {
+      font-family: 'Google Sans', sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Standard Header Bar with Action Chips */
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .header-title-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-title-box h2 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .action-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-family: 'Roboto', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid var(--border-color);
+      background-color: #ffffff;
+      color: var(--text-main);
+    }
+
+    .action-chip .material-symbols-outlined {
+      font-size: 16px;
+    }
+
+    .action-chip:hover {
+      background-color: var(--bg-color);
+      border-color: #c6c9ce;
+      transform: translateY(-1px);
+    }
+
+    .chip-bug:hover {
+      color: var(--danger-text);
+      border-color: #fad2cf;
+      background-color: var(--danger-bg);
+    }
+
+    .chip-feature:hover {
+      color: #b06000;
+      border-color: #feefc3;
+      background-color: #fef7e0;
+    }
+
+    .chip-creator:hover {
+      color: var(--primary-blue);
+      border-color: #d2e3fc;
+      background-color: #e8f0fe;
+    }
+
+    /* Template Selection Deck */
+    .template-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .template-chip {
+      background-color: var(--bg-color);
+      border: 1.5px solid var(--border-color);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+
+    .template-chip:hover {
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+      background-color: #e8f0fe;
+    }
+
+    .template-chip.active {
+      background-color: var(--primary-blue);
+      border-color: var(--primary-blue);
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    /* Studio Two-Column Grid */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1.25fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Left Form Deck */
+    .form-panel {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 1px 3px rgba(60,64,67,0.08);
+    }
+
+    .tab-nav {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 6px;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      background-color: #e8f0fe;
+      color: var(--primary-blue);
+      font-weight: 700;
+    }
+
+    .tab-content {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .tab-pane {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .tab-pane.active {
+      display: flex;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 500px) {
+      .field-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    input[type="text"], input[type="email"], input[type="tel"], input[type="url"], textarea, select {
+      font-family: 'Roboto', sans-serif;
+      font-size: 13px;
+      padding: 7px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: #ffffff;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    input[type="text"]:focus, input[type="email"]:focus, input[type="tel"]:focus, input[type="url"]:focus, textarea:focus, select:focus {
+      border-color: var(--primary-blue);
+    }
+
+    /* Color Swatches */
+    .color-swatches {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .color-dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 0 1px var(--border-color);
+      transition: transform 0.15s ease;
+    }
+
+    .color-dot:hover {
+      transform: scale(1.15);
+    }
+
+    .color-dot.active {
+      box-shadow: 0 0 0 2px var(--primary-blue);
+      transform: scale(1.15);
+    }
+
+    /* Right Preview Deck (Gmail Mockup) */
+    .preview-panel {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 1px 3px rgba(60,64,67,0.08);
+      position: sticky;
+      top: 16px;
+    }
+
+    .gmail-mockup {
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .gmail-header {
+      background: #f2f6fc;
+      border-bottom: 1px solid #dadce0;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #5f6368;
+    }
+
+    .gmail-body {
+      padding: 16px;
+      min-height: 240px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .gmail-body.dark-mode {
+      background-color: #1e1e1e !important;
+      color: #e0e0e0 !important;
+    }
+
+    .mock-message {
+      font-size: 13px;
+      color: #5f6368;
+      line-height: 1.5;
+    }
+
+    .gmail-body.dark-mode .mock-message {
+      color: #a0a0a0;
+    }
+
+    /* The Rendered Signature Container */
+    #signatureRenderBox {
+      background: transparent;
+      padding: 4px 0;
+      word-break: break-word;
+    }
+
+    /* Guide Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background-color: #ffffff;
+      border-radius: 12px;
+      max-width: 520px;
+      width: 100%;
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+      animation: modalPop 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    @keyframes modalPop {
+      0% { transform: scale(0.92); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .guide-step {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background-color: #e8f0fe;
+      color: var(--primary-blue);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 12px;
+    }
+
+    /* Raw HTML Modal */
+    .raw-html-area {
+      width: 100%;
+      height: 180px;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      line-height: 1.4;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: #f8f9fa;
+      color: var(--text-main);
+      resize: vertical;
+      outline: none;
+    }
+
+    /* Status Box */
+    .status-box {
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .status-box.success {
+      display: block;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid #c3e6cb;
+    }
+
+    .status-box.error {
+      display: block;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #f5c6cb;
+    }
+
+    /* Bottom Toolbar */
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 7px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    button:active {
+      transform: scale(0.96);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: scale(1);
+    }
+
+    .material-symbols-outlined {
+      font-size: 17px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: white;
+      min-width: 170px;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-blue);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #f8f9fa;
+      border-color: #dadce0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <!-- Header Bar with Standard Action Chips -->
+    <div class="header-bar">
+      <div class="header-title-box">
+        <span class="material-symbols-outlined" style="font-size: 24px; color: var(--primary-blue);">draw</span>
+        <h2>Email Signature Creator for Gmail</h2>
+      </div>
+
+      <div class="header-actions">
+        <a href="mailto:hikapil@google.com?cc=useful-tools@google.com&amp;subject=%5BUser%20Feedback%5D%20%7C%20Bug%20Found%20on%20go%2Fusefultools&amp;body=Hi%20Kapil%2C%0A%0AI%E2%80%99m%20reaching%20out%20to%20report%20a%20bug.%20Here%20are%20the%20relevant%20details%3A%0A%0ABug%20Description%3A%20%5BPlease%20provide%20a%20description%20of%20the%20issue%20here%5D"
+          target="_blank" rel="noopener noreferrer" class="action-chip chip-bug" title="Report a Bug">
+          <span class="material-symbols-outlined">bug_report</span>
+          <span>Report Bug</span>
+        </a>
+
+        <a href="mailto:hikapil@google.com?cc=useful-tools@google.com&amp;subject=%5BUser%20Feedback%5D%20%7C%20New%20Tool%2FFeature%20Request%20for%20go%2Fusefultools&amp;body=Hi%20Kapil%2C%0A%0AI%E2%80%99m%20reaching%20out%20to%20request%20a%20new%20feature.%20Here%20are%20the%20relevant%20details%3A%0A%0AFeature%20Request%3A%20%5BPlease%20provide%20a%20description%20of%20the%20feature%20you&#39;d%20like%20to%20see%5D"
+          target="_blank" rel="noopener noreferrer" class="action-chip chip-feature" title="Request a New Feature">
+          <span class="material-symbols-outlined">lightbulb</span>
+          <span>Request Feature</span>
+        </a>
+
+        <a href="https://moma.corp.google.com/person/hikapil"
+          target="_blank" rel="noopener noreferrer" class="action-chip chip-creator" title="Meet the Creator on Moma">
+          <span class="material-symbols-outlined">person</span>
+          <span>Meet the Creator</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Template Selection Bar -->
+    <div class="template-bar">
+      <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-right: 4px;">Template:</span>
+      <button class="template-chip active" onclick="setTemplate('modern', this)">🌟 Modern Accent Bar</button>
+      <button class="template-chip" onclick="setTemplate('corporate', this)">💼 Corporate Two-Column</button>
+      <button class="template-chip" onclick="setTemplate('tech', this)">⚡ Tech & Developer</button>
+      <button class="template-chip" onclick="setTemplate('minimal', this)">📐 Clean Minimalist</button>
+      <button class="template-chip" onclick="setTemplate('executive', this)">👑 Executive Banner</button>
+      <button class="template-chip" onclick="setTemplate('compact', this)">🌿 Compact Card</button>
+    </div>
+
+    <!-- Main Studio Two-Column Grid -->
+    <div class="main-grid">
+      <!-- Left Column: Form Controls -->
+      <div class="form-panel">
+        <div class="tab-nav">
+          <button class="tab-btn active" onclick="switchTab('profile', this)">
+            <span class="material-symbols-outlined" style="font-size: 15px;">person</span>
+            Profile
+          </button>
+          <button class="tab-btn" onclick="switchTab('contact', this)">
+            <span class="material-symbols-outlined" style="font-size: 15px;">call</span>
+            Contact
+          </button>
+          <button class="tab-btn" onclick="switchTab('social', this)">
+            <span class="material-symbols-outlined" style="font-size: 15px;">share</span>
+            Socials
+          </button>
+          <button class="tab-btn" onclick="switchTab('style', this)">
+            <span class="material-symbols-outlined" style="font-size: 15px;">palette</span>
+            Style & Extras
+          </button>
+        </div>
+
+        <div class="tab-content">
+          <!-- Tab 1: Profile & Company -->
+          <div class="tab-pane active" id="tab-profile">
+            <div class="field-row">
+              <div class="input-group">
+                <label>Full Name *</label>
+                <input type="text" id="inpName" value="Kapil Sharma" placeholder="e.g. Alex Johnson" oninput="updateSignature()">
+              </div>
+              <div class="input-group">
+                <label>Pronouns</label>
+                <input type="text" id="inpPronouns" value="he/him" placeholder="e.g. they/them, she/her" oninput="updateSignature()">
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="input-group">
+                <label>Job Title</label>
+                <input type="text" id="inpTitle" value="Product Specialist & Developer" placeholder="e.g. Software Engineer" oninput="updateSignature()">
+              </div>
+              <div class="input-group">
+                <label>Department</label>
+                <input type="text" id="inpDept" value="Useful Tools & Operations" placeholder="e.g. Cloud Marketing" oninput="updateSignature()">
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label>Company / Organization</label>
+              <input type="text" id="inpCompany" value="Google LLC" placeholder="e.g. Google" oninput="updateSignature()">
+            </div>
+
+            <!-- Avatar & Image Upload / URL -->
+            <div style="background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+              <label style="color: var(--primary-blue);">
+                <span class="material-symbols-outlined" style="font-size: 14px;">add_photo_alternate</span>
+                Profile Photo / Avatar Image
+              </label>
+
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="text" id="inpAvatarUrl" value="https://lh3.googleusercontent.com/a/default-user" placeholder="Paste Image URL (or upload below)..." style="flex: 1;" oninput="updateSignature()">
+                <label class="btn-secondary" style="margin: 0; cursor: pointer; padding: 6px 10px; font-size: 11px;">
+                  <span class="material-symbols-outlined" style="font-size: 15px;">upload</span>
+                  Upload
+                  <input type="file" id="fileAvatar" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                </label>
+              </div>
+
+              <div class="field-row" style="margin-top: 2px;">
+                <div class="input-group">
+                  <label>Photo Shape</label>
+                  <select id="selectAvatarShape" onchange="updateSignature()">
+                    <option value="50%">Circle</option>
+                    <option value="8px">Rounded Corners</option>
+                    <option value="0px">Square</option>
+                  </select>
+                </div>
+                <div class="input-group">
+                  <label>Photo Size</label>
+                  <select id="selectAvatarSize" onchange="updateSignature()">
+                    <option value="64">64 px (Standard)</option>
+                    <option value="80" selected>80 px (Medium)</option>
+                    <option value="96">96 px (Large)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 2: Contact Info -->
+          <div class="tab-pane" id="tab-contact">
+            <div class="field-row">
+              <div class="input-group">
+                <label>Email Address</label>
+                <input type="email" id="inpEmail" value="hikapil@google.com" placeholder="name@company.com" oninput="updateSignature()">
+              </div>
+              <div class="input-group">
+                <label>Phone / Work</label>
+                <input type="tel" id="inpPhone" value="+1 (555) 019-2834" placeholder="+1 (555) 000-0000" oninput="updateSignature()">
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="input-group">
+                <label>Website URL</label>
+                <input type="url" id="inpWebsite" value="https://moma.corp.google.com/person/hikapil" placeholder="https://example.com" oninput="updateSignature()">
+              </div>
+              <div class="input-group">
+                <label>Office Location / City</label>
+                <input type="text" id="inpAddress" value="Google HQ, Mountain View, CA" placeholder="City, State / Office" oninput="updateSignature()">
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label>Calendar Booking Link</label>
+              <input type="url" id="inpCalendar" value="https://calendar.google.com" placeholder="e.g. Google Calendar Appointment link" oninput="updateSignature()">
+            </div>
+          </div>
+
+          <!-- Tab 3: Social Profiles -->
+          <div class="tab-pane" id="tab-social">
+            <div class="field-row">
+              <div class="input-group">
+                <label>LinkedIn URL</label>
+                <input type="url" id="inpLinkedin" value="https://linkedin.com" placeholder="https://linkedin.com/in/username" oninput="updateSignature()">
+              </div>
+              <div class="input-group">
+                <label>GitHub URL</label>
+                <input type="url" id="inpGithub" value="https://github.com/kapildoesmarketing" placeholder="https://github.com/username" oninput="updateSignature()">
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="input-group">
+                <label>X / Twitter URL</label>
+                <input type="url" id="inpTwitter" placeholder="https://x.com/username" oninput="updateSignature()">
+              </div>
+              <div class="input-group">
+                <label>YouTube URL</label>
+                <input type="url" id="inpYoutube" placeholder="https://youtube.com/@channel" oninput="updateSignature()">
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 4: Style & Extras -->
+          <div class="tab-pane" id="tab-style">
+            <div class="input-group">
+              <label>Brand Accent Color</label>
+              <div class="color-swatches">
+                <div class="color-dot active" style="background: #1a73e8;" onclick="setAccentColor('#1a73e8', this)"></div>
+                <div class="color-dot" style="background: #188038;" onclick="setAccentColor('#188038', this)"></div>
+                <div class="color-dot" style="background: #d93025;" onclick="setAccentColor('#d93025', this)"></div>
+                <div class="color-dot" style="background: #ea8600;" onclick="setAccentColor('#ea8600', this)"></div>
+                <div class="color-dot" style="background: #8e24aa;" onclick="setAccentColor('#8e24aa', this)"></div>
+                <div class="color-dot" style="background: #202124;" onclick="setAccentColor('#202124', this)"></div>
+                <input type="color" id="customColorPicker" value="#1a73e8" style="width: 28px; height: 26px; border: none; cursor: pointer; background: none;" onchange="setAccentColor(this.value, null)">
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="input-group">
+                <label>Email Font Family</label>
+                <select id="selectFont" onchange="updateSignature()">
+                  <option value="Arial, sans-serif" selected>Arial (Universal)</option>
+                  <option value="'Roboto', Arial, sans-serif">Roboto</option>
+                  <option value="'Google Sans', Arial, sans-serif">Google Sans</option>
+                  <option value="Georgia, serif">Georgia (Serif)</option>
+                  <option value="Verdana, sans-serif">Verdana</option>
+                  <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                </select>
+              </div>
+
+              <div class="input-group">
+                <label>Call-to-Action Badge</label>
+                <input type="text" id="inpCtaText" value="📅 Schedule a Quick Meeting" placeholder="e.g. 📅 Book a Call" oninput="updateSignature()">
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label>Legal / Confidentiality Disclaimer</label>
+              <textarea id="inpDisclaimer" style="height: 54px; font-size: 11px;" placeholder="Optional disclaimer or environmental notice..." oninput="updateSignature()">This email and any attachments are confidential and intended solely for the recipient. If received in error, please notify the sender.</textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Live Gmail Preview & Actions -->
+      <div class="preview-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span class="material-symbols-outlined" style="font-size: 18px; color: var(--primary-blue);">mark_email_read</span>
+            <span style="font-size: 13px; font-weight: 700; color: var(--text-main);">Live Gmail Preview</span>
+          </div>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="toggleDarkModePreview()">
+              <span class="material-symbols-outlined" id="darkToggleIcon" style="font-size: 14px;">dark_mode</span>
+              <span id="darkToggleText">Dark Mode</span>
+            </button>
+            <button class="btn-secondary" style="padding: 2px 8px; font-size: 11px;" onclick="openGuideModal()">
+              <span class="material-symbols-outlined" style="font-size: 14px;">help</span>
+              Gmail Guide
+            </button>
+          </div>
+        </div>
+
+        <!-- Gmail Window Mockup -->
+        <div class="gmail-mockup">
+          <div class="gmail-header">
+            <span>New Message • <strong>Project Roadmap & Update</strong></span>
+            <span class="material-symbols-outlined" style="font-size: 14px;">close</span>
+          </div>
+          <div class="gmail-body" id="gmailBodyContainer">
+            <div class="mock-message">
+              Hi team,<br><br>
+              Sharing the latest deliverables and dashboard links for review. Looking forward to our discussion!<br><br>
+              Best regards,
+            </div>
+
+            <!-- The Output HTML Signature -->
+            <div id="signatureRenderBox">
+              <!-- Rendered via JavaScript -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Box -->
+        <div id="statusBox" class="status-box"></div>
+
+        <!-- Action Toolbar -->
+        <div class="toolbar">
+          <button class="btn-primary" onclick="copySignatureForGmail()">
+            <span class="material-symbols-outlined" id="copyGmailIcon">content_copy</span>
+            <span id="copyGmailText">Copy for Gmail</span>
+          </button>
+
+          <button class="btn-secondary" onclick="openRawHtmlModal()">
+            <span class="material-symbols-outlined">code</span>
+            View HTML
+          </button>
+
+          <button class="btn-secondary" onclick="loadSampleData()">
+            <span class="material-symbols-outlined">replay</span>
+            Sample Data
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gmail Setup Guide Modal -->
+  <div class="modal-overlay" id="guideModal" onclick="if(event.target===this) closeGuideModal()">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+        <h3 style="margin: 0; font-size: 16px; display: flex; align-items: center; gap: 6px; color: var(--text-main);">
+          <span class="material-symbols-outlined" style="color: var(--primary-blue);">integration_instructions</span>
+          How to Add Your Signature to Gmail
+        </h3>
+        <button class="btn-secondary" style="padding: 2px 6px;" onclick="closeGuideModal()">
+          <span class="material-symbols-outlined" style="font-size: 16px;">close</span>
+        </button>
+      </div>
+
+      <div class="guide-step">
+        <div class="step-num">1</div>
+        <div>Click the blue <strong>"Copy for Gmail"</strong> button below to copy the formatted signature directly to your clipboard.</div>
+      </div>
+
+      <div class="guide-step">
+        <div class="step-num">2</div>
+        <div>Open <a href="https://mail.google.com" target="_blank" rel="noopener noreferrer" style="color: var(--primary-blue); font-weight: 700;">Gmail</a>, click the <strong>Settings Gear ⚙️</strong> in the top-right, and select <strong>"See all settings"</strong>.</div>
+      </div>
+
+      <div class="guide-step">
+        <div class="step-num">3</div>
+        <div>In the <strong>General</strong> tab, scroll down to the <strong>Signature</strong> section.</div>
+      </div>
+
+      <div class="guide-step">
+        <div class="step-num">4</div>
+        <div>Click <strong>+ Create new</strong>, name your signature (e.g. <em>Work 2026</em>), click inside the signature text area, and press <strong>Ctrl + V</strong> (or <strong>Cmd + V</strong> on Mac) to paste.</div>
+      </div>
+
+      <div class="guide-step">
+        <div class="step-num">5</div>
+        <div>Under <strong>Signature defaults</strong>, select your new signature for <em>"For new emails use"</em> and <em>"On reply/forward use"</em>.</div>
+      </div>
+
+      <div class="guide-step">
+        <div class="step-num">6</div>
+        <div>Scroll to the bottom of the page and click <strong>"Save Changes"</strong>. You're all set! 🎉</div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 6px;">
+        <button class="btn-primary" onclick="closeGuideModal(); copySignatureForGmail();">
+          <span class="material-symbols-outlined">content_copy</span>
+          Copy & Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Raw HTML Code Modal -->
+  <div class="modal-overlay" id="rawHtmlModal" onclick="if(event.target===this) closeRawHtmlModal()">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+        <h3 style="margin: 0; font-size: 16px; display: flex; align-items: center; gap: 6px;">
+          <span class="material-symbols-outlined" style="color: var(--primary-blue);">code</span>
+          Raw HTML Email Signature Code
+        </h3>
+        <button class="btn-secondary" style="padding: 2px 6px;" onclick="closeRawHtmlModal()">
+          <span class="material-symbols-outlined" style="font-size: 16px;">close</span>
+        </button>
+      </div>
+
+      <textarea class="raw-html-area" id="rawHtmlTextarea" readonly></textarea>
+
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button class="btn-secondary" onclick="closeRawHtmlModal()">Close</button>
+        <button class="btn-primary" onclick="copyRawHtmlCode()">
+          <span class="material-symbols-outlined" id="copyCodeIcon">content_copy</span>
+          <span id="copyCodeText">Copy HTML Code</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State Variables
+    let currentTemplate = 'modern';
+    let currentAccentColor = '#1a73e8';
+    let isDarkModePreview = false;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      updateSignature();
+    });
+
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+
+      btn.classList.add('active');
+      const pane = document.getElementById(`tab-${tabId}`);
+      if (pane) pane.classList.add('active');
+    }
+
+    function setTemplate(tplName, btn) {
+      currentTemplate = tplName;
+      document.querySelectorAll('.template-chip').forEach(c => c.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      updateSignature();
+    }
+
+    function setAccentColor(colorHex, dotEl) {
+      currentAccentColor = colorHex;
+      document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+      if (dotEl) dotEl.classList.add('active');
+      document.getElementById('customColorPicker').value = colorHex;
+      updateSignature();
+    }
+
+    function toggleDarkModePreview() {
+      isDarkModePreview = !isDarkModePreview;
+      const container = document.getElementById('gmailBodyContainer');
+      const icon = document.getElementById('darkToggleIcon');
+      const text = document.getElementById('darkToggleText');
+
+      if (isDarkModePreview) {
+        container.classList.add('dark-mode');
+        icon.textContent = 'light_mode';
+        text.textContent = 'Light Mode';
+      } else {
+        container.classList.remove('dark-mode');
+        icon.textContent = 'dark_mode';
+        text.textContent = 'Dark Mode';
+      }
+    }
+
+    function handleImageUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        showStatus('Please select a valid image file.', 'error');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (evt) {
+        document.getElementById('inpAvatarUrl').value = evt.target.result;
+        updateSignature();
+        showStatus('Image uploaded and applied.', 'success');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    /* Generator Logic: Table-Based Clean Inline CSS for 100% Gmail & Mobile Compatibility */
+    function generateSignatureHTML() {
+      const name = document.getElementById('inpName').value.trim() || 'Alex Johnson';
+      const pronouns = document.getElementById('inpPronouns').value.trim();
+      const title = document.getElementById('inpTitle').value.trim();
+      const dept = document.getElementById('inpDept').value.trim();
+      const company = document.getElementById('inpCompany').value.trim();
+
+      const avatarUrl = document.getElementById('inpAvatarUrl').value.trim();
+      const avatarShape = document.getElementById('selectAvatarShape').value;
+      const avatarSize = parseInt(document.getElementById('selectAvatarSize').value, 10) || 80;
+
+      const email = document.getElementById('inpEmail').value.trim();
+      const phone = document.getElementById('inpPhone').value.trim();
+      const website = document.getElementById('inpWebsite').value.trim();
+      const address = document.getElementById('inpAddress').value.trim();
+      const calendar = document.getElementById('inpCalendar').value.trim();
+
+      const linkedin = document.getElementById('inpLinkedin').value.trim();
+      const github = document.getElementById('inpGithub').value.trim();
+      const twitter = document.getElementById('inpTwitter').value.trim();
+      const youtube = document.getElementById('inpYoutube').value.trim();
+
+      const font = document.getElementById('selectFont').value || 'Arial, sans-serif';
+      const ctaText = document.getElementById('inpCtaText').value.trim();
+      const disclaimer = document.getElementById('inpDisclaimer').value.trim();
+      const color = currentAccentColor;
+
+      const titleDeptCompany = [title, dept, company].filter(Boolean).join(' • ');
+
+      // Social Links HTML
+      const socialLinks = [];
+      if (linkedin) socialLinks.push(`<a href="${escapeHtml(linkedin)}" target="_blank" style="display:inline-block; margin-right:8px; text-decoration:none; color:${color}; font-size:12px; font-weight:bold;">LinkedIn</a>`);
+      if (github) socialLinks.push(`<a href="${escapeHtml(github)}" target="_blank" style="display:inline-block; margin-right:8px; text-decoration:none; color:${color}; font-size:12px; font-weight:bold;">GitHub</a>`);
+      if (twitter) socialLinks.push(`<a href="${escapeHtml(twitter)}" target="_blank" style="display:inline-block; margin-right:8px; text-decoration:none; color:${color}; font-size:12px; font-weight:bold;">X (Twitter)</a>`);
+      if (youtube) socialLinks.push(`<a href="${escapeHtml(youtube)}" target="_blank" style="display:inline-block; margin-right:8px; text-decoration:none; color:${color}; font-size:12px; font-weight:bold;">YouTube</a>`);
+      if (website) socialLinks.push(`<a href="${escapeHtml(website)}" target="_blank" style="display:inline-block; margin-right:8px; text-decoration:none; color:${color}; font-size:12px; font-weight:bold;">Website</a>`);
+
+      const socialsHtml = socialLinks.length > 0 ? `<div style="margin-top:8px;">${socialLinks.join('')}</div>` : '';
+
+      // CTA Button HTML
+      const ctaHtml = (ctaText && calendar) ? `
+        <div style="margin-top:10px;">
+          <a href="${escapeHtml(calendar)}" target="_blank" style="display:inline-block; background-color:${color}; color:#ffffff; font-family:${font}; font-size:11px; font-weight:bold; padding:6px 14px; border-radius:14px; text-decoration:none;">
+            ${escapeHtml(ctaText)}
+          </a>
+        </div>
+      ` : '';
+
+      // Disclaimer HTML
+      const disclaimerHtml = disclaimer ? `
+        <div style="margin-top:10px; font-family:${font}; font-size:10px; color:#888888; line-height:1.4; border-top:1px dashed #dddddd; padding-top:6px; max-width:480px;">
+          ${escapeHtml(disclaimer)}
+        </div>
+      ` : '';
+
+      // Avatar HTML
+      const avatarImgHtml = avatarUrl ? `
+        <img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(name)}" width="${avatarSize}" height="${avatarSize}" style="width:${avatarSize}px; height:${avatarSize}px; border-radius:${avatarShape}; object-fit:cover; display:block;" />
+      ` : '';
+
+      // Template 1: Modern Accent Bar (Left colored border)
+      if (currentTemplate === 'modern') {
+        return `
+          <table cellpadding="0" cellspacing="0" border="0" style="font-family:${font}; font-size:12px; line-height:1.4; color:#333333;">
+            <tr>
+              ${avatarImgHtml ? `<td style="vertical-align:top; padding-right:14px;">${avatarImgHtml}</td>` : ''}
+              <td style="border-left:3px solid ${color}; padding-left:14px; vertical-align:top;">
+                <div style="font-size:16px; font-weight:bold; color:#111111; margin-bottom:2px;">
+                  ${escapeHtml(name)} ${pronouns ? `<span style="font-size:11px; font-weight:normal; color:#666666;">(${escapeHtml(pronouns)})</span>` : ''}
+                </div>
+                ${titleDeptCompany ? `<div style="font-size:12px; color:${color}; font-weight:500; margin-bottom:6px;">${escapeHtml(titleDeptCompany)}</div>` : ''}
+                
+                <table cellpadding="0" cellspacing="0" border="0" style="font-size:11px; color:#555555; margin-top:4px;">
+                  ${email ? `<tr><td style="padding:1px 0;">📧 <a href="mailto:${escapeHtml(email)}" style="color:#333333; text-decoration:none;">${escapeHtml(email)}</a></td></tr>` : ''}
+                  ${phone ? `<tr><td style="padding:1px 0;">📞 <a href="tel:${escapeHtml(phone)}" style="color:#333333; text-decoration:none;">${escapeHtml(phone)}</a></td></tr>` : ''}
+                  ${address ? `<tr><td style="padding:1px 0;">📍 ${escapeHtml(address)}</td></tr>` : ''}
+                </table>
+
+                ${socialsHtml}
+                ${ctaHtml}
+              </td>
+            </tr>
+            ${disclaimerHtml ? `<tr><td colspan="2">${disclaimerHtml}</td></tr>` : ''}
+          </table>
+        `;
+      }
+
+      // Template 2: Corporate Two-Column
+      if (currentTemplate === 'corporate') {
+        return `
+          <table cellpadding="0" cellspacing="0" border="0" style="font-family:${font}; font-size:12px; line-height:1.4; color:#333333;">
+            <tr>
+              ${avatarImgHtml ? `<td style="vertical-align:middle; padding-right:16px; border-right:1px solid #e0e0e0;">${avatarImgHtml}</td>` : ''}
+              <td style="padding-left:${avatarImgHtml ? '16px' : '0'}; vertical-align:middle;">
+                <div style="font-size:17px; font-weight:bold; color:#202124;">
+                  ${escapeHtml(name)} ${pronouns ? `<span style="font-size:11px; font-weight:normal; color:#70757a;">(${escapeHtml(pronouns)})</span>` : ''}
+                </div>
+                <div style="font-size:12px; font-weight:bold; color:${color}; margin-top:2px;">${escapeHtml(title || 'Professional')}</div>
+                <div style="font-size:11px; color:#5f6368;">${escapeHtml([dept, company].filter(Boolean).join(' • '))}</div>
+                
+                <div style="margin-top:6px; font-size:11px; color:#444444;">
+                  ${email ? `<span><a href="mailto:${escapeHtml(email)}" style="color:${color}; text-decoration:none;">${escapeHtml(email)}</a></span>` : ''}
+                  ${phone ? ` • <span>${escapeHtml(phone)}</span>` : ''}
+                  ${address ? `<br><span>${escapeHtml(address)}</span>` : ''}
+                </div>
+
+                ${socialsHtml}
+                ${ctaHtml}
+              </td>
+            </tr>
+            ${disclaimerHtml ? `<tr><td colspan="2">${disclaimerHtml}</td></tr>` : ''}
+          </table>
+        `;
+      }
+
+      // Template 3: Tech & Developer (Card / Monospace badge styling)
+      if (currentTemplate === 'tech') {
+        return `
+          <table cellpadding="0" cellspacing="0" border="0" style="font-family:${font}; font-size:12px; line-height:1.4; color:#24292f; background:#f6f8fa; border:1px solid #d0d7de; border-radius:6px; padding:12px 16px;">
+            <tr>
+              ${avatarImgHtml ? `<td style="vertical-align:top; padding-right:12px;">${avatarImgHtml}</td>` : ''}
+              <td style="vertical-align:top;">
+                <div style="font-size:15px; font-weight:bold; color:#0969da;">
+                  ${escapeHtml(name)} <span style="font-family:'Roboto Mono', monospace; font-size:10px; background:#ddf4ff; color:#0969da; padding:2px 6px; border-radius:10px; font-weight:normal;">${escapeHtml(title || 'Developer')}</span>
+                </div>
+                <div style="font-size:11px; color:#57606a; margin-top:2px;">${escapeHtml([dept, company].filter(Boolean).join(' | '))}</div>
+
+                <div style="margin-top:6px; font-family:'Roboto Mono', monospace; font-size:11px; color:#24292f;">
+                  ${email ? `<div>&gt; email: <a href="mailto:${escapeHtml(email)}" style="color:${color}; text-decoration:none;">${escapeHtml(email)}</a></div>` : ''}
+                  ${phone ? `<div>&gt; phone: ${escapeHtml(phone)}</div>` : ''}
+                </div>
+
+                ${socialsHtml}
+                ${ctaHtml}
+              </td>
+            </tr>
+            ${disclaimerHtml ? `<tr><td colspan="2">${disclaimerHtml}</td></tr>` : ''}
+          </table>
+        `;
+      }
+
+      // Template 4: Clean Minimalist (Compact horizontal)
+      if (currentTemplate === 'minimal') {
+        return `
+          <div style="font-family:${font}; font-size:12px; line-height:1.5; color:#333333; border-top:2px solid ${color}; padding-top:8px; max-width:500px;">
+            <div style="font-size:14px; font-weight:bold; color:#111111;">
+              ${escapeHtml(name)} ${pronouns ? `<span style="font-size:11px; font-weight:normal; color:#777777;">(${escapeHtml(pronouns)})</span>` : ''}
+              <span style="font-weight:normal; color:#666666;"> | ${escapeHtml([title, company].filter(Boolean).join(', '))}</span>
+            </div>
+            <div style="font-size:11px; color:#555555; margin-top:2px;">
+              ${email ? `<a href="mailto:${escapeHtml(email)}" style="color:${color}; text-decoration:none;">${escapeHtml(email)}</a>` : ''}
+              ${phone ? ` • ${escapeHtml(phone)}` : ''}
+              ${website ? ` • <a href="${escapeHtml(website)}" style="color:${color}; text-decoration:none;">${escapeHtml(website)}</a>` : ''}
+            </div>
+            ${socialsHtml}
+            ${ctaHtml}
+            ${disclaimerHtml}
+          </div>
+        `;
+      }
+
+      // Template 5: Executive Banner
+      if (currentTemplate === 'executive') {
+        return `
+          <table cellpadding="0" cellspacing="0" border="0" style="font-family:${font}; font-size:12px; line-height:1.4; color:#333333; width:100%; max-width:480px;">
+            <tr>
+              <td style="background:${color}; color:#ffffff; padding:10px 14px; border-radius:6px 6px 0 0;">
+                <div style="font-size:16px; font-weight:bold;">${escapeHtml(name)}</div>
+                <div style="font-size:11px; opacity:0.9;">${escapeHtml([title, dept, company].filter(Boolean).join(' • '))}</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="border:1px solid #dadce0; border-top:none; border-radius:0 0 6px 6px; padding:12px 14px; background:#ffffff;">
+                <table cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    ${avatarImgHtml ? `<td style="vertical-align:top; padding-right:12px;">${avatarImgHtml}</td>` : ''}
+                    <td style="vertical-align:top;">
+                      <div style="font-size:11px; color:#555555;">
+                        ${email ? `<div>✉️ <a href="mailto:${escapeHtml(email)}" style="color:${color}; text-decoration:none;">${escapeHtml(email)}</a></div>` : ''}
+                        ${phone ? `<div>📞 ${escapeHtml(phone)}</div>` : ''}
+                        ${address ? `<div>🏢 ${escapeHtml(address)}</div>` : ''}
+                      </div>
+                      ${socialsHtml}
+                      ${ctaHtml}
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            ${disclaimerHtml ? `<tr><td>${disclaimerHtml}</td></tr>` : ''}
+          </table>
+        `;
+      }
+
+      // Template 6: Compact Card
+      return `
+        <table cellpadding="0" cellspacing="0" border="0" style="font-family:${font}; font-size:11px; line-height:1.4; color:#333333;">
+          <tr>
+            ${avatarImgHtml ? `<td style="vertical-align:middle; padding-right:10px;">${avatarImgHtml}</td>` : ''}
+            <td style="vertical-align:middle;">
+              <div style="font-size:13px; font-weight:bold; color:#111111;">${escapeHtml(name)}</div>
+              <div style="color:${color}; font-size:11px;">${escapeHtml([title, company].filter(Boolean).join(' • '))}</div>
+              <div style="color:#666666; margin-top:2px;">
+                ${email ? `<a href="mailto:${escapeHtml(email)}" style="color:#555555; text-decoration:none;">${escapeHtml(email)}</a>` : ''}
+                ${phone ? ` • ${escapeHtml(phone)}` : ''}
+              </div>
+              ${socialsHtml}
+            </td>
+          </tr>
+          ${disclaimerHtml ? `<tr><td colspan="2">${disclaimerHtml}</td></tr>` : ''}
+        </table>
+      `;
+    }
+
+    function updateSignature() {
+      const html = generateSignatureHTML();
+      document.getElementById('signatureRenderBox').innerHTML = html;
+    }
+
+    /* 1-Click Copy Formatted Signature for Gmail */
+    async function copySignatureForGmail() {
+      const container = document.getElementById('signatureRenderBox');
+      const html = container.innerHTML;
+      const plain = container.innerText;
+
+      try {
+        if (navigator.clipboard && window.ClipboardItem) {
+          const blobHtml = new Blob([html], { type: 'text/html' });
+          const blobText = new Blob([plain], { type: 'text/plain' });
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              'text/html': blobHtml,
+              'text/plain': blobText
+            })
+          ]);
+        } else {
+          // DOM Selection fallback
+          selectAndCopyNode(container);
+        }
+
+        triggerSuccessButton('copyGmailIcon', 'copyGmailText', 'Copied for Gmail!');
+        showStatus('Signature copied! Paste (Ctrl+V) into Gmail Settings.', 'success');
+
+        if (typeof confetti === 'function') {
+          confetti({
+            particleCount: 50,
+            spread: 50,
+            origin: { y: 0.6 }
+          });
+        }
+      } catch (err) {
+        console.warn('ClipboardItem failed, using selection fallback:', err);
+        selectAndCopyNode(container);
+        triggerSuccessButton('copyGmailIcon', 'copyGmailText', 'Copied for Gmail!');
+        showStatus('Signature copied! Paste (Ctrl+V) into Gmail Settings.', 'success');
+      }
+    }
+
+    function selectAndCopyNode(node) {
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      document.execCommand('copy');
+      selection.removeAllRanges();
+    }
+
+    /* Raw HTML Code Modal */
+    function openRawHtmlModal() {
+      document.getElementById('rawHtmlTextarea').value = generateSignatureHTML().trim();
+      document.getElementById('rawHtmlModal').classList.add('open');
+    }
+
+    function closeRawHtmlModal() {
+      document.getElementById('rawHtmlModal').classList.remove('open');
+    }
+
+    function copyRawHtmlCode() {
+      const textarea = document.getElementById('rawHtmlTextarea');
+      textarea.select();
+      document.execCommand('copy');
+      triggerSuccessButton('copyCodeIcon', 'copyCodeText', 'Code Copied!');
+      showStatus('Raw HTML copied to clipboard.', 'success');
+    }
+
+    /* Gmail Setup Guide Modal */
+    function openGuideModal() {
+      document.getElementById('guideModal').classList.add('open');
+    }
+
+    function closeGuideModal() {
+      document.getElementById('guideModal').classList.remove('open');
+    }
+
+    function loadSampleData() {
+      document.getElementById('inpName').value = 'Kapil Sharma';
+      document.getElementById('inpPronouns').value = 'he/him';
+      document.getElementById('inpTitle').value = 'Product Lead & Developer';
+      document.getElementById('inpDept').value = 'Marketing & Useful Tools';
+      document.getElementById('inpCompany').value = 'Google LLC';
+      document.getElementById('inpAvatarUrl').value = 'https://lh3.googleusercontent.com/a/default-user';
+      document.getElementById('inpEmail').value = 'hikapil@google.com';
+      document.getElementById('inpPhone').value = '+1 (650) 253-0000';
+      document.getElementById('inpWebsite').value = 'https://moma.corp.google.com/person/hikapil';
+      document.getElementById('inpAddress').value = 'Google HQ, Mountain View, CA';
+      document.getElementById('inpCalendar').value = 'https://calendar.google.com';
+      document.getElementById('inpLinkedin').value = 'https://linkedin.com';
+      document.getElementById('inpGithub').value = 'https://github.com/kapildoesmarketing';
+      document.getElementById('inpCtaText').value = '📅 Schedule a Quick Meeting';
+      updateSignature();
+      showStatus('Sample profile loaded.', 'success');
+    }
+
+    function triggerSuccessButton(iconId, textId, successText) {
+      const icon = document.getElementById(iconId);
+      const text = document.getElementById(textId);
+      if (!icon || !text) return;
+      const originalText = text.innerText;
+      const originalIcon = icon.innerText;
+
+      icon.innerText = 'check';
+      text.innerText = successText;
+
+      setTimeout(() => {
+        icon.innerText = originalIcon;
+        text.innerText = originalText;
+      }, 2500);
+    }
+
+    function showStatus(msg, type) {
+      const statusBox = document.getElementById('statusBox');
+      statusBox.className = `status-box ${type}`;
+      statusBox.textContent = msg;
+      setTimeout(() => {
+        statusBox.className = 'status-box';
+        statusBox.textContent = '';
+      }, 4000);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, function (m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+      });
+    }
+  </script>
+</body>
+
+</html>
