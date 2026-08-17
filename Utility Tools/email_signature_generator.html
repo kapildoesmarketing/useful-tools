@@ -48,7 +48,7 @@
     .container {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
       max-width: 100%;
       margin: 0 auto;
     }
@@ -134,7 +134,7 @@
     .template-bar {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       overflow-x: auto;
       padding-bottom: 4px;
     }
@@ -143,14 +143,14 @@
       background-color: var(--bg-color);
       border: 1.5px solid var(--border-color);
       border-radius: 8px;
-      padding: 6px 12px;
+      padding: 5px 11px;
       font-size: 12px;
       font-weight: 500;
       color: var(--text-main);
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       white-space: nowrap;
       transition: all 0.15s ease;
     }
@@ -171,12 +171,12 @@
     /* Studio Two-Column Grid */
     .main-grid {
       display: grid;
-      grid-template-columns: 1.15fr 1.25fr;
+      grid-template-columns: 1.1fr 1.25fr;
       gap: 16px;
       align-items: start;
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 920px) {
       .main-grid {
         grid-template-columns: 1fr;
       }
@@ -199,13 +199,14 @@
       gap: 4px;
       border-bottom: 1px solid var(--border-color);
       padding-bottom: 6px;
+      overflow-x: auto;
     }
 
     .tab-btn {
       background: none;
       border: none;
-      padding: 6px 10px;
-      font-size: 12px;
+      padding: 6px 9px;
+      font-size: 11.5px;
       font-weight: 500;
       color: var(--text-secondary);
       cursor: pointer;
@@ -213,6 +214,7 @@
       display: flex;
       align-items: center;
       gap: 4px;
+      white-space: nowrap;
       transition: all 0.15s ease;
     }
 
@@ -246,7 +248,7 @@
     .field-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 8px;
     }
 
     @media (max-width: 500px) {
@@ -258,11 +260,11 @@
     .input-group {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
     }
 
     label {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       color: var(--text-secondary);
       text-transform: uppercase;
@@ -274,10 +276,10 @@
 
     input[type="text"], input[type="email"], input[type="tel"], input[type="url"], textarea, select {
       font-family: 'Roboto', sans-serif;
-      font-size: 13px;
-      padding: 7px 10px;
+      font-size: 12px;
+      padding: 6px 9px;
       border: 1px solid var(--border-color);
-      border-radius: 6px;
+      border-radius: 5px;
       background-color: #ffffff;
       color: var(--text-main);
       outline: none;
@@ -288,17 +290,74 @@
       border-color: var(--primary-blue);
     }
 
+    /* Sub-card Section */
+    .sub-card {
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sub-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* Dynamic Custom Links List */
+    .links-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .link-item-row {
+      display: grid;
+      grid-template-columns: 1fr 1.6fr auto;
+      gap: 6px;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      padding: 5px 8px;
+    }
+
+    .btn-icon {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px;
+      border-radius: 4px;
+    }
+
+    .btn-icon:hover {
+      color: var(--danger-text);
+      background-color: var(--danger-bg);
+    }
+
     /* Color Swatches */
     .color-swatches {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
     }
 
     .color-dot {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
       cursor: pointer;
       border: 2px solid #ffffff;
@@ -350,27 +409,27 @@
 
     .gmail-body {
       padding: 16px;
-      min-height: 240px;
+      min-height: 220px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 16px;
+      gap: 14px;
       transition: background-color 0.2s ease, color 0.2s ease;
     }
 
     .gmail-body.dark-mode {
-      background-color: #1e1e1e !important;
+      background-color: #1f1f1f !important;
       color: #e0e0e0 !important;
     }
 
     .mock-message {
-      font-size: 13px;
+      font-size: 12.5px;
       color: #5f6368;
       line-height: 1.5;
     }
 
     .gmail-body.dark-mode .mock-message {
-      color: #a0a0a0;
+      color: #a8a8a8;
     }
 
     /* The Rendered Signature Container */
@@ -482,16 +541,16 @@
     /* Bottom Toolbar */
     .toolbar {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
       align-items: center;
     }
 
     button {
       font-family: 'Google Sans', sans-serif;
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 500;
-      padding: 7px 16px;
+      padding: 6px 14px;
       border-radius: 4px;
       cursor: pointer;
       border: 1px solid transparent;
@@ -499,7 +558,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 5px;
     }
 
     button:active {
@@ -513,13 +572,13 @@
     }
 
     .material-symbols-outlined {
-      font-size: 17px;
+      font-size: 16px;
     }
 
     .btn-primary {
       background-color: var(--primary-blue);
       color: white;
-      min-width: 170px;
+      min-width: 150px;
     }
 
     .btn-primary:hover:not(:disabled) {
@@ -573,10 +632,10 @@
 
     <!-- Template Selection Bar -->
     <div class="template-bar">
-      <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-right: 4px;">Template:</span>
-      <button class="template-chip active" onclick="setTemplate('modern', this)">🌟 Modern Accent Bar</button>
+      <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-right: 2px;">Layout:</span>
+      <button class="template-chip active" onclick="setTemplate('modern', this)">🌟 Modern Accent</button>
       <button class="template-chip" onclick="setTemplate('corporate', this)">💼 Corporate Two-Column</button>
-      <button class="template-chip" onclick="setTemplate('tech', this)">⚡ Tech & Developer</button>
+      <button class="template-chip" onclick="setTemplate('tech', this)">⚡ Tech & Dev</button>
       <button class="template-chip" onclick="setTemplate('minimal', this)">📐 Clean Minimalist</button>
       <button class="template-chip" onclick="setTemplate('executive', this)">👑 Executive Banner</button>
       <button class="template-chip" onclick="setTemplate('compact', this)">🌿 Compact Card</button>
@@ -588,20 +647,24 @@
       <div class="form-panel">
         <div class="tab-nav">
           <button class="tab-btn active" onclick="switchTab('profile', this)">
-            <span class="material-symbols-outlined" style="font-size: 15px;">person</span>
+            <span class="material-symbols-outlined" style="font-size: 14px;">person</span>
             Profile
           </button>
+          <button class="tab-btn" onclick="switchTab('images', this)">
+            <span class="material-symbols-outlined" style="font-size: 14px;">image</span>
+            Images & Logo
+          </button>
           <button class="tab-btn" onclick="switchTab('contact', this)">
-            <span class="material-symbols-outlined" style="font-size: 15px;">call</span>
+            <span class="material-symbols-outlined" style="font-size: 14px;">call</span>
             Contact
           </button>
-          <button class="tab-btn" onclick="switchTab('social', this)">
-            <span class="material-symbols-outlined" style="font-size: 15px;">share</span>
-            Socials
+          <button class="tab-btn" onclick="switchTab('links', this)">
+            <span class="material-symbols-outlined" style="font-size: 14px;">link</span>
+            Custom Links
           </button>
           <button class="tab-btn" onclick="switchTab('style', this)">
-            <span class="material-symbols-outlined" style="font-size: 15px;">palette</span>
-            Style & Extras
+            <span class="material-symbols-outlined" style="font-size: 14px;">palette</span>
+            Style & Scale
           </button>
         </div>
 
@@ -615,18 +678,18 @@
               </div>
               <div class="input-group">
                 <label>Pronouns</label>
-                <input type="text" id="inpPronouns" value="he/him" placeholder="e.g. they/them, she/her" oninput="updateSignature()">
+                <input type="text" id="inpPronouns" value="he/him" placeholder="e.g. they/them" oninput="updateSignature()">
               </div>
             </div>
 
             <div class="field-row">
               <div class="input-group">
                 <label>Job Title</label>
-                <input type="text" id="inpTitle" value="Product Specialist & Developer" placeholder="e.g. Software Engineer" oninput="updateSignature()">
+                <input type="text" id="inpTitle" value="Product Lead & Developer" placeholder="e.g. Software Engineer" oninput="updateSignature()">
               </div>
               <div class="input-group">
                 <label>Department</label>
-                <input type="text" id="inpDept" value="Useful Tools & Operations" placeholder="e.g. Cloud Marketing" oninput="updateSignature()">
+                <input type="text" id="inpDept" value="Useful Tools & Operations" placeholder="e.g. Marketing" oninput="updateSignature()">
               </div>
             </div>
 
@@ -634,45 +697,91 @@
               <label>Company / Organization</label>
               <input type="text" id="inpCompany" value="Google LLC" placeholder="e.g. Google" oninput="updateSignature()">
             </div>
+          </div>
 
-            <!-- Avatar & Image Upload / URL -->
-            <div style="background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">
-              <label style="color: var(--primary-blue);">
-                <span class="material-symbols-outlined" style="font-size: 14px;">add_photo_alternate</span>
-                Profile Photo / Avatar Image
-              </label>
-
-              <div style="display: flex; gap: 8px; align-items: center;">
-                <input type="text" id="inpAvatarUrl" value="https://lh3.googleusercontent.com/a/default-user" placeholder="Paste Image URL (or upload below)..." style="flex: 1;" oninput="updateSignature()">
-                <label class="btn-secondary" style="margin: 0; cursor: pointer; padding: 6px 10px; font-size: 11px;">
-                  <span class="material-symbols-outlined" style="font-size: 15px;">upload</span>
-                  Upload
-                  <input type="file" id="fileAvatar" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+          <!-- Tab 2: Images & Logo -->
+          <div class="tab-pane" id="tab-images">
+            <!-- Profile Photo Section -->
+            <div class="sub-card">
+              <div class="sub-card-header">
+                <span>👤 1. Profile Photo / Headshot</span>
+                <label style="font-size: 10px; font-weight: normal; cursor: pointer;">
+                  <input type="checkbox" id="chkPhoto" checked onchange="updateSignature()"> Show Photo
                 </label>
               </div>
 
-              <div class="field-row" style="margin-top: 2px;">
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <input type="text" id="inpPhotoUrl" value="https://lh3.googleusercontent.com/a/default-user" placeholder="Paste Image URL or upload..." style="flex: 1;" oninput="updateSignature()">
+                <label class="btn-secondary" style="margin: 0; cursor: pointer; padding: 5px 8px; font-size: 11px;">
+                  <span class="material-symbols-outlined" style="font-size: 14px;">upload</span>
+                  Upload
+                  <input type="file" accept="image/*" style="display: none;" onchange="handleImageUpload(event, 'photo')">
+                </label>
+              </div>
+
+              <div class="field-row">
                 <div class="input-group">
-                  <label>Photo Shape</label>
-                  <select id="selectAvatarShape" onchange="updateSignature()">
-                    <option value="50%">Circle</option>
-                    <option value="8px">Rounded Corners</option>
-                    <option value="0px">Square</option>
+                  <label>Photo Shape / Ratio</label>
+                  <select id="selectPhotoShape" onchange="updateSignature()">
+                    <option value="circle">Circle (1:1)</option>
+                    <option value="rounded">Rounded Square (1:1)</option>
+                    <option value="square">Square (1:1)</option>
                   </select>
                 </div>
                 <div class="input-group">
                   <label>Photo Size</label>
-                  <select id="selectAvatarSize" onchange="updateSignature()">
-                    <option value="64">64 px (Standard)</option>
-                    <option value="80" selected>80 px (Medium)</option>
-                    <option value="96">96 px (Large)</option>
+                  <select id="selectPhotoSize" onchange="updateSignature()">
+                    <option value="48">48 px (Compact)</option>
+                    <option value="58" selected>58 px (Standard Gmail)</option>
+                    <option value="70">70 px (Medium)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Company Logo / Custom Image Section -->
+            <div class="sub-card">
+              <div class="sub-card-header">
+                <span>🏢 2. Company Logo / Custom Image</span>
+                <label style="font-size: 10px; font-weight: normal; cursor: pointer;">
+                  <input type="checkbox" id="chkLogo" onchange="updateSignature()"> Show Logo
+                </label>
+              </div>
+
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <input type="text" id="inpLogoUrl" placeholder="Paste Logo URL or upload..." style="flex: 1;" oninput="updateSignature()">
+                <label class="btn-secondary" style="margin: 0; cursor: pointer; padding: 5px 8px; font-size: 11px;">
+                  <span class="material-symbols-outlined" style="font-size: 14px;">upload</span>
+                  Upload
+                  <input type="file" accept="image/*" style="display: none;" onchange="handleImageUpload(event, 'logo')">
+                </label>
+              </div>
+
+              <div class="field-row">
+                <div class="input-group">
+                  <label>Logo Shape / Ratio</label>
+                  <select id="selectLogoShape" onchange="updateSignature()">
+                    <option value="auto">Original Aspect Ratio</option>
+                    <option value="rect">Wide Rectangle (3:1)</option>
+                    <option value="rounded">Rounded Rect</option>
+                    <option value="circle">Circle (1:1)</option>
+                    <option value="square">Square (1:1)</option>
+                  </select>
+                </div>
+                <div class="input-group">
+                  <label>Logo Width</label>
+                  <select id="selectLogoWidth" onchange="updateSignature()">
+                    <option value="60">60 px (Small)</option>
+                    <option value="85" selected>85 px (Standard)</option>
+                    <option value="110">110 px (Medium)</option>
+                    <option value="140">140 px (Wide)</option>
                   </select>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Tab 2: Contact Info -->
+          <!-- Tab 3: Contact Info -->
           <div class="tab-pane" id="tab-contact">
             <div class="field-row">
               <div class="input-group">
@@ -681,7 +790,7 @@
               </div>
               <div class="input-group">
                 <label>Phone / Work</label>
-                <input type="tel" id="inpPhone" value="+1 (555) 019-2834" placeholder="+1 (555) 000-0000" oninput="updateSignature()">
+                <input type="tel" id="inpPhone" value="+1 (650) 253-0000" placeholder="+1 (555) 000-0000" oninput="updateSignature()">
               </div>
             </div>
 
@@ -697,37 +806,39 @@
             </div>
 
             <div class="input-group">
-              <label>Calendar Booking Link</label>
-              <input type="url" id="inpCalendar" value="https://calendar.google.com" placeholder="e.g. Google Calendar Appointment link" oninput="updateSignature()">
+              <label>Calendar Booking URL</label>
+              <input type="url" id="inpCalendar" value="https://calendar.google.com" placeholder="e.g. Google Calendar link" oninput="updateSignature()">
             </div>
           </div>
 
-          <!-- Tab 3: Social Profiles -->
-          <div class="tab-pane" id="tab-social">
-            <div class="field-row">
-              <div class="input-group">
-                <label>LinkedIn URL</label>
-                <input type="url" id="inpLinkedin" value="https://linkedin.com" placeholder="https://linkedin.com/in/username" oninput="updateSignature()">
-              </div>
-              <div class="input-group">
-                <label>GitHub URL</label>
-                <input type="url" id="inpGithub" value="https://github.com/kapildoesmarketing" placeholder="https://github.com/username" oninput="updateSignature()">
-              </div>
+          <!-- Tab 4: Dynamic Custom Links -->
+          <div class="tab-pane" id="tab-links">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">
+                Custom Social & Work Links
+              </span>
+              <button class="btn-secondary" style="padding: 3px 8px; font-size: 11px;" onclick="addCustomLink('', '')">
+                <span class="material-symbols-outlined" style="font-size: 14px;">add</span>
+                Add Link
+              </button>
             </div>
 
-            <div class="field-row">
-              <div class="input-group">
-                <label>X / Twitter URL</label>
-                <input type="url" id="inpTwitter" placeholder="https://x.com/username" oninput="updateSignature()">
-              </div>
-              <div class="input-group">
-                <label>YouTube URL</label>
-                <input type="url" id="inpYoutube" placeholder="https://youtube.com/@channel" oninput="updateSignature()">
-              </div>
+            <!-- Quick Preset Chips -->
+            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+              <button class="btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="addCustomLink('LinkedIn', 'https://linkedin.com')">+ LinkedIn</button>
+              <button class="btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="addCustomLink('GitHub', 'https://github.com/kapildoesmarketing')">+ GitHub</button>
+              <button class="btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="addCustomLink('Portfolio', 'https://moma.corp.google.com/person/hikapil')">+ Portfolio</button>
+              <button class="btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="addCustomLink('Calendar', 'https://calendar.google.com')">+ Calendar</button>
+              <button class="btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="addCustomLink('Docs', 'https://docs.google.com')">+ Docs</button>
+              <button class="btn-secondary" style="padding: 2px 6px; font-size: 10px;" onclick="addCustomLink('X', 'https://x.com')">+ X</button>
+            </div>
+
+            <div class="links-list" id="customLinksContainer">
+              <!-- Rendered via JS -->
             </div>
           </div>
 
-          <!-- Tab 4: Style & Extras -->
+          <!-- Tab 5: Style, Scale & Extras -->
           <div class="tab-pane" id="tab-style">
             <div class="input-group">
               <label>Brand Accent Color</label>
@@ -738,11 +849,20 @@
                 <div class="color-dot" style="background: #ea8600;" onclick="setAccentColor('#ea8600', this)"></div>
                 <div class="color-dot" style="background: #8e24aa;" onclick="setAccentColor('#8e24aa', this)"></div>
                 <div class="color-dot" style="background: #202124;" onclick="setAccentColor('#202124', this)"></div>
-                <input type="color" id="customColorPicker" value="#1a73e8" style="width: 28px; height: 26px; border: none; cursor: pointer; background: none;" onchange="setAccentColor(this.value, null)">
+                <input type="color" id="customColorPicker" value="#1a73e8" style="width: 26px; height: 24px; border: none; cursor: pointer; background: none;" onchange="setAccentColor(this.value, null)">
               </div>
             </div>
 
             <div class="field-row">
+              <div class="input-group">
+                <label>Signature Scale / Size</label>
+                <select id="selectScale" onchange="updateSignature()">
+                  <option value="compact">Compact (Discreet)</option>
+                  <option value="standard" selected>Standard (Normal Gmail)</option>
+                  <option value="comfortable">Comfortable (Slightly Larger)</option>
+                </select>
+              </div>
+
               <div class="input-group">
                 <label>Email Font Family</label>
                 <select id="selectFont" onchange="updateSignature()">
@@ -754,16 +874,16 @@
                   <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
                 </select>
               </div>
-
-              <div class="input-group">
-                <label>Call-to-Action Badge</label>
-                <input type="text" id="inpCtaText" value="📅 Schedule a Quick Meeting" placeholder="e.g. 📅 Book a Call" oninput="updateSignature()">
-              </div>
             </div>
 
             <div class="input-group">
-              <label>Legal / Confidentiality Disclaimer</label>
-              <textarea id="inpDisclaimer" style="height: 54px; font-size: 11px;" placeholder="Optional disclaimer or environmental notice..." oninput="updateSignature()">This email and any attachments are confidential and intended solely for the recipient. If received in error, please notify the sender.</textarea>
+              <label>Call-to-Action Button Text</label>
+              <input type="text" id="inpCtaText" value="📅 Schedule a Quick Meeting" placeholder="e.g. 📅 Book a Call" oninput="updateSignature()">
+            </div>
+
+            <div class="input-group">
+              <label>Confidentiality / Green Disclaimer</label>
+              <textarea id="inpDisclaimer" style="height: 46px; font-size: 11px;" placeholder="Optional disclaimer..." oninput="updateSignature()">This email may contain confidential information. If received in error, please notify sender.</textarea>
             </div>
           </div>
         </div>
@@ -915,7 +1035,15 @@
     let currentAccentColor = '#1a73e8';
     let isDarkModePreview = false;
 
+    // Custom Links list: [{ label: 'LinkedIn', url: '...' }]
+    let customLinks = [
+      { label: 'LinkedIn', url: 'https://linkedin.com' },
+      { label: 'GitHub', url: 'https://github.com/kapildoesmarketing' },
+      { label: 'Portfolio', url: 'https://moma.corp.google.com/person/hikapil' }
+    ];
+
     window.addEventListener('DOMContentLoaded', () => {
+      renderCustomLinks();
       updateSignature();
     });
 
@@ -960,7 +1088,7 @@
       }
     }
 
-    function handleImageUpload(e) {
+    function handleImageUpload(e, target) {
       const file = e.target.files[0];
       if (!file) return;
 
@@ -971,14 +1099,63 @@
 
       const reader = new FileReader();
       reader.onload = function (evt) {
-        document.getElementById('inpAvatarUrl').value = evt.target.result;
+        if (target === 'photo') {
+          document.getElementById('inpPhotoUrl').value = evt.target.result;
+          document.getElementById('chkPhoto').checked = true;
+        } else {
+          document.getElementById('inpLogoUrl').value = evt.target.result;
+          document.getElementById('chkLogo').checked = true;
+        }
         updateSignature();
         showStatus('Image uploaded and applied.', 'success');
       };
       reader.readAsDataURL(file);
     }
 
-    /* Generator Logic: Table-Based Clean Inline CSS for 100% Gmail & Mobile Compatibility */
+    /* Dynamic Custom Links */
+    function renderCustomLinks() {
+      const container = document.getElementById('customLinksContainer');
+      container.innerHTML = '';
+
+      if (customLinks.length === 0) {
+        container.innerHTML = '<div style="font-size:11px; color:#888; text-align:center; padding:8px;">No custom links added yet. Click "+ Add Link" above.</div>';
+        return;
+      }
+
+      customLinks.forEach((link, idx) => {
+        const row = document.createElement('div');
+        row.className = 'link-item-row';
+        row.innerHTML = `
+          <input type="text" value="${escapeHtml(link.label)}" placeholder="Label (e.g. GitHub)" style="font-size:11px; padding:4px 6px;" oninput="updateLinkItem(${idx}, 'label', this.value)">
+          <input type="url" value="${escapeHtml(link.url)}" placeholder="https://..." style="font-size:11px; padding:4px 6px;" oninput="updateLinkItem(${idx}, 'url', this.value)">
+          <button class="btn-icon" onclick="removeCustomLink(${idx})" title="Remove Link">
+            <span class="material-symbols-outlined" style="font-size:15px;">delete</span>
+          </button>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function addCustomLink(label = '', url = '') {
+      customLinks.push({ label: label || 'Website', url: url || 'https://' });
+      renderCustomLinks();
+      updateSignature();
+    }
+
+    function updateLinkItem(idx, field, val) {
+      if (customLinks[idx]) {
+        customLinks[idx][field] = val;
+        updateSignature();
+      }
+    }
+
+    function removeCustomLink(idx) {
+      customLinks.splice(idx, 1);
+      renderCustomLinks();
+      updateSignature();
+    }
+
+    /* Generator Logic: Scaled, Compact, Table-Based Inline HTML for 100% Gmail Compatibility */
     function generateSignatureHTML() {
       const name = document.getElementById('inpName').value.trim() || 'Alex Johnson';
       const pronouns = document.getElementById('inpPronouns').value.trim();
@@ -986,9 +1163,17 @@
       const dept = document.getElementById('inpDept').value.trim();
       const company = document.getElementById('inpCompany').value.trim();
 
-      const avatarUrl = document.getElementById('inpAvatarUrl').value.trim();
-      const avatarShape = document.getElementById('selectAvatarShape').value;
-      const avatarSize = parseInt(document.getElementById('selectAvatarSize').value, 10) || 80;
+      // Profile Photo
+      const showPhoto = document.getElementById('chkPhoto').checked;
+      const photoUrl = document.getElementById('inpPhotoUrl').value.trim();
+      const photoShape = document.getElementById('selectPhotoShape').value;
+      const photoSize = parseInt(document.getElementById('selectPhotoSize').value, 10) || 58;
+
+      // Logo
+      const showLogo = document.getElementById('chkLogo').checked;
+      const logoUrl = document.getElementById('inpLogoUrl').value.trim();
+      const logoShape = document.getElementById('selectLogoShape').value;
+      const logoWidth = parseInt(document.getElementById('selectLogoWidth').value, 10) || 85;
 
       const email = document.getElementById('inpEmail').value.trim();
       const phone = document.getElementById('inpPhone').value.trim();
@@ -996,32 +1181,60 @@
       const address = document.getElementById('inpAddress').value.trim();
       const calendar = document.getElementById('inpCalendar').value.trim();
 
-      const linkedin = document.getElementById('inpLinkedin').value.trim();
-      const github = document.getElementById('inpGithub').value.trim();
-      const twitter = document.getElementById('inpTwitter').value.trim();
-      const youtube = document.getElementById('inpYoutube').value.trim();
-
       const font = document.getElementById('selectFont').value || 'Arial, sans-serif';
       const ctaText = document.getElementById('inpCtaText').value.trim();
       const disclaimer = document.getElementById('inpDisclaimer').value.trim();
+      const scale = document.getElementById('selectScale').value;
       const color = currentAccentColor;
 
-      const titleDeptCompany = [title, dept, company].filter(Boolean).join(' • ');
+      // Font size scale mapping (Standard is proportional to normal Gmail text)
+      let nameFontSize = '14px';
+      let titleFontSize = '11px';
+      let bodyFontSize = '11px';
+      let subFontSize = '10px';
 
-      // Social Links HTML
-      const socialLinks = [];
-      if (linkedin) socialLinks.push(`<a href="${escapeHtml(linkedin)}" target="_blank" style="display:inline-block; margin-right:8px; text-decoration:none; color:${color}; font-size:12px; font-weight:bold;">LinkedIn</a>`);
-      if (github) socialLinks.push(`<a href="${escapeHtml(github)}" target="_blank" style="display:inline-block; margin-right:8px; text-decoration:none; color:${color}; font-size:12px; font-weight:bold;">GitHub</a>`);
-      if (twitter) socialLinks.push(`<a href="${escapeHtml(twitter)}" target="_blank" style="display:inline-block; margin-right:8px; text-decoration:none; color:${color}; font-size:12px; font-weight:bold;">X (Twitter)</a>`);
-      if (youtube) socialLinks.push(`<a href="${escapeHtml(youtube)}" target="_blank" style="display:inline-block; margin-right:8px; text-decoration:none; color:${color}; font-size:12px; font-weight:bold;">YouTube</a>`);
-      if (website) socialLinks.push(`<a href="${escapeHtml(website)}" target="_blank" style="display:inline-block; margin-right:8px; text-decoration:none; color:${color}; font-size:12px; font-weight:bold;">Website</a>`);
+      if (scale === 'compact') {
+        nameFontSize = '13px';
+        titleFontSize = '10.5px';
+        bodyFontSize = '10px';
+        subFontSize = '9.5px';
+      } else if (scale === 'comfortable') {
+        nameFontSize = '15px';
+        titleFontSize = '12px';
+        bodyFontSize = '11.5px';
+        subFontSize = '10.5px';
+      }
 
-      const socialsHtml = socialLinks.length > 0 ? `<div style="margin-top:8px;">${socialLinks.join('')}</div>` : '';
+      // Format Photo HTML
+      let photoRadius = '50%';
+      if (photoShape === 'rounded') photoRadius = '6px';
+      else if (photoShape === 'square') photoRadius = '0px';
+
+      const photoImgHtml = (showPhoto && photoUrl) ? `
+        <img src="${escapeHtml(photoUrl)}" alt="${escapeHtml(name)}" width="${photoSize}" height="${photoSize}" style="width:${photoSize}px; height:${photoSize}px; border-radius:${photoRadius}; object-fit:cover; display:block; border:0;" />
+      ` : '';
+
+      // Format Logo HTML
+      let logoRadius = '0px';
+      let logoHeightStyle = 'auto';
+      if (logoShape === 'circle') logoRadius = '50%';
+      else if (logoShape === 'rounded') logoRadius = '4px';
+
+      const logoImgHtml = (showLogo && logoUrl) ? `
+        <img src="${escapeHtml(logoUrl)}" alt="Logo" width="${logoWidth}" style="width:${logoWidth}px; height:${logoHeightStyle}; border-radius:${logoRadius}; object-fit:contain; display:block; border:0;" />
+      ` : '';
+
+      // Format Dynamic Custom Links HTML
+      const linksHtmlArray = customLinks
+        .filter(l => l.label && l.url)
+        .map(l => `<a href="${escapeHtml(l.url)}" target="_blank" style="display:inline-block; margin-right:8px; text-decoration:none; color:${color}; font-size:${bodyFontSize}; font-weight:bold;">${escapeHtml(l.label)}</a>`);
+
+      const linksHtml = linksHtmlArray.length > 0 ? `<div style="margin-top:5px; line-height:1.2;">${linksHtmlArray.join('')}</div>` : '';
 
       // CTA Button HTML
       const ctaHtml = (ctaText && calendar) ? `
-        <div style="margin-top:10px;">
-          <a href="${escapeHtml(calendar)}" target="_blank" style="display:inline-block; background-color:${color}; color:#ffffff; font-family:${font}; font-size:11px; font-weight:bold; padding:6px 14px; border-radius:14px; text-decoration:none;">
+        <div style="margin-top:7px;">
+          <a href="${escapeHtml(calendar)}" target="_blank" style="display:inline-block; background-color:${color}; color:#ffffff; font-family:${font}; font-size:${subFontSize}; font-weight:bold; padding:4px 10px; border-radius:12px; text-decoration:none;">
             ${escapeHtml(ctaText)}
           </a>
         </div>
@@ -1029,36 +1242,34 @@
 
       // Disclaimer HTML
       const disclaimerHtml = disclaimer ? `
-        <div style="margin-top:10px; font-family:${font}; font-size:10px; color:#888888; line-height:1.4; border-top:1px dashed #dddddd; padding-top:6px; max-width:480px;">
+        <div style="margin-top:8px; font-family:${font}; font-size:${subFontSize}; color:#888888; line-height:1.3; border-top:1px dashed #e0e0e0; padding-top:4px; max-width:440px;">
           ${escapeHtml(disclaimer)}
         </div>
       ` : '';
 
-      // Avatar HTML
-      const avatarImgHtml = avatarUrl ? `
-        <img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(name)}" width="${avatarSize}" height="${avatarSize}" style="width:${avatarSize}px; height:${avatarSize}px; border-radius:${avatarShape}; object-fit:cover; display:block;" />
-      ` : '';
+      const titleDeptCompany = [title, dept, company].filter(Boolean).join(' • ');
 
       // Template 1: Modern Accent Bar (Left colored border)
       if (currentTemplate === 'modern') {
         return `
-          <table cellpadding="0" cellspacing="0" border="0" style="font-family:${font}; font-size:12px; line-height:1.4; color:#333333;">
+          <table cellpadding="0" cellspacing="0" border="0" style="font-family:${font}; font-size:${bodyFontSize}; line-height:1.35; color:#333333; margin:0; padding:0;">
             <tr>
-              ${avatarImgHtml ? `<td style="vertical-align:top; padding-right:14px;">${avatarImgHtml}</td>` : ''}
-              <td style="border-left:3px solid ${color}; padding-left:14px; vertical-align:top;">
-                <div style="font-size:16px; font-weight:bold; color:#111111; margin-bottom:2px;">
-                  ${escapeHtml(name)} ${pronouns ? `<span style="font-size:11px; font-weight:normal; color:#666666;">(${escapeHtml(pronouns)})</span>` : ''}
+              ${photoImgHtml ? `<td style="vertical-align:top; padding-right:10px; margin:0;">${photoImgHtml}</td>` : ''}
+              <td style="border-left:2.5px solid ${color}; padding-left:10px; vertical-align:top;">
+                <div style="font-size:${nameFontSize}; font-weight:bold; color:#111111; margin-bottom:1px; line-height:1.2;">
+                  ${escapeHtml(name)} ${pronouns ? `<span style="font-size:${subFontSize}; font-weight:normal; color:#666666;">(${escapeHtml(pronouns)})</span>` : ''}
                 </div>
-                ${titleDeptCompany ? `<div style="font-size:12px; color:${color}; font-weight:500; margin-bottom:6px;">${escapeHtml(titleDeptCompany)}</div>` : ''}
+                ${titleDeptCompany ? `<div style="font-size:${titleFontSize}; color:${color}; font-weight:bold; margin-bottom:4px;">${escapeHtml(titleDeptCompany)}</div>` : ''}
                 
-                <table cellpadding="0" cellspacing="0" border="0" style="font-size:11px; color:#555555; margin-top:4px;">
-                  ${email ? `<tr><td style="padding:1px 0;">📧 <a href="mailto:${escapeHtml(email)}" style="color:#333333; text-decoration:none;">${escapeHtml(email)}</a></td></tr>` : ''}
+                <table cellpadding="0" cellspacing="0" border="0" style="font-size:${bodyFontSize}; color:#555555; margin-top:2px;">
+                  ${email ? `<tr><td style="padding:1px 0;">✉️ <a href="mailto:${escapeHtml(email)}" style="color:#333333; text-decoration:none;">${escapeHtml(email)}</a></td></tr>` : ''}
                   ${phone ? `<tr><td style="padding:1px 0;">📞 <a href="tel:${escapeHtml(phone)}" style="color:#333333; text-decoration:none;">${escapeHtml(phone)}</a></td></tr>` : ''}
                   ${address ? `<tr><td style="padding:1px 0;">📍 ${escapeHtml(address)}</td></tr>` : ''}
                 </table>
 
-                ${socialsHtml}
+                ${linksHtml}
                 ${ctaHtml}
+                ${logoImgHtml ? `<div style="margin-top:6px;">${logoImgHtml}</div>` : ''}
               </td>
             </tr>
             ${disclaimerHtml ? `<tr><td colspan="2">${disclaimerHtml}</td></tr>` : ''}
@@ -1069,24 +1280,25 @@
       // Template 2: Corporate Two-Column
       if (currentTemplate === 'corporate') {
         return `
-          <table cellpadding="0" cellspacing="0" border="0" style="font-family:${font}; font-size:12px; line-height:1.4; color:#333333;">
+          <table cellpadding="0" cellspacing="0" border="0" style="font-family:${font}; font-size:${bodyFontSize}; line-height:1.35; color:#333333; margin:0; padding:0;">
             <tr>
-              ${avatarImgHtml ? `<td style="vertical-align:middle; padding-right:16px; border-right:1px solid #e0e0e0;">${avatarImgHtml}</td>` : ''}
-              <td style="padding-left:${avatarImgHtml ? '16px' : '0'}; vertical-align:middle;">
-                <div style="font-size:17px; font-weight:bold; color:#202124;">
-                  ${escapeHtml(name)} ${pronouns ? `<span style="font-size:11px; font-weight:normal; color:#70757a;">(${escapeHtml(pronouns)})</span>` : ''}
+              ${photoImgHtml ? `<td style="vertical-align:middle; padding-right:12px; border-right:1px solid #e0e0e0;">${photoImgHtml}</td>` : ''}
+              <td style="padding-left:${photoImgHtml ? '12px' : '0'}; vertical-align:middle;">
+                <div style="font-size:${nameFontSize}; font-weight:bold; color:#202124; line-height:1.2;">
+                  ${escapeHtml(name)} ${pronouns ? `<span style="font-size:${subFontSize}; font-weight:normal; color:#70757a;">(${escapeHtml(pronouns)})</span>` : ''}
                 </div>
-                <div style="font-size:12px; font-weight:bold; color:${color}; margin-top:2px;">${escapeHtml(title || 'Professional')}</div>
-                <div style="font-size:11px; color:#5f6368;">${escapeHtml([dept, company].filter(Boolean).join(' • '))}</div>
+                <div style="font-size:${titleFontSize}; font-weight:bold; color:${color}; margin-top:1px;">${escapeHtml(title || 'Professional')}</div>
+                <div style="font-size:${subFontSize}; color:#5f6368;">${escapeHtml([dept, company].filter(Boolean).join(' • '))}</div>
                 
-                <div style="margin-top:6px; font-size:11px; color:#444444;">
+                <div style="margin-top:4px; font-size:${bodyFontSize}; color:#444444;">
                   ${email ? `<span><a href="mailto:${escapeHtml(email)}" style="color:${color}; text-decoration:none;">${escapeHtml(email)}</a></span>` : ''}
                   ${phone ? ` • <span>${escapeHtml(phone)}</span>` : ''}
                   ${address ? `<br><span>${escapeHtml(address)}</span>` : ''}
                 </div>
 
-                ${socialsHtml}
+                ${linksHtml}
                 ${ctaHtml}
+                ${logoImgHtml ? `<div style="margin-top:6px;">${logoImgHtml}</div>` : ''}
               </td>
             </tr>
             ${disclaimerHtml ? `<tr><td colspan="2">${disclaimerHtml}</td></tr>` : ''}
@@ -1094,25 +1306,26 @@
         `;
       }
 
-      // Template 3: Tech & Developer (Card / Monospace badge styling)
+      // Template 3: Tech & Dev
       if (currentTemplate === 'tech') {
         return `
-          <table cellpadding="0" cellspacing="0" border="0" style="font-family:${font}; font-size:12px; line-height:1.4; color:#24292f; background:#f6f8fa; border:1px solid #d0d7de; border-radius:6px; padding:12px 16px;">
+          <table cellpadding="0" cellspacing="0" border="0" style="font-family:${font}; font-size:${bodyFontSize}; line-height:1.35; color:#24292f; background:#f6f8fa; border:1px solid #d0d7de; border-radius:5px; padding:8px 12px;">
             <tr>
-              ${avatarImgHtml ? `<td style="vertical-align:top; padding-right:12px;">${avatarImgHtml}</td>` : ''}
+              ${photoImgHtml ? `<td style="vertical-align:top; padding-right:10px;">${photoImgHtml}</td>` : ''}
               <td style="vertical-align:top;">
-                <div style="font-size:15px; font-weight:bold; color:#0969da;">
-                  ${escapeHtml(name)} <span style="font-family:'Roboto Mono', monospace; font-size:10px; background:#ddf4ff; color:#0969da; padding:2px 6px; border-radius:10px; font-weight:normal;">${escapeHtml(title || 'Developer')}</span>
+                <div style="font-size:${nameFontSize}; font-weight:bold; color:#0969da; line-height:1.2;">
+                  ${escapeHtml(name)} <span style="font-family:'Roboto Mono', monospace; font-size:${subFontSize}; background:#ddf4ff; color:#0969da; padding:1px 5px; border-radius:8px; font-weight:normal;">${escapeHtml(title || 'Dev')}</span>
                 </div>
-                <div style="font-size:11px; color:#57606a; margin-top:2px;">${escapeHtml([dept, company].filter(Boolean).join(' | '))}</div>
+                <div style="font-size:${subFontSize}; color:#57606a; margin-top:1px;">${escapeHtml([dept, company].filter(Boolean).join(' | '))}</div>
 
-                <div style="margin-top:6px; font-family:'Roboto Mono', monospace; font-size:11px; color:#24292f;">
+                <div style="margin-top:4px; font-family:'Roboto Mono', monospace; font-size:${bodyFontSize}; color:#24292f;">
                   ${email ? `<div>&gt; email: <a href="mailto:${escapeHtml(email)}" style="color:${color}; text-decoration:none;">${escapeHtml(email)}</a></div>` : ''}
                   ${phone ? `<div>&gt; phone: ${escapeHtml(phone)}</div>` : ''}
                 </div>
 
-                ${socialsHtml}
+                ${linksHtml}
                 ${ctaHtml}
+                ${logoImgHtml ? `<div style="margin-top:5px;">${logoImgHtml}</div>` : ''}
               </td>
             </tr>
             ${disclaimerHtml ? `<tr><td colspan="2">${disclaimerHtml}</td></tr>` : ''}
@@ -1123,18 +1336,19 @@
       // Template 4: Clean Minimalist (Compact horizontal)
       if (currentTemplate === 'minimal') {
         return `
-          <div style="font-family:${font}; font-size:12px; line-height:1.5; color:#333333; border-top:2px solid ${color}; padding-top:8px; max-width:500px;">
-            <div style="font-size:14px; font-weight:bold; color:#111111;">
-              ${escapeHtml(name)} ${pronouns ? `<span style="font-size:11px; font-weight:normal; color:#777777;">(${escapeHtml(pronouns)})</span>` : ''}
-              <span style="font-weight:normal; color:#666666;"> | ${escapeHtml([title, company].filter(Boolean).join(', '))}</span>
+          <div style="font-family:${font}; font-size:${bodyFontSize}; line-height:1.4; color:#333333; border-top:2px solid ${color}; padding-top:6px; max-width:440px;">
+            <div style="font-size:${nameFontSize}; font-weight:bold; color:#111111; line-height:1.2;">
+              ${escapeHtml(name)} ${pronouns ? `<span style="font-size:${subFontSize}; font-weight:normal; color:#777777;">(${escapeHtml(pronouns)})</span>` : ''}
+              <span style="font-weight:normal; color:#666666; font-size:${titleFontSize};"> | ${escapeHtml([title, company].filter(Boolean).join(', '))}</span>
             </div>
-            <div style="font-size:11px; color:#555555; margin-top:2px;">
+            <div style="font-size:${bodyFontSize}; color:#555555; margin-top:2px;">
               ${email ? `<a href="mailto:${escapeHtml(email)}" style="color:${color}; text-decoration:none;">${escapeHtml(email)}</a>` : ''}
               ${phone ? ` • ${escapeHtml(phone)}` : ''}
               ${website ? ` • <a href="${escapeHtml(website)}" style="color:${color}; text-decoration:none;">${escapeHtml(website)}</a>` : ''}
             </div>
-            ${socialsHtml}
+            ${linksHtml}
             ${ctaHtml}
+            ${logoImgHtml ? `<div style="margin-top:5px;">${logoImgHtml}</div>` : ''}
             ${disclaimerHtml}
           </div>
         `;
@@ -1143,26 +1357,27 @@
       // Template 5: Executive Banner
       if (currentTemplate === 'executive') {
         return `
-          <table cellpadding="0" cellspacing="0" border="0" style="font-family:${font}; font-size:12px; line-height:1.4; color:#333333; width:100%; max-width:480px;">
+          <table cellpadding="0" cellspacing="0" border="0" style="font-family:${font}; font-size:${bodyFontSize}; line-height:1.35; color:#333333; width:100%; max-width:440px;">
             <tr>
-              <td style="background:${color}; color:#ffffff; padding:10px 14px; border-radius:6px 6px 0 0;">
-                <div style="font-size:16px; font-weight:bold;">${escapeHtml(name)}</div>
-                <div style="font-size:11px; opacity:0.9;">${escapeHtml([title, dept, company].filter(Boolean).join(' • '))}</div>
+              <td style="background:${color}; color:#ffffff; padding:6px 10px; border-radius:5px 5px 0 0;">
+                <div style="font-size:${nameFontSize}; font-weight:bold; line-height:1.2;">${escapeHtml(name)}</div>
+                <div style="font-size:${subFontSize}; opacity:0.9;">${escapeHtml([title, dept, company].filter(Boolean).join(' • '))}</div>
               </td>
             </tr>
             <tr>
-              <td style="border:1px solid #dadce0; border-top:none; border-radius:0 0 6px 6px; padding:12px 14px; background:#ffffff;">
+              <td style="border:1px solid #dadce0; border-top:none; border-radius:0 0 5px 5px; padding:8px 10px; background:#ffffff;">
                 <table cellpadding="0" cellspacing="0" border="0">
                   <tr>
-                    ${avatarImgHtml ? `<td style="vertical-align:top; padding-right:12px;">${avatarImgHtml}</td>` : ''}
+                    ${photoImgHtml ? `<td style="vertical-align:top; padding-right:10px;">${photoImgHtml}</td>` : ''}
                     <td style="vertical-align:top;">
-                      <div style="font-size:11px; color:#555555;">
+                      <div style="font-size:${bodyFontSize}; color:#555555;">
                         ${email ? `<div>✉️ <a href="mailto:${escapeHtml(email)}" style="color:${color}; text-decoration:none;">${escapeHtml(email)}</a></div>` : ''}
                         ${phone ? `<div>📞 ${escapeHtml(phone)}</div>` : ''}
                         ${address ? `<div>🏢 ${escapeHtml(address)}</div>` : ''}
                       </div>
-                      ${socialsHtml}
+                      ${linksHtml}
                       ${ctaHtml}
+                      ${logoImgHtml ? `<div style="margin-top:5px;">${logoImgHtml}</div>` : ''}
                     </td>
                   </tr>
                 </table>
@@ -1175,17 +1390,18 @@
 
       // Template 6: Compact Card
       return `
-        <table cellpadding="0" cellspacing="0" border="0" style="font-family:${font}; font-size:11px; line-height:1.4; color:#333333;">
+        <table cellpadding="0" cellspacing="0" border="0" style="font-family:${font}; font-size:${bodyFontSize}; line-height:1.35; color:#333333; margin:0; padding:0;">
           <tr>
-            ${avatarImgHtml ? `<td style="vertical-align:middle; padding-right:10px;">${avatarImgHtml}</td>` : ''}
+            ${photoImgHtml ? `<td style="vertical-align:middle; padding-right:8px;">${photoImgHtml}</td>` : ''}
             <td style="vertical-align:middle;">
-              <div style="font-size:13px; font-weight:bold; color:#111111;">${escapeHtml(name)}</div>
-              <div style="color:${color}; font-size:11px;">${escapeHtml([title, company].filter(Boolean).join(' • '))}</div>
-              <div style="color:#666666; margin-top:2px;">
+              <div style="font-size:${nameFontSize}; font-weight:bold; color:#111111; line-height:1.2;">${escapeHtml(name)}</div>
+              <div style="color:${color}; font-size:${titleFontSize}; font-weight:bold;">${escapeHtml([title, company].filter(Boolean).join(' • '))}</div>
+              <div style="color:#666666; font-size:${bodyFontSize}; margin-top:2px;">
                 ${email ? `<a href="mailto:${escapeHtml(email)}" style="color:#555555; text-decoration:none;">${escapeHtml(email)}</a>` : ''}
                 ${phone ? ` • ${escapeHtml(phone)}` : ''}
               </div>
-              ${socialsHtml}
+              ${linksHtml}
+              ${logoImgHtml ? `<div style="margin-top:4px;">${logoImgHtml}</div>` : ''}
             </td>
           </tr>
           ${disclaimerHtml ? `<tr><td colspan="2">${disclaimerHtml}</td></tr>` : ''}
@@ -1215,7 +1431,6 @@
             })
           ]);
         } else {
-          // DOM Selection fallback
           selectAndCopyNode(container);
         }
 
@@ -1280,15 +1495,20 @@
       document.getElementById('inpTitle').value = 'Product Lead & Developer';
       document.getElementById('inpDept').value = 'Marketing & Useful Tools';
       document.getElementById('inpCompany').value = 'Google LLC';
-      document.getElementById('inpAvatarUrl').value = 'https://lh3.googleusercontent.com/a/default-user';
+      document.getElementById('inpPhotoUrl').value = 'https://lh3.googleusercontent.com/a/default-user';
+      document.getElementById('chkPhoto').checked = true;
       document.getElementById('inpEmail').value = 'hikapil@google.com';
       document.getElementById('inpPhone').value = '+1 (650) 253-0000';
       document.getElementById('inpWebsite').value = 'https://moma.corp.google.com/person/hikapil';
       document.getElementById('inpAddress').value = 'Google HQ, Mountain View, CA';
       document.getElementById('inpCalendar').value = 'https://calendar.google.com';
-      document.getElementById('inpLinkedin').value = 'https://linkedin.com';
-      document.getElementById('inpGithub').value = 'https://github.com/kapildoesmarketing';
       document.getElementById('inpCtaText').value = '📅 Schedule a Quick Meeting';
+      customLinks = [
+        { label: 'LinkedIn', url: 'https://linkedin.com' },
+        { label: 'GitHub', url: 'https://github.com/kapildoesmarketing' },
+        { label: 'Portfolio', url: 'https://moma.corp.google.com/person/hikapil' }
+      ];
+      renderCustomLinks();
       updateSignature();
       showStatus('Sample profile loaded.', 'success');
     }
