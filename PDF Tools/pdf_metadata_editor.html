@@ -137,7 +137,7 @@
     .drop-zone {
       border: 2px dashed var(--border-color);
       border-radius: 10px;
-      padding: 22px 20px;
+      padding: 24px 20px;
       text-align: center;
       background-color: var(--bg-color);
       cursor: pointer;
@@ -155,7 +155,7 @@
     }
 
     .drop-icon {
-      font-size: 38px;
+      font-size: 40px;
       color: var(--primary-blue);
     }
 
@@ -186,7 +186,7 @@
       align-items: start;
     }
 
-    @media (max-width: 860px) {
+    @media (max-width: 880px) {
       .main-grid {
         grid-template-columns: 1fr;
       }
@@ -219,7 +219,7 @@
       gap: 10px;
     }
 
-    @media (max-width: 500px) {
+    @media (max-width: 520px) {
       .field-row {
         grid-template-columns: 1fr;
       }
@@ -244,7 +244,7 @@
 
     input[type="text"], input[type="datetime-local"], textarea, select {
       font-family: 'Roboto', sans-serif;
-      font-size: 13px;
+      font-size: 12.5px;
       padding: 7px 10px;
       border: 1px solid var(--border-color);
       border-radius: 6px;
@@ -256,6 +256,44 @@
 
     input[type="text"]:focus, input[type="datetime-local"]:focus, textarea:focus, select:focus {
       border-color: var(--primary-blue);
+    }
+
+    /* Quick Preset Action Chips */
+    .preset-toolbar {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 8px 10px;
+      background-color: #f1f3f4;
+      border-radius: 6px;
+    }
+
+    .chip-btn {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .chip-btn:hover {
+      background-color: #e8f0fe;
+      border-color: var(--primary-blue);
+      color: var(--primary-blue);
+    }
+
+    .chip-btn-danger:hover {
+      background-color: var(--danger-bg);
+      border-color: var(--danger-text);
+      color: var(--danger-text);
     }
 
     /* Technical Properties List */
@@ -289,6 +327,7 @@
       flex-wrap: wrap;
       gap: 4px;
       margin-top: 4px;
+      min-height: 22px;
     }
 
     .kw-chip {
@@ -314,7 +353,42 @@
       align-items: center;
     }
 
-    /* Sanitize Privacy Banner */
+    /* Comparison / Live Diff Box */
+    .diff-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+      margin-top: 6px;
+    }
+
+    .diff-table th {
+      text-align: left;
+      padding: 5px 6px;
+      background: #f8f9fa;
+      border-bottom: 1px solid var(--border-color);
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .diff-table td {
+      padding: 5px 6px;
+      border-bottom: 1px solid #f1f3f4;
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    .diff-table td.diff-changed {
+      background-color: #e6f4ea;
+      color: #137333;
+      font-weight: bold;
+    }
+
+    .diff-table td.diff-removed {
+      background-color: #fce8e6;
+      color: #c5221f;
+      text-decoration: line-through;
+    }
+
+    /* Privacy Banner */
     .privacy-banner {
       background: #fef7e0;
       border: 1px solid #feefc3;
@@ -495,71 +569,100 @@
     <div class="main-grid" id="mainGrid">
       <!-- Left Column: Editable Metadata Fields -->
       <div class="panel-card">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
           <h3 class="card-title">
             <span class="material-symbols-outlined" style="font-size: 18px; color: var(--primary-blue);">edit_note</span>
             Document Metadata
           </h3>
-          <button class="btn-secondary" style="padding: 3px 8px; font-size: 11px;" onclick="setNowDate()">
-            <span class="material-symbols-outlined" style="font-size: 14px;">today</span>
-            Set Today's Date
+
+          <div style="display: flex; gap: 4px; align-items: center;">
+            <button class="chip-btn" onclick="setNowDate()" title="Set creation and modification time to now">
+              <span class="material-symbols-outlined" style="font-size: 14px;">today</span>
+              Set Today's Date
+            </button>
+            <button class="chip-btn" onclick="clearDates()" title="Remove dates">
+              <span class="material-symbols-outlined" style="font-size: 14px;">event_busy</span>
+              Clear Dates
+            </button>
+          </div>
+        </div>
+
+        <!-- Preset Quick Actions Bar -->
+        <div class="preset-toolbar">
+          <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">
+            Quick Presets:
+          </span>
+          <button class="chip-btn chip-btn-danger" onclick="sanitizeAndStripAll()" title="Strip all metadata for 100% anonymization">
+            <span class="material-symbols-outlined" style="font-size: 14px; color: var(--danger-text);">cleaning_services</span>
+            Sanitize & Anonymize
+          </button>
+          <button class="chip-btn" onclick="applyCorporatePreset()" title="Pre-fill corporate Google metadata">
+            <span class="material-symbols-outlined" style="font-size: 14px;">business</span>
+            Set Corporate Preset
+          </button>
+          <button class="chip-btn" onclick="restoreOriginalMetadata()" title="Revert to original uploaded metadata">
+            <span class="material-symbols-outlined" style="font-size: 14px;">restore</span>
+            Revert Changes
           </button>
         </div>
 
         <div class="input-group">
           <label>Document Title</label>
-          <input type="text" id="metaTitle" placeholder="e.g. Q3 Business Performance & Roadmap">
+          <input type="text" id="metaTitle" placeholder="e.g. Q3 Business Performance & Roadmap" oninput="renderDiffTable()">
         </div>
 
         <div class="field-row">
           <div class="input-group">
             <label>Author / Creator Name</label>
-            <input type="text" id="metaAuthor" placeholder="e.g. Kapil Sharma">
+            <input type="text" id="metaAuthor" placeholder="e.g. Kapil Sharma" oninput="renderDiffTable()">
           </div>
           <div class="input-group">
-            <label>Subject / Topic</label>
-            <input type="text" id="metaSubject" placeholder="e.g. Quarterly Review">
+            <label>Subject / Description</label>
+            <input type="text" id="metaSubject" placeholder="e.g. Quarterly Review" oninput="renderDiffTable()">
           </div>
         </div>
 
         <div class="input-group">
-          <label>Keywords / Tags (Comma Separated)</label>
-          <input type="text" id="metaKeywords" placeholder="e.g. google, report, quarterly, finance" oninput="updateKeywordsChips()">
+          <label>Keywords / Tags (Press Enter or Comma to add)</label>
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="metaKeywords" placeholder="Type tags: google, report, roadmap..." style="flex: 1;" onkeydown="handleKeywordKeydown(event)" oninput="updateKeywordsChips(); renderDiffTable();">
+            <button class="btn-secondary" style="padding: 4px 8px; font-size: 11px;" onclick="addKeywordFromInput()">+ Tag</button>
+          </div>
           <div class="keywords-chips" id="keywordsChips"></div>
         </div>
 
         <div class="field-row">
           <div class="input-group">
             <label>Creator Application</label>
-            <input type="text" id="metaCreator" placeholder="e.g. Google Docs / Chrome">
+            <input type="text" id="metaCreator" placeholder="e.g. Google Docs / Chrome" oninput="renderDiffTable()">
           </div>
           <div class="input-group">
             <label>PDF Producer</label>
-            <input type="text" id="metaProducer" placeholder="e.g. pdf-lib / Skia / Quartz">
+            <input type="text" id="metaProducer" placeholder="e.g. Skia / pdf-lib" oninput="renderDiffTable()">
           </div>
         </div>
 
         <div class="field-row">
           <div class="input-group">
             <label>Creation Date</label>
-            <input type="datetime-local" id="metaCreationDate">
+            <input type="datetime-local" id="metaCreationDate" oninput="renderDiffTable()">
           </div>
           <div class="input-group">
             <label>Modification Date</label>
-            <input type="datetime-local" id="metaModDate">
+            <input type="datetime-local" id="metaModDate" oninput="renderDiffTable()">
           </div>
         </div>
 
-        <!-- Privacy Notice / Sanitize Warning -->
+        <!-- Privacy Notice Banner -->
         <div class="privacy-banner">
           <span class="material-symbols-outlined" style="font-size: 18px; color: #b06000;">shield</span>
           <div>
-            <strong>Sharing publicly?</strong> Use <strong>"Sanitize & Strip All Metadata"</strong> to remove author names, software versions, and creation timestamps before publishing.
+            <strong>Privacy Guarantee:</strong> Saving or sanitizing metadata strips hidden XMP streams and synchronizes the PDF Info dictionary. All processing happens 100% in your browser.
           </div>
         </div>
       </div>
 
-      <!-- Right Column: Technical Document Properties -->
+      <!-- Right Column: Technical Properties & Live Changes Diff -->
       <div class="panel-card">
         <h3 class="card-title">
           <span class="material-symbols-outlined" style="font-size: 18px; color: #188038;">analytics</span>
@@ -592,24 +695,28 @@
             <td id="propEncryption" style="color: var(--success-text);">No Password (Unlocked)</td>
           </tr>
           <tr>
-            <td>Embedded Forms:</td>
+            <td>Interactive Forms:</td>
             <td id="propFormFields">None</td>
-          </tr>
-          <tr>
-            <td>Original Author:</td>
-            <td id="propRawAuthor">-</td>
-          </tr>
-          <tr>
-            <td>Original Created:</td>
-            <td id="propRawCreated">-</td>
           </tr>
         </table>
 
-        <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px;">
-          <button class="btn-danger" style="width: 100%;" onclick="sanitizeAndStripAll()">
-            <span class="material-symbols-outlined">cleaning_services</span>
-            Sanitize & Strip All Metadata
-          </button>
+        <div style="margin-top: 8px;">
+          <h4 style="margin: 0 0 4px 0; font-size: 12.5px; color: var(--text-main); display: flex; align-items: center; gap: 4px;">
+            <span class="material-symbols-outlined" style="font-size: 16px; color: var(--primary-blue);">compare_arrows</span>
+            Live Changes (Before vs. After)
+          </h4>
+          <table class="diff-table">
+            <thead>
+              <tr>
+                <th style="width: 25%;">Field</th>
+                <th style="width: 37.5%;">Original</th>
+                <th style="width: 37.5%;">New Value</th>
+              </tr>
+            </thead>
+            <tbody id="diffTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -637,12 +744,25 @@
   </div>
 
   <script>
-    // State
+    // Initialize PDF.js worker
+    if (typeof pdfjsLib !== 'undefined') {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+
+    // State Variables
     let originalArrayBuffer = null;
-    let pdfLibDoc = null;
-    let pdfJsDoc = null;
     let originalFileName = 'document.pdf';
     let originalFileSize = 0;
+    let originalMetadata = {
+      title: '',
+      author: '',
+      subject: '',
+      keywords: '',
+      creator: '',
+      producer: '',
+      creationDate: '',
+      modDate: ''
+    };
 
     // Drag and Drop Listeners
     const dropZone = document.getElementById('dropZone');
@@ -680,88 +800,160 @@
 
       originalFileName = file.name;
       originalFileSize = file.size;
-      showStatus('Reading PDF metadata...', 'success');
+      showStatus('Reading PDF document and extracting metadata...', 'success');
 
       try {
         originalArrayBuffer = await file.arrayBuffer();
-
-        // Load with pdf-lib & PDF.js
-        pdfLibDoc = await PDFLib.PDFDocument.load(originalArrayBuffer);
-        pdfJsDoc = await pdfjsLib.getDocument({ data: originalArrayBuffer.slice(0) }).promise;
-
-        await populateMetadataAndProperties();
-
-        document.getElementById('dropZone').style.display = 'none';
-        document.getElementById('docSummaryBar').style.display = 'flex';
-        document.getElementById('mainGrid').style.display = 'grid';
-        document.getElementById('savePdfBtn').disabled = false;
-
-        document.getElementById('docName').textContent = originalFileName;
-        document.getElementById('docQuickStats').textContent = `(${pdfJsDoc.numPages} pages • ${formatBytes(originalFileSize)})`;
-
-        showStatus('PDF metadata loaded successfully.', 'success');
+        await loadPdfData(originalArrayBuffer, file.name, file.size);
+        showStatus('PDF loaded successfully. You can now edit properties or sanitize metadata.', 'success');
       } catch (err) {
         console.error(err);
         showStatus('Failed to load PDF: ' + err.message, 'error');
       }
     }
 
-    async function populateMetadataAndProperties() {
-      // 1. Read metadata from pdf-lib
-      const title = pdfLibDoc.getTitle() || '';
-      const author = pdfLibDoc.getAuthor() || '';
-      const subject = pdfLibDoc.getSubject() || '';
-      const keywords = (pdfLibDoc.getKeywords() || []).join(', ');
-      const creator = pdfLibDoc.getCreator() || '';
-      const producer = pdfLibDoc.getProducer() || '';
-      const creationDate = pdfLibDoc.getCreationDate();
-      const modDate = pdfLibDoc.getModificationDate();
+    async function loadPdfData(arrayBuffer, fileName, fileSize) {
+      // 1. Load with pdf-lib
+      const pdfLibDoc = await PDFLib.PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
 
-      document.getElementById('metaTitle').value = title;
-      document.getElementById('metaAuthor').value = author;
-      document.getElementById('metaSubject').value = subject;
-      document.getElementById('metaKeywords').value = keywords;
-      document.getElementById('metaCreator').value = creator;
-      document.getElementById('metaProducer').value = producer;
-
-      if (creationDate) {
-        document.getElementById('metaCreationDate').value = toDatetimeLocalString(creationDate);
-      } else {
-        document.getElementById('metaCreationDate').value = '';
+      // 2. Load with PDF.js for technical rendering
+      const pdfJsDoc = await pdfjsLib.getDocument({ data: arrayBuffer.slice(0) }).promise;
+      let pdfJsMeta = null;
+      try {
+        pdfJsMeta = await pdfJsDoc.getMetadata();
+      } catch (e) {
+        console.warn('PDF.js metadata extraction warning:', e);
       }
 
-      if (modDate) {
-        document.getElementById('metaModDate').value = toDatetimeLocalString(modDate);
-      } else {
-        document.getElementById('metaModDate').value = '';
-      }
+      // Extract metadata values
+      const info = (pdfJsMeta && pdfJsMeta.info) ? pdfJsMeta.info : {};
+
+      const title = pdfLibDoc.getTitle() || info.Title || '';
+      const author = pdfLibDoc.getAuthor() || info.Author || '';
+      const subject = pdfLibDoc.getSubject() || info.Subject || '';
+      const keywords = (pdfLibDoc.getKeywords() || []).join(', ') || info.Keywords || '';
+      const creator = pdfLibDoc.getCreator() || info.Creator || '';
+      const producer = pdfLibDoc.getProducer() || info.Producer || '';
+
+      const creationDate = pdfLibDoc.getCreationDate() || parsePdfDate(info.CreationDate);
+      const modDate = pdfLibDoc.getModificationDate() || parsePdfDate(info.ModDate);
+
+      originalMetadata = {
+        title: title,
+        author: author,
+        subject: subject,
+        keywords: keywords,
+        creator: creator,
+        producer: producer,
+        creationDate: creationDate ? toDatetimeLocalString(creationDate) : '',
+        modDate: modDate ? toDatetimeLocalString(modDate) : ''
+      };
+
+      // Populate Form Fields
+      document.getElementById('metaTitle').value = originalMetadata.title;
+      document.getElementById('metaAuthor').value = originalMetadata.author;
+      document.getElementById('metaSubject').value = originalMetadata.subject;
+      document.getElementById('metaKeywords').value = originalMetadata.keywords;
+      document.getElementById('metaCreator').value = originalMetadata.creator;
+      document.getElementById('metaProducer').value = originalMetadata.producer;
+      document.getElementById('metaCreationDate').value = originalMetadata.creationDate;
+      document.getElementById('metaModDate').value = originalMetadata.modDate;
 
       updateKeywordsChips();
 
-      // 2. Technical Properties
-      document.getElementById('propFileName').textContent = originalFileName;
-      document.getElementById('propFileSize').textContent = formatBytes(originalFileSize);
-      document.getElementById('propPageCount').textContent = pdfJsDoc.numPages;
+      // Populate Technical Properties
+      document.getElementById('propFileName').textContent = fileName;
+      document.getElementById('propFileSize').textContent = formatBytes(fileSize);
+      document.getElementById('propPageCount').textContent = `${pdfJsDoc.numPages} page(s)`;
 
       // Page dimensions
-      const page1 = await pdfJsDoc.getPage(1);
-      const viewport = page1.getViewport({ scale: 1.0 });
-      const widthPt = Math.round(viewport.width);
-      const heightPt = Math.round(viewport.height);
-      const isA4 = Math.abs(widthPt - 595) < 10 && Math.abs(heightPt - 842) < 10;
-      const isLetter = Math.abs(widthPt - 612) < 10 && Math.abs(heightPt - 792) < 10;
-      let dimLabel = `${widthPt} × ${heightPt} pt`;
-      if (isA4) dimLabel += ' (A4)';
-      else if (isLetter) dimLabel += ' (US Letter)';
-      document.getElementById('propDimensions').textContent = dimLabel;
+      try {
+        const page1 = await pdfJsDoc.getPage(1);
+        const viewport = page1.getViewport({ scale: 1.0 });
+        const widthPt = Math.round(viewport.width);
+        const heightPt = Math.round(viewport.height);
+        const isA4 = Math.abs(widthPt - 595) < 10 && Math.abs(heightPt - 842) < 10;
+        const isLetter = Math.abs(widthPt - 612) < 10 && Math.abs(heightPt - 792) < 10;
+        let dimLabel = `${widthPt} × ${heightPt} pt`;
+        if (isA4) dimLabel += ' (A4)';
+        else if (isLetter) dimLabel += ' (US Letter)';
+        document.getElementById('propDimensions').textContent = dimLabel;
+      } catch (e) {
+        document.getElementById('propDimensions').textContent = 'Standard';
+      }
 
       // Check AcroForm
-      const form = pdfLibDoc.getForm();
-      const fields = form ? form.getFields() : [];
-      document.getElementById('propFormFields').textContent = fields.length > 0 ? `${fields.length} interactive fields` : 'None';
+      try {
+        const form = pdfLibDoc.getForm();
+        const fields = form ? form.getFields() : [];
+        document.getElementById('propFormFields').textContent = fields.length > 0 ? `${fields.length} interactive fields` : 'None';
+      } catch (e) {
+        document.getElementById('propFormFields').textContent = 'None';
+      }
 
-      document.getElementById('propRawAuthor').textContent = author || '(None)';
-      document.getElementById('propRawCreated').textContent = creationDate ? creationDate.toLocaleDateString() : '(None)';
+      // Update UI View
+      document.getElementById('dropZone').style.display = 'none';
+      document.getElementById('docSummaryBar').style.display = 'flex';
+      document.getElementById('mainGrid').style.display = 'grid';
+      document.getElementById('savePdfBtn').disabled = false;
+
+      document.getElementById('docName').textContent = fileName;
+      document.getElementById('docQuickStats').textContent = `(${pdfJsDoc.numPages} pages • ${formatBytes(fileSize)})`;
+
+      renderDiffTable();
+    }
+
+    /* Live Changes Diff Table */
+    function renderDiffTable() {
+      const tbody = document.getElementById('diffTableBody');
+      tbody.innerHTML = '';
+
+      const fields = [
+        { label: 'Title', orig: originalMetadata.title, curr: document.getElementById('metaTitle').value.trim() },
+        { label: 'Author', orig: originalMetadata.author, curr: document.getElementById('metaAuthor').value.trim() },
+        { label: 'Subject', orig: originalMetadata.subject, curr: document.getElementById('metaSubject').value.trim() },
+        { label: 'Keywords', orig: originalMetadata.keywords, curr: document.getElementById('metaKeywords').value.trim() },
+        { label: 'Creator', orig: originalMetadata.creator, curr: document.getElementById('metaCreator').value.trim() },
+        { label: 'Producer', orig: originalMetadata.producer, curr: document.getElementById('metaProducer').value.trim() },
+        { label: 'Created', orig: originalMetadata.creationDate, curr: document.getElementById('metaCreationDate').value },
+        { label: 'Modified', orig: originalMetadata.modDate, curr: document.getElementById('metaModDate').value }
+      ];
+
+      fields.forEach(f => {
+        const isChanged = f.orig !== f.curr;
+        const row = document.createElement('tr');
+
+        let valClass = '';
+        if (isChanged) {
+          valClass = f.curr ? 'diff-changed' : 'diff-removed';
+        }
+
+        row.innerHTML = `
+          <td><strong>${f.label}</strong></td>
+          <td style="color: #666;">${escapeHtml(f.orig) || '<em>(empty)</em>'}</td>
+          <td class="${valClass}">${escapeHtml(f.curr) || '<em>(empty)</em>'}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    /* Keywords Helpers */
+    function handleKeywordKeydown(e) {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        addKeywordFromInput();
+      }
+    }
+
+    function addKeywordFromInput() {
+      const inp = document.getElementById('metaKeywords');
+      const val = inp.value.trim();
+      if (!val) return;
+
+      const tags = val.split(',').map(s => s.trim()).filter(Boolean);
+      inp.value = tags.join(', ');
+      updateKeywordsChips();
+      renderDiffTable();
     }
 
     function updateKeywordsChips() {
@@ -789,40 +981,83 @@
       tags.splice(idx, 1);
       document.getElementById('metaKeywords').value = tags.join(', ');
       updateKeywordsChips();
+      renderDiffTable();
     }
 
+    /* Preset Actions */
     function setNowDate() {
       const now = new Date();
       const dtStr = toDatetimeLocalString(now);
       document.getElementById('metaCreationDate').value = dtStr;
       document.getElementById('metaModDate').value = dtStr;
-      showStatus("Set creation and modification timestamps to now.", 'success');
+      renderDiffTable();
+      showStatus("Set creation & modified timestamps to current time.", 'success');
+    }
+
+    function clearDates() {
+      document.getElementById('metaCreationDate').value = '';
+      document.getElementById('metaModDate').value = '';
+      renderDiffTable();
+      showStatus("Cleared timestamps.", 'success');
     }
 
     function sanitizeAndStripAll() {
-      if (confirm('Strip ALL metadata? This will remove Author, Title, Creator, Producer, Keywords, and Timestamps for complete privacy.')) {
-        document.getElementById('metaTitle').value = '';
-        document.getElementById('metaAuthor').value = '';
-        document.getElementById('metaSubject').value = '';
-        document.getElementById('metaKeywords').value = '';
-        document.getElementById('metaCreator').value = '';
-        document.getElementById('metaProducer').value = '';
-        document.getElementById('metaCreationDate').value = '';
-        document.getElementById('metaModDate').value = '';
-        updateKeywordsChips();
-        showStatus('All metadata fields cleared. Click "Save & Download PDF" to export sanitized file.', 'success');
-      }
+      document.getElementById('metaTitle').value = '';
+      document.getElementById('metaAuthor').value = '';
+      document.getElementById('metaSubject').value = '';
+      document.getElementById('metaKeywords').value = '';
+      document.getElementById('metaCreator').value = '';
+      document.getElementById('metaProducer').value = '';
+      document.getElementById('metaCreationDate').value = '';
+      document.getElementById('metaModDate').value = '';
+      updateKeywordsChips();
+      renderDiffTable();
+      showStatus('All metadata wiped clean. Click "Save & Download PDF" to export sanitized file.', 'success');
     }
 
+    function applyCorporatePreset() {
+      const baseName = originalFileName.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ');
+      document.getElementById('metaTitle').value = baseName.charAt(0).toUpperCase() + baseName.slice(1);
+      document.getElementById('metaAuthor').value = 'Kapil Sharma';
+      document.getElementById('metaSubject').value = 'Google Internal Document';
+      document.getElementById('metaKeywords').value = 'google, project, documentation';
+      document.getElementById('metaCreator').value = 'Google Docs';
+      document.getElementById('metaProducer').value = 'pdf-lib / Google Skia';
+      setNowDate();
+      updateKeywordsChips();
+      renderDiffTable();
+      showStatus('Applied Google corporate metadata preset.', 'success');
+    }
+
+    function restoreOriginalMetadata() {
+      document.getElementById('metaTitle').value = originalMetadata.title;
+      document.getElementById('metaAuthor').value = originalMetadata.author;
+      document.getElementById('metaSubject').value = originalMetadata.subject;
+      document.getElementById('metaKeywords').value = originalMetadata.keywords;
+      document.getElementById('metaCreator').value = originalMetadata.creator;
+      document.getElementById('metaProducer').value = originalMetadata.producer;
+      document.getElementById('metaCreationDate').value = originalMetadata.creationDate;
+      document.getElementById('metaModDate').value = originalMetadata.modDate;
+      updateKeywordsChips();
+      renderDiffTable();
+      showStatus('Reverted to original uploaded metadata.', 'success');
+    }
+
+    /* Save & Export PDF */
     async function saveAndDownloadPDF() {
-      if (!pdfLibDoc) return;
+      if (!originalArrayBuffer) {
+        showStatus('No PDF loaded.', 'error');
+        return;
+      }
 
       const saveBtn = document.getElementById('savePdfBtn');
       saveBtn.disabled = true;
-      showStatus('Applying metadata and assembling PDF...', 'success');
+      showStatus('Applying metadata and assembling PDF binary...', 'success');
 
       try {
-        // Apply values to pdf-lib doc
+        // Load fresh document from original buffer to ensure clean modifications
+        const pdfDoc = await PDFLib.PDFDocument.load(originalArrayBuffer.slice(0), { ignoreEncryption: true });
+
         const title = document.getElementById('metaTitle').value.trim();
         const author = document.getElementById('metaAuthor').value.trim();
         const subject = document.getElementById('metaSubject').value.trim();
@@ -832,31 +1067,41 @@
         const creationDateVal = document.getElementById('metaCreationDate').value;
         const modDateVal = document.getElementById('metaModDate').value;
 
-        pdfLibDoc.setTitle(title);
-        pdfLibDoc.setAuthor(author);
-        pdfLibDoc.setSubject(subject);
+        // Apply metadata to Info dictionary
+        pdfDoc.setTitle(title);
+        pdfDoc.setAuthor(author);
+        pdfDoc.setSubject(subject);
 
         const keywordsArray = keywordsStr ? keywordsStr.split(',').map(s => s.trim()).filter(Boolean) : [];
-        pdfLibDoc.setKeywords(keywordsArray);
+        pdfDoc.setKeywords(keywordsArray);
 
-        pdfLibDoc.setCreator(creator);
-        pdfLibDoc.setProducer(producer);
+        pdfDoc.setCreator(creator);
+        pdfDoc.setProducer(producer);
 
         if (creationDateVal) {
-          pdfLibDoc.setCreationDate(new Date(creationDateVal));
+          pdfDoc.setCreationDate(new Date(creationDateVal));
         }
         if (modDateVal) {
-          pdfLibDoc.setModificationDate(new Date(modDateVal));
+          pdfDoc.setModificationDate(new Date(modDateVal));
         }
 
-        const pdfBytes = await pdfLibDoc.save();
+        // Check if all fields are stripped (Anonymize mode)
+        const isSanitized = !title && !author && !subject && keywordsArray.length === 0 && !creator && !producer && !creationDateVal && !modDateVal;
+
+        // If sanitized or if modifying metadata, delete existing catalog XMP Metadata stream to prevent conflicts
+        if (pdfDoc.catalog.has(PDFLib.PDFName.of('Metadata'))) {
+          pdfDoc.catalog.delete(PDFLib.PDFName.of('Metadata'));
+        }
+
+        const pdfBytes = await pdfDoc.save();
 
         // Download file
         const blob = new Blob([pdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         const baseName = originalFileName.replace(/\.[^/.]+$/, '');
-        a.download = `${baseName}_updated.pdf`;
+        const suffix = isSanitized ? 'sanitized' : 'updated';
+        a.download = `${baseName}_${suffix}.pdf`;
         a.href = url;
         document.body.appendChild(a);
         a.click();
@@ -864,12 +1109,12 @@
         URL.revokeObjectURL(url);
 
         triggerSuccessButton('saveIcon', 'saveText', 'Updated PDF Downloaded!');
-        showStatus('Updated PDF saved and downloaded successfully.', 'success');
+        showStatus(`Updated PDF saved successfully (${formatBytes(pdfBytes.byteLength)}).`, 'success');
 
         if (typeof confetti === 'function') {
           confetti({
-            particleCount: 60,
-            spread: 55,
+            particleCount: 65,
+            spread: 60,
             origin: { y: 0.6 }
           });
         }
@@ -905,20 +1150,8 @@
         originalFileSize = bytes.byteLength;
         originalArrayBuffer = bytes.buffer;
 
-        pdfLibDoc = await PDFLib.PDFDocument.load(originalArrayBuffer);
-        pdfJsDoc = await pdfjsLib.getDocument({ data: originalArrayBuffer.slice(0) }).promise;
-
-        await populateMetadataAndProperties();
-
-        document.getElementById('dropZone').style.display = 'none';
-        document.getElementById('docSummaryBar').style.display = 'flex';
-        document.getElementById('mainGrid').style.display = 'grid';
-        document.getElementById('savePdfBtn').disabled = false;
-
-        document.getElementById('docName').textContent = originalFileName;
-        document.getElementById('docQuickStats').textContent = `(${pdfJsDoc.numPages} pages • ${formatBytes(originalFileSize)})`;
-
-        showStatus('Sample PDF loaded with metadata.', 'success');
+        await loadPdfData(originalArrayBuffer, originalFileName, originalFileSize);
+        showStatus('Sample PDF loaded with pre-configured metadata.', 'success');
       } catch (err) {
         console.error(err);
         showStatus('Failed to generate sample PDF: ' + err.message, 'error');
@@ -927,14 +1160,34 @@
 
     function resetAll() {
       originalArrayBuffer = null;
-      pdfLibDoc = null;
-      pdfJsDoc = null;
       document.getElementById('fileInput').value = '';
       document.getElementById('dropZone').style.display = 'flex';
       document.getElementById('docSummaryBar').style.display = 'none';
       document.getElementById('mainGrid').style.display = 'none';
       document.getElementById('savePdfBtn').disabled = true;
-      showStatus('Reset completed. Upload a new PDF.', 'success');
+      showStatus('Reset completed. Ready for a new PDF.', 'success');
+    }
+
+    function parsePdfDate(pdfDateStr) {
+      if (!pdfDateStr) return null;
+      if (pdfDateStr instanceof Date) return pdfDateStr;
+      if (typeof pdfDateStr === 'string') {
+        // Handle PDF format: "D:YYYYMMDDHHmmSSOHH'mm'"
+        const clean = pdfDateStr.replace(/^D:/, '');
+        if (clean.length >= 8) {
+          const year = parseInt(clean.substr(0, 4), 10);
+          const month = parseInt(clean.substr(4, 2), 10) - 1;
+          const day = parseInt(clean.substr(6, 2), 10);
+          const hour = clean.length >= 10 ? parseInt(clean.substr(8, 2), 10) : 0;
+          const min = clean.length >= 12 ? parseInt(clean.substr(10, 2), 10) : 0;
+          const sec = clean.length >= 14 ? parseInt(clean.substr(12, 2), 10) : 0;
+          const d = new Date(year, month, day, hour, min, sec);
+          if (!isNaN(d.getTime())) return d;
+        }
+        const d2 = new Date(pdfDateStr);
+        if (!isNaN(d2.getTime())) return d2;
+      }
+      return null;
     }
 
     function toDatetimeLocalString(date) {
