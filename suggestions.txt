@@ -146,23 +146,19 @@ PART 2: 📄 PDF TOOLS SECTION EXPANSION IDEAS
      - Scanned Document OCR: run 100% in-browser OCR (via Tesseract.js) to recognize text from scanned paper PDFs or photos without uploading files to any external server.
      - Export recognized text as TXT, Markdown, or Searchable PDF.
 
-6.2. PDF Compressor & DPI Resizer
-     - Compress large image-heavy PDFs by rendering pages to canvas with adjustable JPEG quality (High, Medium, Low) and DPI settings (72, 150, 300 DPI).
-     - Live side-by-side file size reduction estimation before downloading.
-
-6.3. PDF Grayscale & Print Ink Saver
+6.2. PDF Grayscale & Print Ink Saver
      - Convert color PDFs into clean monochrome or high-contrast grayscale to save printer ink and toner.
      - Brightness, contrast, and threshold adjustment sliders for enhancing faint scanned receipts or documents.
 
-6.4. PDF N-Up & Booklet Layout Creator (2-Up, 4-Up, Handouts)
+6.3. PDF N-Up & Booklet Layout Creator (2-Up, 4-Up, Handouts)
      - Combine multiple PDF pages into a single sheet (2 pages per sheet, 4 pages per sheet, or presentation handout style).
      - Booklet imposition mode: rearranges pages into printable double-sided folded booklet sequence.
 
-6.5. PDF Metadata & Document Properties Editor
+6.4. PDF Metadata & Document Properties Editor
      - View and modify document metadata: Title, Author, Subject, Keywords, Creator, and Creation Date.
      - 1-click "Sanitize & Strip All Metadata" for privacy and anonymization before publishing documents publicly.
 
-6.6. PDF Form Filler & Data Exporter
+6.5. PDF Form Filler & Data Exporter
      - View and fill interactive AcroForm fields (text fields, checkboxes, radio buttons, dropdowns) directly in the browser.
      - Export completed PDF or extract all form field data into JSON/CSV spreadsheets.
 
